@@ -1,0 +1,24 @@
+# Secrets
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+
+# Raw corpus: reproducible with scripts/fetch_corpus.py (manifest.json is versioned)
+data/raw/**/*.xml
+
+# Generated data and indexes
+data/processed/
+data/indexes/
+chroma/
+
+# OS / editors
+.DS_Store
+.vscode/
+.idea/

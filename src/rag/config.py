@@ -29,10 +29,22 @@ class Settings(BaseSettings):
     # exceeded Mistral's per-request token limit when measured on 2026-10-08.
     embedding_model: str = "mistral-embed"
     embedding_batch_size: int = Field(default=32, gt=0)
-    # Free tier allows 60 requests/minute; stay slightly below.
+    # Embedding requests; the free plan allows 60/minute for mistral-embed.
     mistral_requests_per_minute: int = Field(default=50, gt=0)
     mistral_timeout_s: float = Field(default=60.0, gt=0)
     mistral_max_retry_s: float = Field(default=120.0, gt=0)
+
+    # Retrieval
+    retrieval_top_k: int = Field(default=5, gt=0)
+
+    # Generation. A dated model version, not "-latest", so runs stay comparable.
+    # Ministral 14B: the largest chat model with a non-zero rate limit on the free plan
+    # (measured 2026-10-09: mistral-small / mistral-medium had a limit of 0 requests/minute).
+    llm_model: str = "ministral-14b-2512"
+    llm_requests_per_minute: int = Field(default=25, gt=0)  # plan limit: 30
+    llm_temperature: float = Field(default=0.0, ge=0)
+    llm_max_tokens: int = Field(default=1024, gt=0)
+    llm_random_seed: int = 0
 
     @model_validator(mode="after")
     def _overlap_smaller_than_chunk(self) -> "Settings":

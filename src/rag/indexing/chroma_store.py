@@ -19,7 +19,7 @@ from chromadb.api.collection_configuration import (
 from chromadb.api.models.Collection import Collection
 from chromadb.config import Settings as ChromaSettings
 
-from rag.models import Chunk
+from rag.models import Chunk, RetrievedChunk
 
 COLLECTION_CONFIGURATION = CreateCollectionConfiguration(
     hnsw=CreateHNSWConfiguration(space="cosine")
@@ -71,6 +71,29 @@ class ChromaStore:
                 documents=[chunk.text for chunk in batch],
                 metadatas=[chunk_metadata(chunk) for chunk in batch],
             )
+
+    def query(self, embedding: Sequence[float], top_k: int) -> list[RetrievedChunk]:
+        """Nearest chunks by cosine similarity (1 - cosine distance), best first."""
+        query_embeddings: list[Sequence[float]] = [embedding]
+        result = self._collection.query(
+            query_embeddings=query_embeddings,
+            n_results=top_k,
+            include=["documents", "metadatas", "distances"],
+        )
+        ids = result["ids"][0]
+        documents = (result["documents"] or [[]])[0]
+        metadatas = (result["metadatas"] or [[]])[0]
+        distances = (result["distances"] or [[]])[0]
+        return [
+            RetrievedChunk(
+                chunk=Chunk.model_validate({**metadata, "chunk_id": chunk_id, "text": text}),
+                score=1.0 - distance,
+                rank=rank,
+            )
+            for rank, (chunk_id, text, metadata, distance) in enumerate(
+                zip(ids, documents, metadatas, distances, strict=True), start=1
+            )
+        ]
 
 
 def chunk_metadata(chunk: Chunk) -> dict[str, str | int]:

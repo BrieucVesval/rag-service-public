@@ -150,3 +150,52 @@ Newest entries at the bottom. Each entry: date, phase, what, why (alternatives c
   ```
 - **Files**: `src/rag/config.py`, `src/rag/indexing/`, `src/rag/ingestion/processed.py`, `scripts/build_index.py`, `tests/indexing/`, `tests/ingestion/test_processed.py`, `.env.example`, `pyproject.toml`, `uv.lock`
 - **Open points**: dedup before insertion (threshold to calibrate), BM25 index on the same chunk IDs, incremental re-indexing (only changed fiches).
+
+### 5c — Dense retrieval, grounded generation, `ask` CLI
+
+- **Date**: 2026-10-09
+- **What**:
+  - Models: `RetrievedChunk` (chunk, cosine similarity, rank), `Citation` (a `[n]` marker resolved to a chunk), `Answer` (text, refused flag, citations, invalid citation numbers, retrieved chunks, resolved model name, tokens, latency per stage).
+  - `ChromaStore.query` and `src/rag/retrieval/`: `Retriever` protocol, `DenseRetriever` (embed the question, nearest chunks by cosine similarity).
+  - `src/rag/generation/`: `prompts.py` (system prompt with grounding rules, context as numbered blocks `[n] title / URL / text`, fixed refusal sentence), `citations.py` (extract `[1]`, `[1, 2]`, `[1][3]`; flag numbers that point to no block), `llm.py` (`LLM` protocol, `MistralLLM` with temperature 0, fixed `random_seed`, its own rate limiter, resolved model name and token usage returned).
+  - `src/rag/pipeline.py`: `RAGPipeline` (retrieve → generate → resolve citations). No LLM call when nothing is retrieved. One structured JSON log line per query: chunk IDs, scores, ranks, cited and invalid numbers, tokens, latency per stage (retrieval, generation, total).
+  - `scripts/ask.py "question"` (`--show-context`, `--json`).
+- **Why**:
+  - Fixed refusal sentence, detected by string match: simple and testable. Alternative: structured JSON output (`{"answer", "refused", "citations"}`), more robust but harder for a small model and less readable; to revisit if refusal detection proves unreliable.
+  - Citations checked structurally here (block exists); whether the block supports the claim is the job of the LLM-as-judge (step 6 of the architecture).
+  - Prompt instructions in English, answers requested in French: repo convention; instruction language vs. answer quality could be measured later.
+  - Temperature 0 and fixed seed: reproducible runs for evaluation.
+- **Provider change (measured)**: on the free plan, `mistral-small-*`, `mistral-medium-*` and `magistral-small` return 429 with `x-ratelimit-limit-req-minute: 0` (no access), while `ministral-14b-2512` (30 req/min, 937k tokens/min), `ministral-8b-2512` (188 req/min) and `ministral-3b` are available. Default generation model is therefore `ministral-14b-2512`, the largest available. Mistral Small remains a later comparison (needs a paid plan).
+- **Result** (4 manual questions, `ministral-14b-2512`, top-5, 2026-10-09):
+  - "Quel est le préavis pour quitter un logement loué vide ?" → 3 mois, 1 mois en zone tendue, cited [1][2][5]. Correct and grounded. 2.9k tokens in / 99 out, 2.2 s.
+  - "Faut-il une autorisation pour transformer un bureau en logement à Paris ?" → long answer; F2416 now appears in the top-5 (ranks 4–5). **Faithfulness problems**: it states that Paris has no compensation requirement (not in the sources, and an inference from absence), conflates *changement d'usage* (housing → other use) with *changement de destination*, and adds an irrelevant exemption. Several claims carry a citation that does not support them. 5.3 s.
+  - "Combien coûte un passeport ?" (out of corpus) → correct refusal. Top similarity 0.799 vs. 0.85–0.88 for in-domain questions: even with compressed scores, out-of-domain questions show a visible gap, a candidate signal for the confidence score.
+  - "Mon propriétaire peut-il garder mon dépôt de garantie si je laisse des trous de cheville… ?" → "Oui… s'ils sont considérés comme des dégradations" with correct justification documents [5]. The sources never mention wall plugs: the "Oui" is an unsupported inference. Retrieval is all from F31269 (5 chunks of the same fiche).
+  - Latency 2–5 s, dominated by generation (retrieval 0.3–0.9 s). Cost: 0.
+- **Takeaways for the next steps**: citations that are present but do not support the claim are the main failure mode, so citation verification (LLM-as-judge) is needed and the golden set must include cases like "bureau → logement à Paris" and "trous de cheville". Top-k is often filled by one fiche, limiting context diversity.
+- **Tests**: `tests/generation/` (citations, prompts, LLM with fake client), `tests/retrieval/test_dense.py` (on-disk Chroma with fake embedder), `tests/test_pipeline.py` (fake retriever and LLM: citations, invalid citations, refusal, no-retrieval short-circuit, structured log). Shared fixture in `tests/conftest.py`. 60 tests pass, no network.
+- **Reproduce**:
+  ```bash
+  uv run python scripts/build_index.py   # once (5b)
+  uv run python scripts/ask.py --show-context "Quel est le préavis pour quitter un logement loué vide ?"
+  ```
+- **Files**: `src/rag/models.py`, `src/rag/config.py`, `src/rag/indexing/chroma_store.py`, `src/rag/retrieval/`, `src/rag/generation/`, `src/rag/pipeline.py`, `scripts/ask.py`, `tests/conftest.py`, `tests/generation/`, `tests/retrieval/`, `tests/test_pipeline.py`, `.env.example`, `CLAUDE.md`
+- **Open points**: golden set and first measured evaluation of v0; LLM-as-judge for citations; per-stage latency split of retrieval into embedding vs. vector search; context diversity (one fiche filling the top-k).
+
+#### 5c analysis — Citations that exist but do not support the claim
+
+- **Observed case**: for "Faut-il une autorisation pour transformer un bureau en logement à Paris ?", the answer contains "Aucune mention de compensation obligatoire (contrairement à certaines communes) [1]". Block [1] (F35336) only says the procedure differs depending on whether the commune requires compensating the loss of housing; it says nothing about Paris. The model inferred "no compensation in Paris" from the absence of Paris in the chunk, and the inference is wrong (Paris is one of the communes that require compensation). The citation points to a real, on-topic source, so the sentence looks grounded.
+- **Three levels of citation quality**:
+
+  | Level | Example | Detected by v0? |
+  |---|---|---|
+  | 1. No citation | "Le préavis est de 3 mois." | Yes (easy) |
+  | 2. Citation to a non-existent block | "… [9]" with 5 blocks | Yes (`invalid_citation_numbers`) |
+  | 3. Citation to a real block that does not say it | "Pas de compensation à Paris [1]" | **No** |
+
+- **Why level 3 is the most harmful**: the citation gives an appearance of reliability to an invented statement, so the user has no reason to double-check. In an administrative context, it can lead someone to skip a mandatory step. Our v0 only checks that `[n]` points to an existing block, not that the block entails the sentence.
+- **Planned fix: LLM-as-judge citation verification** (architecture step 6):
+  - Split the answer into (claim, cited block) pairs; ask a judge LLM whether the block **supports**, **does not support**, or **contradicts** the claim. The judge's task (entailment on a short passage) is much simpler than answering.
+  - Metric: **citation accuracy** = share of cited claims supported by their source. Also usable at runtime to drop or flag unsupported sentences before showing the answer.
+  - Pitfall: the judge is itself an LLM and can be wrong. Its verdicts must be checked by hand on a sample to measure its own agreement with a human before trusting the metric.
+- **Interview narrative**: "My first version cited its sources and correctly refused out-of-scope questions, so it looked reliable. Testing showed it attached citations to claims the source did not contain. Checking that a citation exists is not enough; it must support the sentence. I added LLM-as-judge verification and measured citation accuracy before and after." (Fill in the measured numbers once step 6 is done.)

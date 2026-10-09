@@ -36,3 +36,38 @@ class Chunk(BaseModel):
     end_char: int
     doc_title: str
     url: str | None = None
+
+
+class RetrievedChunk(BaseModel):
+    """A chunk returned by a retriever, with its score and 1-based rank."""
+
+    model_config = ConfigDict(frozen=True)
+
+    chunk: Chunk
+    score: float
+    rank: int
+
+
+class Citation(BaseModel):
+    """A `[n]` marker in an answer, resolved to the context block it points to."""
+
+    model_config = ConfigDict(frozen=True)
+
+    number: int
+    chunk_id: str
+    doc_id: str
+    doc_title: str
+    url: str | None = None
+
+
+class Answer(BaseModel):
+    question: str
+    text: str
+    refused: bool
+    citations: list[Citation]
+    invalid_citation_numbers: list[int]
+    retrieved: list[RetrievedChunk]
+    model: str
+    prompt_tokens: int = 0
+    completion_tokens: int = 0
+    latency_ms: dict[str, float] = Field(default_factory=dict)

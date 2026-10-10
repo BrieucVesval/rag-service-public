@@ -28,6 +28,12 @@ CASE_PREFIX = "Cas : "
 WHERE_TO_GO_PREFIX = "Où s'adresser : "
 ONLINE_SERVICE_PREFIX = "Service en ligne : "
 
+# Table layout: merged cells (HTML colspan / rowspan) and multi-row headers.
+COLSPAN_ATTR = "fusionHorizontale"
+ROWSPAN_ATTR = "fusionVerticale"
+HEADER_ROW_TYPE = "header"
+HEADER_LABEL_SEPARATOR = " – "
+
 # Top-level children of <Publication> that hold the answer content, rendered in this order.
 BODY_TAGS = ("Avertissement", "Introduction", "Texte", "ListeSituations")
 
@@ -194,25 +200,66 @@ def _render_list(element: Element, indent: int = 0) -> str:
 
 
 def _render_table(element: Element) -> str:
-    rows = [
-        [_cell_text(cell) for cell in row.findall("Cellule")] for row in element.findall("Rangée")
-    ]
-    rows = [row for row in rows if row]
-    if not rows:
+    grid = _table_grid(element)
+    if not grid:
         return ""
-    width = max(len(row) for row in rows)
-    rows = [row + [""] * (width - len(row)) for row in rows]
+    width = max(len(cells) for _, cells in grid)
+    rows = [cells + [""] * (width - len(cells)) for _, cells in grid]
+
+    # Markdown allows a single header row: leading header rows are merged column by column.
+    # Without a typed header, the first row plays that role.
+    header_count = next((i for i, (is_header, _) in enumerate(grid) if not is_header), len(grid))
+    header_count = max(header_count, 1)
+    header = [_merge_labels(column) for column in zip(*rows[:header_count], strict=True)]
 
     lines: list[str] = []
     caption = _inline(element.find("TitreRiche"))
     if caption:
         lines += [f"**{caption}**", ""]
-    # Markdown tables need a header row: the first row plays that role even if not typed "header".
-    header, *body = rows
     lines.append(_table_row(header))
     lines.append(_table_row(["---"] * width))
-    lines.extend(_table_row(row) for row in body)
+    lines.extend(_table_row(row) for row in rows[header_count:])
     return "\n".join(lines)
+
+
+def _table_grid(element: Element) -> list[tuple[bool, list[str]]]:
+    """Lay out a table's cells on a grid, as (is_header, cells) rows.
+
+    Merged cells follow HTML semantics: cells covered by a span are absent from the XML.
+    The merged cell's text is repeated in every position it covers, so each row reads on
+    its own, even when a chunk boundary falls inside the table.
+    """
+    grid: list[tuple[bool, list[str]]] = []
+    carried: dict[int, tuple[str, int]] = {}  # column -> (text, rows still covered below)
+    for row in element.findall("Rangée"):
+        cells = {column: text for column, (text, _) in carried.items()}
+        carried = {column: (text, left - 1) for column, (text, left) in carried.items() if left > 1}
+        column = 0
+        for cell in row.findall("Cellule"):
+            while column in cells:
+                column += 1
+            text = _cell_text(cell)
+            colspan, rowspan = _span(cell, COLSPAN_ATTR), _span(cell, ROWSPAN_ATTR)
+            for covered in range(column, column + colspan):
+                cells[covered] = text
+                if rowspan > 1:
+                    carried[covered] = (text, rowspan - 1)
+            column += colspan
+        if row.find("Cellule") is None:
+            continue
+        is_header = row.get("type") == HEADER_ROW_TYPE
+        grid.append((is_header, [cells.get(i, "") for i in range(max(cells) + 1)]))
+    return grid
+
+
+def _span(cell: Element, attribute: str) -> int:
+    value = cell.get(attribute, "")
+    return max(int(value), 1) if value.isdigit() else 1
+
+
+def _merge_labels(labels: Iterable[str]) -> str:
+    """Join the distinct non-empty labels of one header column, top to bottom."""
+    return HEADER_LABEL_SEPARATOR.join(dict.fromkeys(_non_empty_all(labels)))
 
 
 def _table_row(cells: list[str]) -> str:

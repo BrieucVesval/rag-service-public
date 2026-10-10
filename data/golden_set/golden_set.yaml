@@ -964,9 +964,10 @@ questions:
         quote: "lorsque le bail est signé, renouvelé ou tacitement reconduit depuis le 24 août 2022, et qu'il concerne un logement classé F ou G"
     origin: drafted_reviewed
     notes: >-
-      The F1165 table row for this rule has a merged cell that the loader currently drops
-      (see project log, open point on table cell spans): the rendered row wrongly shows
-      "Interdit" under the furnished column. Evidence quotes only the cell text.
+      The F1165 table row for this rule has a merged cell (empty and furnished leases). Until
+      the loader fix of 2026-10-10 (project log, step 7) it was dropped and the row wrongly
+      showed "Interdit" under the furnished column; it now reads correctly, with "Interdit"
+      under the mobility lease. Evidence quotes only the cell text.
 
   - id: q050
     question: "Combien de temps à l'avance mon propriétaire doit-il me prévenir s'il veut récupérer son logement ?"

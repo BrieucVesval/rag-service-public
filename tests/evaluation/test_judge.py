@@ -2,6 +2,7 @@ import json
 from typing import Any
 
 import pytest
+from pydantic import BaseModel
 
 from rag.evaluation.judge import (
     RETRY_INSTRUCTION,
@@ -23,9 +24,13 @@ class ScriptedLLM:
     def __init__(self, *replies: str) -> None:
         self.replies = list(replies)
         self.prompts: list[tuple[str, str]] = []
+        self.schemas: list[type[BaseModel] | None] = []
 
-    def generate(self, system: str, user: str) -> LLMResponse:
+    def generate(
+        self, system: str, user: str, schema: type[BaseModel] | None = None
+    ) -> LLMResponse:
         self.prompts.append((system, user))
+        self.schemas.append(schema)
         return LLMResponse(
             text=self.replies.pop(0), model=self.model, prompt_tokens=100, completion_tokens=20
         )
@@ -48,6 +53,7 @@ def test_sentence_verdicts_are_parsed_and_markers_hidden_from_judge(
     verdicts, responses = Judge(llm).judge_sentences("Préavis ?", retrieved, sentences)
 
     assert [v.verdict for v in verdicts] == [SupportVerdict.SUPPORTED, SupportVerdict.UNSUPPORTED]
+    assert llm.schemas[0] is not None and "sentences" in llm.schemas[0].model_fields
     assert verdicts[0].supporting_blocks == [1]
     assert len(responses) == 1
     user_prompt = llm.prompts[0][1]

@@ -2,6 +2,7 @@ from types import SimpleNamespace
 from typing import Any
 
 import pytest
+from pydantic import BaseModel
 
 from rag.generation.llm import MistralLLM
 from rag.indexing.embedder import RateLimiter
@@ -61,13 +62,19 @@ def test_generate_without_choice_raises() -> None:
         make_llm(FakeChatAPI("x", choices=False)).generate("s", "u")
 
 
-def test_text_mode_by_default_json_mode_on_request() -> None:
-    chat = FakeChatAPI('{"ok": true}')
-    make_llm(chat).generate("s", "u")
+def test_text_by_default_strict_json_schema_on_request() -> None:
+    class Reply(BaseModel):
+        answer: str
+
+    chat = FakeChatAPI('{"answer": "oui"}')
+    llm = make_llm(chat)
+
+    llm.generate("s", "u")
     assert chat.kwargs["response_format"] is None
 
-    client: Any = SimpleNamespace(chat=chat)
-    limiter = RateLimiter(60_000, clock=lambda: 0.0, sleep=lambda _: None)
-    judge = MistralLLM(client, "judge", 0.0, 256, 7, limiter, json_output=True)
-    judge.generate("s", "u")
-    assert chat.kwargs["response_format"].type == "json_object"
+    llm.generate("s", "u", Reply)
+    response_format = chat.kwargs["response_format"]
+    assert response_format.type == "json_schema"
+    assert response_format.json_schema.name == "Reply"
+    assert response_format.json_schema.strict is True
+    assert response_format.json_schema.schema_definition["required"] == ["answer"]

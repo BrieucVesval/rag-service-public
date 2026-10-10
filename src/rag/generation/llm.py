@@ -5,6 +5,7 @@ from typing import Protocol
 from mistralai.client import Mistral
 from mistralai.client.models import (
     ChatCompletionRequestMessage,
+    JSONSchema,
     ResponseFormat,
     SystemMessage,
     UserMessage,
@@ -25,7 +26,11 @@ class LLMResponse(BaseModel):
 class LLM(Protocol):
     model: str
 
-    def generate(self, system: str, user: str) -> LLMResponse: ...
+    def generate(
+        self, system: str, user: str, schema: type[BaseModel] | None = None
+    ) -> LLMResponse:
+        """Free text, or a JSON object conforming to `schema` when one is given."""
+        ...
 
 
 class MistralLLM:
@@ -37,7 +42,6 @@ class MistralLLM:
         max_tokens: int,
         random_seed: int,
         rate_limiter: RateLimiter,
-        json_output: bool = False,
     ) -> None:
         self.client = client
         self.model = model
@@ -45,8 +49,6 @@ class MistralLLM:
         self.max_tokens = max_tokens
         self.random_seed = random_seed
         self.rate_limiter = rate_limiter
-        # JSON mode: the API guarantees a syntactically valid JSON object (not its schema).
-        self.response_format = ResponseFormat(type="json_object") if json_output else None
 
     @classmethod
     def from_settings(cls, settings: Settings) -> "MistralLLM":
@@ -61,7 +63,7 @@ class MistralLLM:
 
     @classmethod
     def judge_from_settings(cls, settings: Settings) -> "MistralLLM":
-        """The LLM judge: its own model, rate limit and token budget, JSON output."""
+        """The LLM judge: its own model, rate limit and token budget."""
         return cls(
             client=make_mistral_client(settings),
             model=settings.judge_model,
@@ -69,10 +71,11 @@ class MistralLLM:
             max_tokens=settings.judge_max_tokens,
             random_seed=settings.llm_random_seed,
             rate_limiter=RateLimiter(settings.judge_requests_per_minute),
-            json_output=True,
         )
 
-    def generate(self, system: str, user: str) -> LLMResponse:
+    def generate(
+        self, system: str, user: str, schema: type[BaseModel] | None = None
+    ) -> LLMResponse:
         messages: list[ChatCompletionRequestMessage] = [
             SystemMessage(content=system),
             UserMessage(content=user),
@@ -84,7 +87,7 @@ class MistralLLM:
             temperature=self.temperature,
             max_tokens=self.max_tokens,
             random_seed=self.random_seed,
-            response_format=self.response_format,
+            response_format=_response_format(schema),
         )
         message = response.choices[0].message if response.choices else None
         if message is None:
@@ -96,6 +99,22 @@ class MistralLLM:
             prompt_tokens=response.usage.prompt_tokens or 0,
             completion_tokens=response.usage.completion_tokens or 0,
         )
+
+
+def _response_format(schema: type[BaseModel] | None) -> ResponseFormat | None:
+    """Strict structured output: decoding is constrained to the JSON schema.
+
+    Plain JSON mode ("json_object") was not enough: Mistral Large 3 returned truncated,
+    invalid JSON for one answer, identically on retry at temperature 0 (2026-10-10).
+    """
+    if schema is None:
+        return None
+    return ResponseFormat(
+        type="json_schema",
+        json_schema=JSONSchema(
+            name=schema.__name__, schema_definition=schema.model_json_schema(), strict=True
+        ),
+    )
 
 
 def _content_text(content: object) -> str:

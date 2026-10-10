@@ -8,8 +8,9 @@ Two independent judgments per answer:
   it? The judge does not see the context here, only the answer and the facts.
 
 The judge writes a short reason before each verdict (reasoning first improves
-verdicts) and replies in JSON mode. The reply is validated with pydantic; an invalid
-reply is retried once with the validation error, then reported as JudgeError.
+verdicts) and replies with structured output constrained to a JSON schema. The reply
+is still validated (ids in order, existing blocks); an invalid reply is retried once
+with the validation error, then reported as JudgeError.
 """
 
 import json
@@ -170,7 +171,7 @@ class Judge:
                     raise ValueError(f"sentence {verdict.id}: unknown blocks {out_of_range}")
             return verdicts
 
-        return self._call(FAITHFULNESS_SYSTEM_PROMPT, user, parse)
+        return self._call(FAITHFULNESS_SYSTEM_PROMPT, user, _SentenceReply, parse)
 
     def judge_key_facts(
         self, question: str, answer: str, key_facts: Sequence[str]
@@ -182,17 +183,21 @@ class Judge:
             _check_ids([v.id for v in verdicts], len(key_facts))
             return verdicts
 
-        return self._call(CORRECTNESS_SYSTEM_PROMPT, user, parse)
+        return self._call(CORRECTNESS_SYSTEM_PROMPT, user, _FactReply, parse)
 
     def _call(
-        self, system: str, user: str, parse: Callable[[str], list[VerdictT]]
+        self,
+        system: str,
+        user: str,
+        schema: type[BaseModel],
+        parse: Callable[[str], list[VerdictT]],
     ) -> tuple[list[VerdictT], list[LLMResponse]]:
-        responses = [self.llm.generate(system, user)]
+        responses = [self.llm.generate(system, user, schema)]
         try:
             return parse(responses[0].text), responses
         except (json.JSONDecodeError, ValidationError, ValueError) as error:
             retry_user = user + RETRY_INSTRUCTION.format(error=_short(error))
-            responses.append(self.llm.generate(system, retry_user))
+            responses.append(self.llm.generate(system, retry_user, schema))
             try:
                 return parse(responses[1].text), responses
             except (json.JSONDecodeError, ValidationError, ValueError) as second_error:

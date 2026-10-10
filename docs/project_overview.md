@@ -8,8 +8,8 @@ Interview talking points, grouped by theme, are in [`interview_notes.md`](interv
 
 ## Status
 
-- **Current**: retrieval and LLM-free generation metrics measured on dev for v0 (Recall@5 0.67, evidence recall@5 0.50; refusal accuracy 0.93, 6/6 correct refusals). Paid Mistral plan with Mistral Large 3 as judge.
-- **Next**: LLM judge (correctness, faithfulness, citation accuracy) on the saved generation run, then judge validation against human labels.
+- **Current**: v0 fully measured on dev, pending judge validation: Recall@5 0.67, refusal accuracy 0.93, faithfulness 0.93, citation accuracy 0.95, citation precision 0.80, correctness 0.61 (judge: Mistral Large 3). The judge is not stable on borderline cases (94% verdict agreement between two runs).
+- **Next**: human labels to measure judge agreement (8b-3), then merge the evaluation harness.
 
 ## Roadmap
 
@@ -18,8 +18,8 @@ Interview talking points, grouped by theme, are in [`interview_notes.md`](interv
 | 1 | Corpus and ingestion (incl. merged table cells fix) | ✅ Done |
 | 2 | Minimal end-to-end RAG (v0) | ✅ Done |
 | 3 | Golden set (50 questions) | ✅ Done |
-| 3b | Evaluation harness | 🟡 Retrieval and LLM-free generation done, judge next |
-| 4 | Baseline evaluation of v0 | 🟡 Retrieval and refusals measured |
+| 3b | Evaluation harness | 🟡 Judge done, human validation next |
+| 4 | Baseline evaluation of v0 | 🟡 Measured on dev, judge to validate |
 | 5 | Citation verification (LLM-as-judge) and confidence score | ⬜ |
 | 6 | Chunking comparison (fixed vs. headers vs. semantic) | ⬜ |
 | 7 | Hybrid retrieval (dense + BM25, RRF) and reranking | ⬜ |
@@ -44,6 +44,7 @@ Interview talking points, grouped by theme, are in [`interview_notes.md`](interv
 | 2026-10-10 | 8a. Retrieval evaluation | Recall@k, All@k, MRR, evidence recall; one JSON run file per run with commit, config, index and golden set hash. v0 dev: R@5 0.67, Evid@5 0.50, multi-hop All@5 0.14 | Fiche-level metrics (independent of chunking) plus evidence recall for the passage level |
 | 2026-10-10 | 8b-0. Judge choice | Free plan has no model stronger than the generator; prices compared; switched to the paid plan | Mistral Large 3 as judge (~$0.21 per dev run, ~4x cheaper than Medium 3.5) |
 | 2026-10-10 | 8b-1. Generation run | Answers + contexts saved for later judging; refusal accuracy 0.93, 6/6 correct refusals, 2/24 false refusals; cost $0.017 | Generate once, judge later: judges compared on identical answers |
+| 2026-10-10 | 8b-2. LLM judge | Sentence-level support and key-fact correctness; v0 dev: faithfulness 0.93, citation accuracy 0.95, precision 0.80, correctness 0.61; $0.06 per run | Strict JSON-schema output (JSON mode returned invalid JSON); judge stability measured: 94% |
 
 ## Key numbers so far
 
@@ -55,7 +56,9 @@ Interview talking points, grouped by theme, are in [`interview_notes.md`](interv
 - v0 retrieval, dev (24 answerable questions): Recall@5 0.67 (lookup 0.83, multi-hop 0.50, ambiguous 0.50), evidence recall@5 0.50, MRR 0.65, multi-hop All@5 0.14; 2.77 distinct fiches per top-5.
 - Top similarity: answerable 0.846–0.917, unanswerable 0.788–0.840 (dev).
 - v0 generation, dev: refusal accuracy 0.93 (6/6 unanswerable refused, 2/24 false refusals), 3.55 citations per answer, no invalid citation; $0.017 for 30 answers (78k prompt tokens).
-- Tests: 105 unit tests, no network.
+- v0 judged, dev: faithfulness 0.93, citation accuracy 0.95, citation precision 0.80, correctness 0.61 (0.67 when the fiche is retrieved, 0.40 when not); judge $0.061 per dev run.
+- Judge stability: 94% sentence and 89% key-fact verdict agreement between two runs on identical answers.
+- Tests: 125 unit tests, no network.
 
 ## Key lessons
 
@@ -69,3 +72,6 @@ Interview talking points, grouped by theme, are in [`interview_notes.md`](interv
 8. **Finding the right fiche is not finding the right passage**: v0 retrieves an expected fiche for 67% of questions but only 50% of the answering sentences. Measuring both (fiche recall and evidence recall) separates a search problem from a chunking problem.
 9. **Check the metric before trusting it**: evidence recall could have been biased by quotes cut at chunk boundaries; all 109 quotes were verified to fit in a chunk. Building the harness also exposed a miscount in the docs (128 quotes reported, 109 real).
 10. **The same query does not always give the same embedding**: two identical runs gave score drifts up to 0.0056 on 6/30 questions, enough to swap close chunks. A gain smaller than run-to-run noise is not a gain; caching query embeddings makes runs repeatable.
+11. **An LLM judge is a measuring instrument with its own noise and errors**: two runs on identical answers agreed on 94% of verdicts, flipped on the most important case (q021), and one verdict contradicted its own reason. Human agreement must be measured before trusting it.
+12. **"JSON mode" is not a guarantee**: it returned truncated JSON, identically on retry at temperature 0. Strict schema-constrained output fixed it; a retry cannot fix a deterministic error.
+13. **Most v0 errors come from retrieval, not generation**: faithfulness 0.93 but correctness 0.61, and correctness drops from 0.67 to 0.40 when no expected fiche is retrieved.

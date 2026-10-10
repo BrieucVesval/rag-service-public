@@ -412,3 +412,52 @@ Newest entries at the bottom. Each entry: date, phase, what, why (alternatives c
 - **Reproduce**: `uv run python scripts/eval_generation.py` (about $0.02 on dev)
 - **Files**: `src/rag/evaluation/generation_eval.py`, `src/rag/evaluation/grouping.py`, `src/rag/evaluation/retrieval_eval.py`, `src/rag/costs.py`, `src/rag/config.py`, `scripts/eval_generation.py`, `scripts/eval_retrieval.py`, `tests/evaluation/test_generation_eval.py`, `tests/evaluation/test_retrieval_eval.py`, `tests/test_costs.py`, `.env.example`
 - **Open points**: 8b-2 LLM judge (correctness, faithfulness, citation accuracy) on this saved run; raise rate limits to the paid plan's; check whether answers without expected fiches are supported by other fiches (incomplete `expected_docs`).
+
+#### 8b-2 — LLM judge: faithfulness, citation accuracy, correctness
+
+- **Date**: 2026-10-10
+- **What**:
+  - `src/rag/evaluation/sentences.py`: `split_sentences` — deterministic split of an answer into sentences (lines, list items, sentence-ending punctuation before a capital), each with its cited numbers; marker-only lines join the previous sentence, wordless lines ("---") are dropped.
+  - `src/rag/evaluation/judge.py`: `Judge` with two judgments — `judge_sentences` (each sentence vs. the context blocks: `supported` / `partial` / `unsupported` / `contradicted` / `no_claim`, plus the supporting block numbers) and `judge_key_facts` (each golden key fact vs. the answer: `present` / `partial` / `absent` / `contradicted`, without the context). Reason written before verdict. Replies validated (ids complete and in order, existing blocks); one retry with the validation error, then `JudgeError`, which carries the failed calls' token usage.
+  - `src/rag/evaluation/judge_eval.py`: metrics, `judge_question`, `judge_run`, summaries. `scripts/judge_generation.py <generation run>` writes a `judge` run referencing the generation run (ID, path, SHA-256) and refuses to run if the golden set changed since generation.
+  - `src/rag/generation/llm.py`: `LLM.generate(system, user, schema=None)`; with a pydantic schema the call uses **strict JSON-schema structured output**. `MistralLLM.judge_from_settings`; settings `judge_model` (`mistral-large-2512`), `judge_requests_per_minute` (12), `judge_temperature`, `judge_max_tokens`, judge prices. `strip_citations` in `generation/citations.py`.
+- **Metrics** (per question, then averaged over questions):
+  - **Faithfulness** = supported claim sentences / claim sentences (`partial` counts as not supported: a half-invented sentence is still a problem).
+  - **Citation accuracy** = cited claim sentences where at least one cited block is among the supporting blocks.
+  - **Citation precision** = (claim sentence, cited block) pairs where the block supports the sentence.
+  - **Correctness** = key facts present / key facts (`partial` = 0.5). Refused answerable question: 0, no judge call. Refused unanswerable question: not judged.
+- **Why** (and alternatives):
+  - Sentences split in code rather than atomic claims extracted by an LLM: deterministic, free, testable, and the unit the generation prompt cites at. Cost: a sentence with one true and one invented fact gets a single (`partial`) verdict.
+  - One judge call per answer (all sentences) rather than per sentence: ~22 calls instead of ~200, ~4x cheaper. Risk: verdicts influencing each other; to compare if human agreement is poor.
+  - **Citation markers hidden from the judge**: it reports which blocks support each sentence on its own; the code compares with what was cited. Otherwise the judge tends to confirm existing citations.
+  - Correctness judged without the context: it compares the answer with the reference only, so it measures the user-facing outcome whatever the retrieval did.
+  - Faithfulness × correctness separate failure causes: faithful but incorrect → retrieval did not bring the information; correct but unfaithful → answer from the model's own knowledge (dangerous for rules that change).
+- **Incident: JSON mode is not enough.** First judge run (`json_object` mode, `experiments/20261010T171518Z-judge-…json`, commit `ce89b70`): q001's faithfulness reply was truncated, invalid JSON (`Expecting ',' delimiter`), **identical on retry** since temperature is 0 — a retry with the same input cannot fix a deterministic error. Fix: strict structured output (`response_format` `json_schema`, `strict: true`, schema from the pydantic reply model), which constrains decoding to the schema; the same q001 call then returned valid, complete JSON. Commit `c6e2602`.
+- **Result: v0 judged, dev split** (reference run `experiments/20261010T172137Z-judge-mistral-large-2512-on-20261010T170359Z.json`, commit `c6e2602`, clean tree; judge `mistral-large-2512`; 44 calls, 260 s, 76,733 prompt + 15,146 completion tokens, **judge cost $0.061**; 0 errors):
+
+  | Group | n | Faithfulness | Citation accuracy | Citation precision | Correctness |
+  |---|---|---|---|---|---|
+  | All | 30 (24 answerable) | **0.93** | **0.95** | **0.80** | **0.61** |
+  | Lookup | 12 | 0.95 | 0.95 | 0.85 | 0.70 |
+  | Multi-hop | 7 | 0.92 | 0.92 | 0.67 | 0.54 |
+  | Ambiguous | 5 | 0.89 | 0.98 | 0.85 | 0.50 |
+
+  Sentence verdicts: 136 supported, 5 partial, 4 unsupported, 3 contradicted, 48 no claim (196 sentences). Key-fact verdicts: 39 present, 9 partial, 18 absent, 5 contradicted (71 facts).
+- **Judge stability (same answers, same prompts, temperature 0, only the output format changed)**: sentence verdicts agree on **181/193 (94%)**, key-fact verdicts on **56/63 (89%)**; when both runs say `supported`, the supporting blocks are identical in 104/125. Changes concentrate on borderline cases (`partial` ↔ `supported`) and on "information not found" sentences (`contradicted` ↔ `supported`). Aggregates move accordingly: faithfulness 0.89 → 0.93 overall, multi-hop 0.79 → 0.92. **Most importantly, q021 sentence 11 ("aucune autorisation supplémentaire de la mairie n'est requise", the bureau → logement à Paris case, v0's known failure from step 5c) flips from `unsupported` to `supported`.** Consequences:
+  - On 30 questions, differences of a few points of faithfulness, and category-level differences, are within judge noise. Comparisons between pipeline versions must exceed this noise, or use repeated judging.
+  - The judge can be wrong on exactly the cases that matter: human validation (8b-3) is required before trusting these numbers.
+  - A self-contradicting verdict was also found: q026 sentence 2 is `contradicted` while its reason says the sources state the same thing.
+- **Analysis** (reference run, to be confirmed by 8b-3):
+  - **Correctness is the weak point (0.61), and it tracks retrieval**: 0.67 when an expected fiche is in the top-5 (19 questions) vs. 0.40 when none is (5 questions). Fully correct answers (q001, q004, q011, q019, q028, q048) all had their fiche retrieved.
+  - **High faithfulness, moderate correctness**: answers mostly stick to their context (0.93), but the context often lacks the answer. This points at retrieval and chunking first, not at the generator.
+  - **Citation precision 0.80 < accuracy 0.95**: the generator often cites every block (`[1][2][3][4][5]`) — at least one cited block supports the sentence, but many cited blocks do not. Multi-hop is lowest (0.67).
+  - **Unfaithful content found**: an unsupported "6 semaines" deadline (q008); the winter truce (q030, true in reality but absent from the context: correct but unfaithful, from the model's own knowledge); an invented example amount (q011, partial). Some unsupported sentences carry no citation at all, although the answer-level "uncited" rate of 8b-1 was 0: the sentence level is finer.
+  - **Partial refusals are risky**: three "Je ne trouve pas cette information …" sentences were judged `contradicted` in one run (the sources did contain it), i.e. the generator under-reads its context.
+- **Tests**: `tests/evaluation/test_sentences.py` (4), `tests/evaluation/test_judge.py` (7: parsing, markers hidden from the judge, schema passed, retry with the error, 4 inconsistent replies fail after one retry, key facts judged without context), `tests/evaluation/test_judge_eval.py` (8: metric definitions, answered question gets both judgments, refused answerable scores 0 without a call, refused unanswerable not judged, judge failure recorded with its tokens), `tests/generation/test_llm.py` (+1: strict JSON schema on request), `tests/generation/test_citations.py` (+1). 125 tests pass. A test caught a cost-accounting bug: tokens of failed judge calls were not counted.
+- **Reproduce**:
+  ```bash
+  uv run python scripts/eval_generation.py                     # ~$0.02, dev
+  uv run python scripts/judge_generation.py experiments/<generation run>.json   # ~$0.06
+  ```
+- **Files**: `src/rag/evaluation/sentences.py`, `src/rag/evaluation/judge.py`, `src/rag/evaluation/judge_eval.py`, `src/rag/generation/llm.py`, `src/rag/generation/citations.py`, `src/rag/config.py`, `scripts/judge_generation.py`, `tests/evaluation/`, `tests/generation/`, `tests/test_pipeline.py`, `.env.example`
+- **Open points**: 8b-3 human labels and judge agreement (including q021 s11 and q026 s2); clearer rubric for "information not found" sentences and for sentences restating the question; judge noise with repeated runs; store the raw judge reply on failure for debugging.

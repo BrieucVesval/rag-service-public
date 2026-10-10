@@ -1,0 +1,3455 @@
+{
+  "run": {
+    "run_id": "20261010T172137Z-judge-mistral-large-2512-on-20261010T170359Z",
+    "kind": "judge",
+    "started_at": "2026-10-10T17:21:37.716021Z",
+    "duration_s": 259.6981195410044,
+    "git_commit": "c6e2602",
+    "git_dirty": false,
+    "settings": {
+      "processed_dir": "data/processed/service_public",
+      "chroma_dir": "data/indexes/chroma",
+      "chunk_size": 2000,
+      "chunk_overlap": 200,
+      "embedding_model": "mistral-embed",
+      "embedding_batch_size": 32,
+      "mistral_requests_per_minute": 50,
+      "mistral_timeout_s": 60.0,
+      "mistral_max_retry_s": 120.0,
+      "retrieval_top_k": 5,
+      "llm_model": "ministral-14b-2512",
+      "llm_requests_per_minute": 25,
+      "llm_temperature": 0.0,
+      "llm_max_tokens": 1024,
+      "llm_random_seed": 0,
+      "llm_input_usd_per_mtok": 0.2,
+      "llm_output_usd_per_mtok": 0.2,
+      "judge_model": "mistral-large-2512",
+      "judge_requests_per_minute": 12,
+      "judge_temperature": 0.0,
+      "judge_max_tokens": 4096,
+      "judge_input_usd_per_mtok": 0.5,
+      "judge_output_usd_per_mtok": 1.5,
+      "golden_set_path": "data/golden_set/golden_set.yaml",
+      "experiments_dir": "experiments",
+      "eval_k_values": [
+        1,
+        3,
+        5,
+        10
+      ]
+    },
+    "index": {
+      "collection": "fixed-2000-200-mistral-embed",
+      "chunks": 2832,
+      "chunk_strategy": "fixed",
+      "built_at": "2026-10-10T16:03:42+00:00",
+      "processed_at": "2026-10-10T16:00:39+00:00",
+      "chunk_overlap": 200,
+      "embedding_model": "mistral-embed",
+      "raw_downloaded_at": "2026-10-07T16:35:15+00:00",
+      "chunk_size": 2000,
+      "git_commit": "2b6900d"
+    },
+    "golden_set": {
+      "path": "data/golden_set/golden_set.yaml",
+      "sha256": "5c74e2b856e91d6409eca7012d7244c0deaf5ff455cc930619e96f7c1418b10a",
+      "corpus_snapshot": "2026-10-07T16:35:15+00:00",
+      "split": "dev",
+      "n_questions": 30
+    }
+  },
+  "generation_run": {
+    "run_id": "20261010T170359Z-generation-ministral-14b-2512-dense-fixed-2000-200-mistral-embed-dev",
+    "path": "experiments/20261010T170359Z-generation-ministral-14b-2512-dense-fixed-2000-200-mistral-embed-dev.json",
+    "sha256": "f8de1356e7e8f89bf63a6fdd9430dca0a5ede1b6f19d53f41263ab256982fc65",
+    "llm_model": "ministral-14b-2512"
+  },
+  "judge_model": "mistral-large-2512",
+  "judge_cost_usd": 0.0610855,
+  "summary": {
+    "all": {
+      "n_questions": 30,
+      "n_errors": 0,
+      "faithfulness": 0.9283725113270568,
+      "citation_accuracy": 0.9464736652236653,
+      "citation_precision": 0.8001474350070606,
+      "correctness": 0.6121527777777778,
+      "sentence_verdicts": {
+        "supported": 136,
+        "no_claim": 48,
+        "partial": 5,
+        "unsupported": 4,
+        "contradicted": 3
+      },
+      "fact_verdicts": {
+        "present": 39,
+        "absent": 18,
+        "partial": 9,
+        "contradicted": 5
+      },
+      "judge_calls": 44,
+      "prompt_tokens": 76733,
+      "completion_tokens": 15146
+    },
+    "category:lookup": {
+      "n_questions": 12,
+      "n_errors": 0,
+      "faithfulness": 0.9478195415695416,
+      "citation_accuracy": 0.9487433862433863,
+      "citation_precision": 0.846780303030303,
+      "correctness": 0.7013888888888888,
+      "sentence_verdicts": {
+        "supported": 63,
+        "no_claim": 10,
+        "partial": 2,
+        "unsupported": 2
+      },
+      "fact_verdicts": {
+        "present": 19,
+        "absent": 5,
+        "partial": 3,
+        "contradicted": 2
+      },
+      "judge_calls": 24,
+      "prompt_tokens": 38986,
+      "completion_tokens": 6287
+    },
+    "split:dev": {
+      "n_questions": 30,
+      "n_errors": 0,
+      "faithfulness": 0.9283725113270568,
+      "citation_accuracy": 0.9464736652236653,
+      "citation_precision": 0.8001474350070606,
+      "correctness": 0.6121527777777778,
+      "sentence_verdicts": {
+        "supported": 136,
+        "no_claim": 48,
+        "partial": 5,
+        "unsupported": 4,
+        "contradicted": 3
+      },
+      "fact_verdicts": {
+        "present": 39,
+        "absent": 18,
+        "partial": 9,
+        "contradicted": 5
+      },
+      "judge_calls": 44,
+      "prompt_tokens": 76733,
+      "completion_tokens": 15146
+    },
+    "category:multi_hop": {
+      "n_questions": 7,
+      "n_errors": 0,
+      "faithfulness": 0.9158008658008658,
+      "citation_accuracy": 0.9166666666666666,
+      "citation_precision": 0.6734126984126985,
+      "correctness": 0.5392857142857143,
+      "sentence_verdicts": {
+        "no_claim": 18,
+        "supported": 42,
+        "contradicted": 2,
+        "partial": 2,
+        "unsupported": 1
+      },
+      "fact_verdicts": {
+        "present": 14,
+        "partial": 3,
+        "absent": 7,
+        "contradicted": 3
+      },
+      "judge_calls": 12,
+      "prompt_tokens": 22086,
+      "completion_tokens": 5190
+    },
+    "category:unanswerable": {
+      "n_questions": 6,
+      "n_errors": 0,
+      "faithfulness": null,
+      "citation_accuracy": null,
+      "citation_precision": null,
+      "correctness": null,
+      "sentence_verdicts": {},
+      "fact_verdicts": {},
+      "judge_calls": 0,
+      "prompt_tokens": 0,
+      "completion_tokens": 0
+    },
+    "category:ambiguous": {
+      "n_questions": 5,
+      "n_errors": 0,
+      "faithfulness": 0.8888888888888888,
+      "citation_accuracy": 0.984375,
+      "citation_precision": 0.850350935828877,
+      "correctness": 0.5,
+      "sentence_verdicts": {
+        "no_claim": 20,
+        "supported": 31,
+        "contradicted": 1,
+        "partial": 1,
+        "unsupported": 1
+      },
+      "fact_verdicts": {
+        "absent": 6,
+        "present": 6,
+        "partial": 3
+      },
+      "judge_calls": 8,
+      "prompt_tokens": 15661,
+      "completion_tokens": 3669
+    }
+  },
+  "results": [
+    {
+      "question_id": "q001",
+      "question": "Mon voisin fait brûler ses feuilles mortes et ses branches dans son jardin tous les week-ends. Il a le droit ?",
+      "category": "lookup",
+      "split": "dev",
+      "refused": false,
+      "sentences": [
+        {
+          "id": 1,
+          "text": "Non, votre voisin n'a pas le droit de brûler ses déchets verts (feuilles mortes, branches, etc.) dans son jardin, que ce soit à l'air libre ou avec un incinérateur [1][2].",
+          "cited": [
+            1,
+            2
+          ],
+          "reason": "The sources explicitly state that burning green waste (including dead leaves and branches) is prohibited, whether in the open air or with a garden incinerator.",
+          "verdict": "supported",
+          "supporting_blocks": [
+            1
+          ]
+        },
+        {
+          "id": 2,
+          "text": "Vous pouvez alerter les services d'hygiène de la mairie pour faire cesser cette pratique illégale [1][2].",
+          "cited": [
+            1,
+            2
+          ],
+          "reason": "The sources confirm that alerting the hygiene services of the town hall is the correct procedure to stop illegal burning of green waste.",
+          "verdict": "supported",
+          "supporting_blocks": [
+            1,
+            2
+          ]
+        },
+        {
+          "id": 3,
+          "text": "En cas de non-respect, il risque une amende de 750 € [2].",
+          "cited": [
+            2
+          ],
+          "reason": "The sources specify that the penalty for burning green waste is a fine of 750 €.",
+          "verdict": "supported",
+          "supporting_blocks": [
+            2
+          ]
+        }
+      ],
+      "key_facts": [
+        {
+          "id": 1,
+          "fact": "Brûler des déchets verts chez soi est interdit",
+          "reason": "The answer explicitly states that burning green waste (including leaves and branches) is not allowed.",
+          "verdict": "present"
+        },
+        {
+          "id": 2,
+          "fact": "Amende de 750 €",
+          "reason": "The answer mentions a fine of 750 € for non-compliance.",
+          "verdict": "present"
+        }
+      ],
+      "faithfulness": 1.0,
+      "citation_accuracy": 1.0,
+      "citation_precision": 0.8,
+      "correctness": 1.0,
+      "judge_calls": 2,
+      "prompt_tokens": 2928,
+      "completion_tokens": 275,
+      "error": null
+    },
+    {
+      "question_id": "q002",
+      "question": "Il a neigé cette nuit : c'est à moi de dégager le trottoir devant ma maison ou c'est à la mairie ?",
+      "category": "lookup",
+      "split": "dev",
+      "refused": false,
+      "sentences": [
+        {
+          "id": 1,
+          "text": "Si un **arrêté municipal** impose le déneigement devant votre habitation, vous devez le faire :",
+          "cited": [],
+          "reason": "The sources explicitly state that if a municipal decree exists, residents must clear the snow in front of their homes.",
+          "verdict": "supported",
+          "supporting_blocks": [
+            1
+          ]
+        },
+        {
+          "id": 2,
+          "text": "**Locataire ou propriétaire d’une maison individuelle ou en lotissement** [1].",
+          "cited": [
+            1
+          ],
+          "reason": "The sources specify that occupants (tenants or owners of individual houses or those in subdivisions) are responsible for snow removal if a municipal decree exists.",
+          "verdict": "supported",
+          "supporting_blocks": [
+            1
+          ]
+        },
+        {
+          "id": 3,
+          "text": "**Syndic de copropriété** pour un immeuble en copropriété [1].",
+          "cited": [
+            1
+          ],
+          "reason": "The sources state that the syndicate of co-owners (via the property manager) is responsible for snow removal in front of a co-owned building if a municipal decree exists.",
+          "verdict": "supported",
+          "supporting_blocks": [
+            1
+          ]
+        },
+        {
+          "id": 4,
+          "text": "Si **aucun arrêté municipal** n’existe, c’est la mairie (service voirie) qui s’en charge [1].",
+          "cited": [
+            1
+          ],
+          "reason": "The sources confirm that if no municipal decree exists, the municipality (road maintenance service) is responsible for snow removal.",
+          "verdict": "supported",
+          "supporting_blocks": [
+            1,
+            2
+          ]
+        },
+        {
+          "id": 5,
+          "text": "Pour vérifier, consultez l’arrêté en mairie ou sur le site internet de votre commune [1].",
+          "cited": [
+            1
+          ],
+          "reason": "The sources mention that the municipal decree can be consulted at the town hall or on the municipality's website.",
+          "verdict": "supported",
+          "supporting_blocks": [
+            1
+          ]
+        }
+      ],
+      "key_facts": [
+        {
+          "id": 1,
+          "fact": "Obligation de déneiger si un arrêté du maire le prévoit",
+          "reason": "The answer explicitly states that the obligation to clear snow depends on a municipal decree (arrêté municipal).",
+          "verdict": "present"
+        },
+        {
+          "id": 2,
+          "fact": "Sans arrêté, la mairie s'en charge",
+          "reason": "The answer clearly mentions that if no municipal decree exists, the town hall (mairie) is responsible for snow clearance.",
+          "verdict": "present"
+        },
+        {
+          "id": 3,
+          "fact": "Amende de 150 € au maximum en cas de non-respect",
+          "reason": "The answer does not mention any fine for non-compliance.",
+          "verdict": "absent"
+        }
+      ],
+      "faithfulness": 1.0,
+      "citation_accuracy": 1.0,
+      "citation_precision": 1.0,
+      "correctness": 0.6666666666666666,
+      "judge_calls": 2,
+      "prompt_tokens": 2981,
+      "completion_tokens": 448,
+      "error": null
+    },
+    {
+      "question_id": "q004",
+      "question": "J'ai quitté mon appart il y a deux ans et mon ancien proprio me réclame des loyers impayés. Il peut encore le faire ?",
+      "category": "lookup",
+      "split": "dev",
+      "refused": false,
+      "sentences": [
+        {
+          "id": 1,
+          "text": "Oui, le propriétaire peut encore réclamer les loyers impayés, car le délai de prescription est de **3 ans** pour les dettes de loyers ou de charges, même après le départ du locataire [1][2][3][4][5].",
+          "cited": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "reason": "The sources explicitly state that the owner can claim unpaid rents or charges for up to 3 years, even after the tenant has left.",
+          "verdict": "supported",
+          "supporting_blocks": [
+            2,
+            3,
+            4,
+            5
+          ]
+        },
+        {
+          "id": 2,
+          "text": "Exemple : Si les loyers étaient impayés en 2022, le propriétaire peut les réclamer jusqu'en 2025 [1][2][3][4][5].",
+          "cited": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "reason": "The sources provide an example of a 3-year prescription period for unpaid rents or charges, aligning with the given example.",
+          "verdict": "supported",
+          "supporting_blocks": [
+            2,
+            3,
+            5
+          ]
+        }
+      ],
+      "key_facts": [
+        {
+          "id": 1,
+          "fact": "Délai de 3 ans pour réclamer les loyers et charges impayés",
+          "reason": "The answer explicitly states the 3-year prescription period for unpaid rent and charges.",
+          "verdict": "present"
+        },
+        {
+          "id": 2,
+          "fact": "Le délai s'applique aussi après le départ du locataire",
+          "reason": "The answer confirms the 3-year period applies even after the tenant's departure.",
+          "verdict": "present"
+        }
+      ],
+      "faithfulness": 1.0,
+      "citation_accuracy": 1.0,
+      "citation_precision": 0.7,
+      "correctness": 1.0,
+      "judge_calls": 2,
+      "prompt_tokens": 2735,
+      "completion_tokens": 231,
+      "error": null
+    },
+    {
+      "question_id": "q005",
+      "question": "Mes voisins du dessus font la fête jusqu'à 3 h du matin presque tous les samedis. Qu'est-ce qu'ils risquent ?",
+      "category": "lookup",
+      "split": "dev",
+      "refused": false,
+      "sentences": [
+        {
+          "id": 1,
+          "text": "Pour des bruits liés à une activité professionnelle (comme un bar ou une discothèque), les exploitants doivent respecter des **limites de niveaux sonores** :",
+          "cited": [],
+          "reason": "The sentence correctly states the obligation for professional establishments to respect limits of sound levels, as mentioned in source [1].",
+          "verdict": "supported",
+          "supporting_blocks": [
+            1
+          ]
+        },
+        {
+          "id": 2,
+          "text": "**Émergence sonore max. +5 dB(A) le jour (7h–22h)** et **+3 dB(A) la nuit (22h–7h)** par rapport au bruit ambiant habituel, **uniquement si le niveau sonore ambiant dépasse 25 dB(A) dans un logement voisin (ou 30 dB(A) ailleurs)** [1].",
+          "cited": [
+            1
+          ],
+          "reason": "The sentence accurately describes the emergence sonore limits and conditions, as detailed in source [1].",
+          "verdict": "supported",
+          "supporting_blocks": [
+            1
+          ]
+        },
+        {
+          "id": 3,
+          "text": "**Sanctions possibles** :",
+          "cited": [],
+          "reason": "The sentence introduces the topic of possible sanctions, which is a transition and not a factual claim.",
+          "verdict": "no_claim",
+          "supporting_blocks": []
+        },
+        {
+          "id": 4,
+          "text": "**Amende forfaitaire** pour l’exploitant :",
+          "cited": [],
+          "reason": "The sentence states the possibility of a fixed fine for the operator, which is supported by sources [2] and [4].",
+          "verdict": "supported",
+          "supporting_blocks": [
+            2,
+            4
+          ]
+        },
+        {
+          "id": 5,
+          "text": "**68 €** si paiement sous 45 jours,",
+          "cited": [],
+          "reason": "The sentence correctly cites the amount of the fine (68 €) if paid within 45 days, as mentioned in sources [2] and [4].",
+          "verdict": "supported",
+          "supporting_blocks": [
+            2,
+            4
+          ]
+        },
+        {
+          "id": 6,
+          "text": "**180 €** après ce délai [2][4].",
+          "cited": [
+            2,
+            4
+          ],
+          "reason": "The sentence correctly cites the increased fine (180 €) after the 45-day period, as mentioned in sources [2] and [4].",
+          "verdict": "supported",
+          "supporting_blocks": [
+            2,
+            4
+          ]
+        },
+        {
+          "id": 7,
+          "text": "**Fermeture administrative** (arrêté du préfet) en cas de **troubles graves et répétés** [1].",
+          "cited": [
+            1
+          ],
+          "reason": "The sentence accurately describes the possibility of administrative closure by the prefect in cases of serious and repeated disturbances, as stated in source [1].",
+          "verdict": "supported",
+          "supporting_blocks": [
+            1
+          ]
+        },
+        {
+          "id": 8,
+          "text": "**Intervention de la police municipale/nationale** pour constater les infractions et verbaliser [2].",
+          "cited": [
+            2
+          ],
+          "reason": "The sentence correctly states that police can intervene to record infractions and issue fines, as mentioned in sources [2] and [4].",
+          "verdict": "supported",
+          "supporting_blocks": [
+            2,
+            4
+          ]
+        },
+        {
+          "id": 9,
+          "text": "**Si c’est un logement privé (pas une activité professionnelle)** :",
+          "cited": [],
+          "reason": "The sentence introduces a new context (private housing) and is a transition, not a factual claim.",
+          "verdict": "no_claim",
+          "supporting_blocks": []
+        },
+        {
+          "id": 10,
+          "text": "**Tapage nocturne** (22h–7h) est interdit par la loi [3].",
+          "cited": [
+            3
+          ],
+          "reason": "The sentence correctly states that nighttime noise (22h–7h) is prohibited by law, as mentioned in source [3].",
+          "verdict": "supported",
+          "supporting_blocks": [
+            3
+          ]
+        },
+        {
+          "id": 11,
+          "text": "Le maire peut prendre un **arrêté municipal** fixant des horaires plus restrictifs [3].",
+          "cited": [
+            3
+          ],
+          "reason": "The sentence accurately describes the mayor's ability to issue municipal decrees setting more restrictive hours, as stated in source [3].",
+          "verdict": "supported",
+          "supporting_blocks": [
+            3
+          ]
+        },
+        {
+          "id": 12,
+          "text": "**Sanctions** : verbalisation possible (même amendes que ci-dessus) [2][4].",
+          "cited": [
+            2,
+            4
+          ],
+          "reason": "The sentence states that fines can be issued, which is supported by sources [2] and [4], though it does not specify if the amounts are identical for private individuals.",
+          "verdict": "partial",
+          "supporting_blocks": [
+            2,
+            4
+          ]
+        },
+        {
+          "id": 13,
+          "text": "**À noter** :",
+          "cited": [],
+          "reason": "The sentence is a transition and does not state a factual claim.",
+          "verdict": "no_claim",
+          "supporting_blocks": []
+        },
+        {
+          "id": 14,
+          "text": "Si les voisins sont locataires, le propriétaire peut aussi être tenu responsable [5].",
+          "cited": [
+            5
+          ],
+          "reason": "The sentence correctly states that the owner can be held responsible for the behavior of tenants, as mentioned in source [5].",
+          "verdict": "supported",
+          "supporting_blocks": [
+            5
+          ]
+        },
+        {
+          "id": 15,
+          "text": "Si le logement est en copropriété, le **syndic** doit être averti (règlement de copropriété peut interdire les nuisances) [5].",
+          "cited": [
+            5
+          ],
+          "reason": "The sentence accurately describes the role of the syndic in enforcing the co-ownership rules, as stated in source [5].",
+          "verdict": "supported",
+          "supporting_blocks": [
+            5
+          ]
+        },
+        {
+          "id": 16,
+          "text": "*Je ne trouve pas dans les sources si les sanctions diffèrent selon Paris ou d’autres communes.*",
+          "cited": [],
+          "reason": "The sentence correctly notes that the sources do not specify differences in sanctions between Paris and other municipalities.",
+          "verdict": "supported",
+          "supporting_blocks": []
+        }
+      ],
+      "key_facts": [
+        {
+          "id": 1,
+          "fact": "Tapage nocturne entre 22h et 7h",
+          "reason": "The answer explicitly states that tapage nocturne is prohibited between 22h and 7h.",
+          "verdict": "present"
+        },
+        {
+          "id": 2,
+          "fact": "Amende de 450 € maximum",
+          "reason": "The answer mentions an amende forfaitaire but does not specify a maximum of 450 €, only listing 68 € and 180 € as possible amounts.",
+          "verdict": "absent"
+        },
+        {
+          "id": 3,
+          "fact": "Amende forfaitaire de 68 € si payée dans les 45 jours",
+          "reason": "The answer states the amende forfaitaire is 68 € if paid within 45 days.",
+          "verdict": "present"
+        }
+      ],
+      "faithfulness": 0.9230769230769231,
+      "citation_accuracy": 1.0,
+      "citation_precision": 1.0,
+      "correctness": 0.6666666666666666,
+      "judge_calls": 2,
+      "prompt_tokens": 4010,
+      "completion_tokens": 1125,
+      "error": null
+    },
+    {
+      "question_id": "q007",
+      "question": "Je suis locataire avec une chaudière au gaz. Tous les combien dois-je la faire contrôler, et quel papier dois-je garder ?",
+      "category": "lookup",
+      "split": "dev",
+      "refused": false,
+      "sentences": [
+        {
+          "id": 1,
+          "text": "Vous devez faire contrôler votre chaudière au gaz **chaque année civile** [1][3][5].",
+          "cited": [
+            1,
+            3,
+            5
+          ],
+          "reason": "The sources explicitly state that the annual maintenance of the boiler must be done each calendar year.",
+          "verdict": "supported",
+          "supporting_blocks": [
+            3,
+            5
+          ]
+        },
+        {
+          "id": 2,
+          "text": "À la fin de l'entretien, le chauffagiste doit vous remettre une **attestation d'entretien** (sous forme papier ou dématérialisée) à conserver **pendant au moins 2 ans** [5].",
+          "cited": [
+            5
+          ],
+          "reason": "The sources confirm that the heating technician must provide an 'attestation d'entretien' within 15 days, to be kept for a minimum of 2 years.",
+          "verdict": "supported",
+          "supporting_blocks": [
+            5
+          ]
+        }
+      ],
+      "key_facts": [
+        {
+          "id": 1,
+          "fact": "Entretien chaque année civile",
+          "reason": "The answer explicitly states that the boiler must be checked every calendar year.",
+          "verdict": "present"
+        },
+        {
+          "id": 2,
+          "fact": "Attestation d'entretien remise dans les 15 jours",
+          "reason": "The answer does not mention the 15-day deadline for the delivery of the maintenance certificate.",
+          "verdict": "absent"
+        },
+        {
+          "id": 3,
+          "fact": "Attestation à conserver au moins 2 ans",
+          "reason": "The answer states that the maintenance certificate must be kept for at least 2 years.",
+          "verdict": "present"
+        }
+      ],
+      "faithfulness": 1.0,
+      "citation_accuracy": 1.0,
+      "citation_precision": 0.75,
+      "correctness": 0.6666666666666666,
+      "judge_calls": 2,
+      "prompt_tokens": 3294,
+      "completion_tokens": 262,
+      "error": null
+    },
+    {
+      "question_id": "q008",
+      "question": "Mon propriétaire menace de me mettre dehors en décembre parce que j'ai des retards de loyer. Il peut ?",
+      "category": "lookup",
+      "split": "dev",
+      "refused": false,
+      "sentences": [
+        {
+          "id": 1,
+          "text": "Votre propriétaire ne peut pas vous expulser directement sans passer par un juge, sauf si votre dette dépasse **5 000 €** [1].",
+          "cited": [
+            1
+          ],
+          "reason": "The sources state that the landlord can directly seize the judge for expulsion if the debt exceeds 5,000 €, implying a judicial process is required otherwise.",
+          "verdict": "supported",
+          "supporting_blocks": [
+            1
+          ]
+        },
+        {
+          "id": 2,
+          "text": "Si votre dette est inférieure ou égale à 5 000 €, le propriétaire doit d'abord tenter une **conciliation** (obligatoire) avant de saisir le juge [2].",
+          "cited": [
+            2
+          ],
+          "reason": "The sources specify that conciliation is mandatory for disputes involving amounts ≤ 5,000 € before the judge can be seized.",
+          "verdict": "supported",
+          "supporting_blocks": [
+            2
+          ]
+        },
+        {
+          "id": 3,
+          "text": "Vous avez **6 semaines** pour régulariser votre situation (payer ou trouver un accord avec le propriétaire) [2].",
+          "cited": [
+            2
+          ],
+          "reason": "The sources do not explicitly mention a 6-week deadline for regularizing the situation; this is an unsupported inference.",
+          "verdict": "unsupported",
+          "supporting_blocks": []
+        },
+        {
+          "id": 4,
+          "text": "Si vous ne le faites pas, le propriétaire peut demander au juge la résiliation du bail et votre expulsion.",
+          "cited": [],
+          "reason": "The sources confirm that if the debt is not repaid or an agreement is not reached, the landlord can request bail termination and expulsion from the judge.",
+          "verdict": "supported",
+          "supporting_blocks": [
+            2
+          ]
+        },
+        {
+          "id": 5,
+          "text": "**À faire immédiatement** :",
+          "cited": [],
+          "reason": "The sentence is a heading and does not state a fact.",
+          "verdict": "no_claim",
+          "supporting_blocks": []
+        },
+        {
+          "id": 6,
+          "text": "Contacter le propriétaire pour négocier un **délai de paiement** (par écrit et signé) [2].",
+          "cited": [
+            2
+          ],
+          "reason": "The sources recommend contacting the landlord to negotiate a payment plan and formalizing it in writing.",
+          "verdict": "supported",
+          "supporting_blocks": [
+            2
+          ]
+        },
+        {
+          "id": 7,
+          "text": "Demander une **aide financière** (Caf, FSL, Action Logement, etc.) [2].",
+          "cited": [
+            2
+          ],
+          "reason": "The sources list financial aids (Caf, FSL, Action Logement) as a recommended step for tenants with rent difficulties.",
+          "verdict": "supported",
+          "supporting_blocks": [
+            2
+          ]
+        },
+        {
+          "id": 8,
+          "text": "Si vous contestez le montant, contacter **SOS loyers impayés** ou un **conciliateur de justice** (gratuit) [2].",
+          "cited": [
+            2
+          ],
+          "reason": "The sources advise contacting SOS loyers impayés or a conciliator if the debt amount is contested or negotiations fail.",
+          "verdict": "supported",
+          "supporting_blocks": [
+            2
+          ]
+        },
+        {
+          "id": 9,
+          "text": "Si vous régularisez votre situation dans les délais, vous pouvez **rester dans le logement** [1][2].",
+          "cited": [
+            1,
+            2
+          ],
+          "reason": "The sources confirm that repaying the debt within the allowed timeframe allows the tenant to stay in the housing.",
+          "verdict": "supported",
+          "supporting_blocks": [
+            1,
+            2
+          ]
+        }
+      ],
+      "key_facts": [
+        {
+          "id": 1,
+          "fact": "Pas d'expulsion du 1er novembre au 31 mars (trêve hivernale)",
+          "reason": "The answer does not mention the winter truce (trêve hivernale) or the prohibition of evictions between November 1st and March 31st.",
+          "verdict": "absent"
+        },
+        {
+          "id": 2,
+          "fact": "La procédure peut être engagée pendant la trêve, l'expulsion a lieu après",
+          "reason": "The answer correctly states that the procedure can be initiated during the truce but the expulsion occurs afterward, though it does not explicitly tie this to the trêve hivernale.",
+          "verdict": "partial"
+        }
+      ],
+      "faithfulness": 0.875,
+      "citation_accuracy": 0.8571428571428571,
+      "citation_precision": 0.875,
+      "correctness": 0.25,
+      "judge_calls": 2,
+      "prompt_tokens": 3361,
+      "completion_tokens": 653,
+      "error": null
+    },
+    {
+      "question_id": "q011",
+      "question": "J'ai obtenu MaPrimeRénov' pour changer ma chaudière. Est-ce que je peux en plus prendre un éco-prêt à taux zéro pour payer ce qui reste ?",
+      "category": "lookup",
+      "split": "dev",
+      "refused": false,
+      "sentences": [
+        {
+          "id": 1,
+          "text": "Oui, vous pouvez cumuler **MaPrimeRénov’ (MPR)** avec un **éco-PTZ** pour financer le reste à charge de vos travaux de rénovation énergétique (ici, le changement de chaudière), **à condition que** :",
+          "cited": [],
+          "reason": "The sources explicitly state that the eco-PTZ can be combined with MaPrimeRénov' (MPR) to finance the remaining balance of eligible energy renovation works.",
+          "verdict": "supported",
+          "supporting_blocks": [
+            1
+          ]
+        },
+        {
+          "id": 2,
+          "text": "Les travaux soient réalisés dans un **logement à usage de résidence principale** [1].",
+          "cited": [
+            1
+          ],
+          "reason": "The sources specify that the works must be carried out in a primary residence to benefit from the combination of eco-PTZ and MaPrimeRénov'.",
+          "verdict": "supported",
+          "supporting_blocks": [
+            1
+          ]
+        },
+        {
+          "id": 3,
+          "text": "Vous soyez **propriétaire occupant ou bailleur** [1].",
+          "cited": [
+            1
+          ],
+          "reason": "The sources state that the combination is available to both owner-occupiers and landlords.",
+          "verdict": "supported",
+          "supporting_blocks": [
+            1
+          ]
+        },
+        {
+          "id": 4,
+          "text": "En cas de location, le logement doit être loué dans les **6 mois suivant la fin des travaux** [1].",
+          "cited": [
+            1
+          ],
+          "reason": "The sources confirm that in the case of a rental, the property must be rented out within 6 months following the completion of the works.",
+          "verdict": "supported",
+          "supporting_blocks": [
+            1
+          ]
+        },
+        {
+          "id": 5,
+          "text": "**Démarches pour obtenir l’éco-PTZ** :",
+          "cited": [],
+          "reason": "The sentence introduces a procedural section without stating a factual claim.",
+          "verdict": "no_claim",
+          "supporting_blocks": []
+        },
+        {
+          "id": 6,
+          "text": "Choisir un **établissement de crédit ou société signataire d’une convention avec l’État** (liste officielle) [1].",
+          "cited": [
+            1
+          ],
+          "reason": "The sources specify that the eco-PTZ is offered by credit institutions, financing companies, or third-party financing companies that have signed an agreement with the State.",
+          "verdict": "supported",
+          "supporting_blocks": [
+            1
+          ]
+        },
+        {
+          "id": 7,
+          "text": "Transmettre à cet établissement **la décision d’octroi de MaPrimeRénov’** (délivrée par l’Anah), **datant de moins de 6 mois** [1].",
+          "cited": [
+            1
+          ],
+          "reason": "The sources state that the decision to grant MaPrimeRénov' must be transmitted to the institution and must not be older than 6 months.",
+          "verdict": "supported",
+          "supporting_blocks": [
+            1
+          ]
+        },
+        {
+          "id": 8,
+          "text": "**Montant de l’éco-PTZ** :",
+          "cited": [],
+          "reason": "The sentence introduces a section on the amount of the eco-PTZ without stating a factual claim.",
+          "verdict": "no_claim",
+          "supporting_blocks": []
+        },
+        {
+          "id": 9,
+          "text": "Il couvre **le reste à charge après MPR**, dans la limite de **50 000 €** [1][2].",
+          "cited": [
+            1,
+            2
+          ],
+          "reason": "The sources confirm that the eco-PTZ covers the remaining balance after MaPrimeRénov' and is capped at €50,000.",
+          "verdict": "supported",
+          "supporting_blocks": [
+            1,
+            2
+          ]
+        },
+        {
+          "id": 10,
+          "text": "Exemple : Si vos travaux coûtent **10 000 € TTC** et que MPR couvre **6 000 €**, l’éco-PTZ peut financer jusqu’à **4 000 €** (après déduction d’éventuelles autres aides comme les CEE) [1][2].",
+          "cited": [
+            1,
+            2
+          ],
+          "reason": "The sources explain that the eco-PTZ covers the remaining balance after MaPrimeRénov' and other aids (e.g., CEE), but the example is illustrative and not explicitly stated in the sources.",
+          "verdict": "partial",
+          "supporting_blocks": [
+            1,
+            2
+          ]
+        },
+        {
+          "id": 11,
+          "text": "**Remboursement** :",
+          "cited": [],
+          "reason": "The sentence introduces a section on repayment without stating a factual claim.",
+          "verdict": "no_claim",
+          "supporting_blocks": []
+        },
+        {
+          "id": 12,
+          "text": "Délai maximal de **20 ans** (peut être réduit sur demande) [2].",
+          "cited": [
+            2
+          ],
+          "reason": "The sources state that the repayment period for the eco-PTZ is 20 years and can be reduced upon request.",
+          "verdict": "supported",
+          "supporting_blocks": [
+            1
+          ]
+        },
+        {
+          "id": 13,
+          "text": "**Attention** : Tant que l’éco-PTZ n’est pas remboursé, le logement ne peut pas être transformé en local commercial, loué saisonnièrement ou utilisé comme résidence secondaire [2].",
+          "cited": [
+            2
+          ],
+          "reason": "The sources specify that the property cannot be converted into commercial premises, rented seasonally, or used as a secondary residence until the eco-PTZ is fully repaid.",
+          "verdict": "supported",
+          "supporting_blocks": [
+            1
+          ]
+        },
+        {
+          "id": 14,
+          "text": "*Je ne trouve pas dans les sources si le changement de chaudière seul est éligible à ces aides (vérifiez la liste des travaux éligibles sur [service-public.gouv.fr](https://www.service-public.gouv.fr/particuliers/vosdroits/F35083)).*",
+          "cited": [],
+          "reason": "The sentence correctly states that the sources do not specify whether a boiler replacement alone is eligible for these aids.",
+          "verdict": "supported",
+          "supporting_blocks": []
+        }
+      ],
+      "key_facts": [
+        {
+          "id": 1,
+          "fact": "Éco-PTZ et MaPrimeRénov' sont cumulables",
+          "reason": "The answer explicitly states that MaPrimeRénov’ (MPR) can be combined with an éco-PTZ.",
+          "verdict": "present"
+        },
+        {
+          "id": 2,
+          "fact": "Uniquement pour le reste à charge des travaux aidés par MaPrimeRénov'",
+          "reason": "The answer specifies that the éco-PTZ covers the remaining cost after MaPrimeRénov' (reste à charge).",
+          "verdict": "present"
+        }
+      ],
+      "faithfulness": 0.9090909090909091,
+      "citation_accuracy": 0.7777777777777778,
+      "citation_precision": 0.8181818181818182,
+      "correctness": 1.0,
+      "judge_calls": 2,
+      "prompt_tokens": 3939,
+      "completion_tokens": 972,
+      "error": null
+    },
+    {
+      "question_id": "q012",
+      "question": "Cinq ans après la construction de notre maison, de grosses fissures apparaissent dans les murs porteurs. Le constructeur doit-il encore réparer ?",
+      "category": "lookup",
+      "split": "dev",
+      "refused": false,
+      "sentences": [
+        {
+          "id": 1,
+          "text": "Oui, le constructeur doit encore réparer les fissures dans les murs porteurs, car elles relèvent de la **garantie décennale** [4][5].",
+          "cited": [
+            4,
+            5
+          ],
+          "reason": "The sources explicitly state that the decennial guarantee covers damage to load-bearing walls (gros œuvre) for 10 years after the reception of works.",
+          "verdict": "supported",
+          "supporting_blocks": [
+            3,
+            4,
+            5
+          ]
+        },
+        {
+          "id": 2,
+          "text": "Cette garantie couvre les dommages affectant la **solidité du bâtiment** (comme les murs porteurs) pendant **10 ans après la réception des travaux** [5].",
+          "cited": [
+            5
+          ],
+          "reason": "The sources confirm that the decennial guarantee covers damage affecting the solidity of the building (e.g., load-bearing walls) for 10 years after the reception of works.",
+          "verdict": "supported",
+          "supporting_blocks": [
+            3,
+            4,
+            5
+          ]
+        },
+        {
+          "id": 3,
+          "text": "Vous devez :",
+          "cited": [],
+          "reason": "The sentence is a transition (list introduction) and does not state a fact.",
+          "verdict": "no_claim",
+          "supporting_blocks": []
+        },
+        {
+          "id": 4,
+          "text": "Lui envoyer une **lettre RAR** pour lui signaler les désordres [4][5].",
+          "cited": [
+            4,
+            5
+          ],
+          "reason": "The sources specify that a registered letter (lettre RAR) must be sent to the constructor to report disorders for the decennial guarantee.",
+          "verdict": "supported",
+          "supporting_blocks": [
+            3,
+            4
+          ]
+        },
+        {
+          "id": 5,
+          "text": "Si nécessaire, saisir votre **assurance dommages-ouvrage** [4].",
+          "cited": [
+            4
+          ],
+          "reason": "The sources state that the homeowner must notify their 'assurance dommages-ouvrage' to claim repairs under the decennial guarantee.",
+          "verdict": "supported",
+          "supporting_blocks": [
+            3,
+            4
+          ]
+        },
+        {
+          "id": 6,
+          "text": "En cas de refus, engager une **médiation** ou saisir le **tribunal judiciaire** [4][5].",
+          "cited": [
+            4,
+            5
+          ],
+          "reason": "The sources mention mediation or legal action (tribunal judiciaire) as recourse if the constructor refuses to repair under the decennial guarantee.",
+          "verdict": "supported",
+          "supporting_blocks": [
+            3,
+            4,
+            5
+          ]
+        },
+        {
+          "id": 7,
+          "text": "*Les fissures dans les murs porteurs ne sont pas couvertes par la garantie de bon fonctionnement (2 ans) ou la garantie de parfait achèvement (1 an)* [1][5].",
+          "cited": [
+            1,
+            5
+          ],
+          "reason": "The sources confirm that load-bearing wall damage is excluded from the 2-year good functioning guarantee and the 1-year perfect completion guarantee.",
+          "verdict": "supported",
+          "supporting_blocks": [
+            1,
+            5
+          ]
+        }
+      ],
+      "key_facts": [
+        {
+          "id": 1,
+          "fact": "Garantie décennale : dommages apparus dans les 10 ans après la réception des travaux",
+          "reason": "The answer explicitly states the 10-year duration of the 'garantie décennale' after the reception of works.",
+          "verdict": "present"
+        },
+        {
+          "id": 2,
+          "fact": "Elle couvre les désordres qui menacent la solidité ou rendent la construction impropre à sa destination",
+          "reason": "The answer mentions that the 'garantie décennale' covers damages affecting the solidity of the building, which aligns with the reference fact but does not explicitly mention 'rendent la construction impropre à sa destination'.",
+          "verdict": "partial"
+        }
+      ],
+      "faithfulness": 1.0,
+      "citation_accuracy": 1.0,
+      "citation_precision": 0.9,
+      "correctness": 0.75,
+      "judge_calls": 2,
+      "prompt_tokens": 2993,
+      "completion_tokens": 588,
+      "error": null
+    },
+    {
+      "question_id": "q014",
+      "question": "J'ai déposé mon permis de construire pour une maison. La mairie a combien de temps pour me répondre, et que se passe-t-il si elle ne répond pas ?",
+      "category": "lookup",
+      "split": "dev",
+      "refused": false,
+      "sentences": [
+        {
+          "id": 1,
+          "text": "Pour une **maison individuelle**, la mairie a **3 mois** pour répondre à partir de la date de dépôt d’un dossier complet [1][3].",
+          "cited": [
+            1,
+            3
+          ],
+          "reason": "The sources explicitly state that for a house (maison individuelle), the instruction period is 3 months from the date of submission of a complete file.",
+          "verdict": "supported",
+          "supporting_blocks": [
+            1,
+            3
+          ]
+        },
+        {
+          "id": 2,
+          "text": "Si la mairie ne répond pas dans ce délai, votre projet est **accepté tacitement** (permis de construire tacite) [1][3].",
+          "cited": [
+            1,
+            3
+          ],
+          "reason": "The sources confirm that if no response is received from the mairie at the end of the instruction period, the project is accepted tacitly (permis de construire tacite).",
+          "verdict": "supported",
+          "supporting_blocks": [
+            1,
+            3
+          ]
+        },
+        {
+          "id": 3,
+          "text": "Vous pouvez demander un **certificat de non-opposition** pour prouver cette acceptation [1].",
+          "cited": [
+            1
+          ],
+          "reason": "The sources state that upon request, the mairie must provide a certificate of non-opposition as proof of the tacit acceptance.",
+          "verdict": "supported",
+          "supporting_blocks": [
+            1,
+            3
+          ]
+        },
+        {
+          "id": 4,
+          "text": "*Exception* : Dans certains cas (ex. : site classé, parc national), l’absence de réponse peut signifier un **refus implicite** [4].",
+          "cited": [
+            4
+          ],
+          "reason": "The sources mention that in certain cases (e.g., classified sites, national parks), the absence of a response can mean an implicit refusal.",
+          "verdict": "supported",
+          "supporting_blocks": [
+            3
+          ]
+        }
+      ],
+      "key_facts": [
+        {
+          "id": 1,
+          "fact": "Délai d'instruction de 2 mois pour une maison individuelle",
+          "reason": "The answer states a 3-month delay instead of the 2-month delay mentioned in the reference fact.",
+          "verdict": "contradicted"
+        },
+        {
+          "id": 2,
+          "fact": "Le délai part du dépôt du dossier complet",
+          "reason": "The answer correctly mentions that the delay starts from the date of deposit of a complete dossier.",
+          "verdict": "present"
+        },
+        {
+          "id": 3,
+          "fact": "Sans réponse, le permis est accordé tacitement",
+          "reason": "The answer correctly states that without a response, the permit is tacitly granted.",
+          "verdict": "present"
+        }
+      ],
+      "faithfulness": 1.0,
+      "citation_accuracy": 0.75,
+      "citation_precision": 0.8333333333333334,
+      "correctness": 0.6666666666666666,
+      "judge_calls": 2,
+      "prompt_tokens": 3416,
+      "completion_tokens": 409,
+      "error": null
+    },
+    {
+      "question_id": "q015",
+      "question": "J'ai reçu mon chèque énergie en mai. Jusqu'à quand je peux l'utiliser ?",
+      "category": "lookup",
+      "split": "dev",
+      "refused": false,
+      "sentences": [
+        {
+          "id": 1,
+          "text": "Vous avez reçu votre chèque énergie en mai (après le 1er septembre).",
+          "cited": [],
+          "reason": "The sentence states a fact about when the chèque énergie was received (after September 1st), but the sources do not confirm the specific month of reception for the user. This is an assumption based on the question.",
+          "verdict": "unsupported",
+          "supporting_blocks": []
+        },
+        {
+          "id": 2,
+          "text": "Sa date de validité expire donc le **31 mars de la 2e année civile suivante** [1][2][3].",
+          "cited": [
+            1,
+            2,
+            3
+          ],
+          "reason": "The sources explicitly state that a chèque énergie emitted from September 1st onward expires on March 31st of the 2nd following civil year.",
+          "verdict": "supported",
+          "supporting_blocks": [
+            1,
+            2
+          ]
+        },
+        {
+          "id": 3,
+          "text": "Exemple : Si vous l’avez reçu en mai 2024, il sera valable jusqu’au **31 mars 2026**.",
+          "cited": [],
+          "reason": "The example provided is a correct application of the rule stated in the sources for a chèque énergie received after September 1st.",
+          "verdict": "supported",
+          "supporting_blocks": [
+            1,
+            2
+          ]
+        }
+      ],
+      "key_facts": [
+        {
+          "id": 1,
+          "fact": "Valable jusqu'au 31 mars de l'année suivante s'il est émis avant le 1er septembre",
+          "reason": "The answer specifies the validity period for a chèque énergie received after September 1st (31 March of the 2nd following year), not before September 1st (31 March of the following year).",
+          "verdict": "contradicted"
+        },
+        {
+          "id": 2,
+          "fact": "La date de fin de validité est inscrite sur le chèque",
+          "reason": "The answer does not mention that the expiry date is written on the chèque énergie itself.",
+          "verdict": "absent"
+        }
+      ],
+      "faithfulness": 0.6666666666666666,
+      "citation_accuracy": 1.0,
+      "citation_precision": 0.6666666666666666,
+      "correctness": 0.0,
+      "judge_calls": 2,
+      "prompt_tokens": 3137,
+      "completion_tokens": 339,
+      "error": null
+    },
+    {
+      "question_id": "q017",
+      "question": "On veut virer notre syndic à la prochaine AG. Il faut quelle majorité pour voter ça ?",
+      "category": "lookup",
+      "split": "dev",
+      "refused": false,
+      "sentences": [
+        {
+          "id": 1,
+          "text": "Pour virer le syndic en fin de mandat, il faut obtenir **la majorité absolue de l'article 25** lors du vote en assemblée générale [1][3][5].",
+          "cited": [
+            1,
+            3,
+            5
+          ],
+          "reason": "The sources explicitly state that the designation of a new syndic requires the majority absolue of the article 25.",
+          "verdict": "supported",
+          "supporting_blocks": [
+            1,
+            3,
+            5
+          ]
+        },
+        {
+          "id": 2,
+          "text": "Si aucun candidat n'obtient cette majorité absolue, mais qu'un candidat obtient **au moins ⅓ des voix de tous les copropriétaires**, un **second vote à la majorité simple de l'article 24** peut avoir lieu lors de la même assemblée [1][3].",
+          "cited": [
+            1,
+            3
+          ],
+          "reason": "The sources confirm that if no candidate obtains the majority absolue but at least one obtains ⅓ of the votes, a second vote at the majority simple of the article 24 can occur during the same assembly.",
+          "verdict": "supported",
+          "supporting_blocks": [
+            1,
+            3,
+            5
+          ]
+        }
+      ],
+      "key_facts": [
+        {
+          "id": 1,
+          "fact": "Majorité absolue de l'article 25",
+          "reason": "The answer explicitly states the requirement for an absolute majority under Article 25 to dismiss the syndic.",
+          "verdict": "present"
+        },
+        {
+          "id": 2,
+          "fact": "Majorité des voix de tous les copropriétaires, y compris absents",
+          "reason": "The answer mentions 'au moins ⅓ des voix de tous les copropriétaires' in the context of a second vote, but it does not explicitly state that the absolute majority (Article 25) refers to the majority of all co-owners' votes, including absentees.",
+          "verdict": "partial"
+        }
+      ],
+      "faithfulness": 1.0,
+      "citation_accuracy": 1.0,
+      "citation_precision": 1.0,
+      "correctness": 0.75,
+      "judge_calls": 2,
+      "prompt_tokens": 3013,
+      "completion_tokens": 285,
+      "error": null
+    },
+    {
+      "question_id": "q019",
+      "question": "Notre syndic a été désigné il y a bientôt 3 ans. Son contrat s'arrête quand, et qu'est-ce qu'on peut faire à la fin ?",
+      "category": "lookup",
+      "split": "dev",
+      "refused": false,
+      "sentences": [
+        {
+          "id": 1,
+          "text": "Le mandat du syndic professionnel ou non professionnel a une durée maximale de **3 ans** [2][3].",
+          "cited": [
+            2,
+            3
+          ],
+          "reason": "The sources explicitly state that the maximum duration of a syndic's mandate (professional or non-professional) is 3 years.",
+          "verdict": "supported",
+          "supporting_blocks": [
+            1,
+            2,
+            3
+          ]
+        },
+        {
+          "id": 2,
+          "text": "À la fin de son mandat, vous pouvez :",
+          "cited": [],
+          "reason": "The sentence is a transition and does not state any factual claim.",
+          "verdict": "no_claim",
+          "supporting_blocks": []
+        },
+        {
+          "id": 3,
+          "text": "**Renouveler son mandat** en approuvant un nouveau contrat lors de l’assemblée générale (vote à la majorité absolue) [2][3].",
+          "cited": [
+            2,
+            3
+          ],
+          "reason": "The sources confirm that the mandate can be renewed by approving a new contract during the general assembly with a majority absolute vote.",
+          "verdict": "supported",
+          "supporting_blocks": [
+            1,
+            2
+          ]
+        },
+        {
+          "id": 4,
+          "text": "**Changer de syndic** en désignant un nouveau syndic lors de l’assemblée générale, sans avoir à justifier le motif [1].",
+          "cited": [
+            1
+          ],
+          "reason": "The sources state that a new syndic can be designated without any particular motive during the general assembly.",
+          "verdict": "supported",
+          "supporting_blocks": [
+            1
+          ]
+        },
+        {
+          "id": 5,
+          "text": "Pour changer de syndic, il faut :",
+          "cited": [],
+          "reason": "The sentence is a transition and does not state any factual claim.",
+          "verdict": "no_claim",
+          "supporting_blocks": []
+        },
+        {
+          "id": 6,
+          "text": "**Organiser une mise en concurrence** des syndics candidats (demander projets de contrat et fiches de prix) [1].",
+          "cited": [
+            1
+          ],
+          "reason": "The sources describe the requirement to organize a competitive process by requesting contract projects and price sheets from candidate syndics.",
+          "verdict": "supported",
+          "supporting_blocks": [
+            1
+          ]
+        },
+        {
+          "id": 7,
+          "text": "**Inscrire la question** à l’ordre du jour de l’assemblée générale en envoyant une demande par **lettre recommandée avec accusé de réception** (le syndic ne peut refuser) [1].",
+          "cited": [
+            1
+          ],
+          "reason": "The sources specify that the question must be included in the general assembly agenda via a registered letter with acknowledgment of receipt, and the syndic cannot refuse.",
+          "verdict": "supported",
+          "supporting_blocks": [
+            1
+          ]
+        },
+        {
+          "id": 8,
+          "text": "**Convoquer une assemblée générale avant la fin du mandat** pour voter la désignation du nouveau syndic [1][4].",
+          "cited": [
+            1,
+            4
+          ],
+          "reason": "The sources confirm that a general assembly must be convened before the end of the current mandate to vote on the new syndic.",
+          "verdict": "supported",
+          "supporting_blocks": [
+            1
+          ]
+        },
+        {
+          "id": 9,
+          "text": "Le nouveau contrat prend effet **au plus tôt 1 jour franc après l’assemblée générale** [4].",
+          "cited": [
+            4
+          ],
+          "reason": "The sources state that the new contract takes effect at the earliest 1 day after the general assembly.",
+          "verdict": "supported",
+          "supporting_blocks": [
+            4
+          ]
+        },
+        {
+          "id": 10,
+          "text": "Le syndic sortant ne perçoit **aucune indemnité** en cas de non-renouvellement [4].",
+          "cited": [
+            4
+          ],
+          "reason": "The sources explicitly mention that the outgoing syndic is not entitled to any indemnity in case of non-renewal.",
+          "verdict": "supported",
+          "supporting_blocks": [
+            4
+          ]
+        }
+      ],
+      "key_facts": [
+        {
+          "id": 1,
+          "fact": "Contrat de syndic de 3 ans en principe",
+          "reason": "The answer explicitly states that the mandate of the syndic has a maximum duration of 3 years.",
+          "verdict": "present"
+        },
+        {
+          "id": 2,
+          "fact": "À l'échéance : renouveler le même syndic ou en désigner un nouveau",
+          "reason": "The answer lists the options of renewing the same syndic or designating a new one at the end of the mandate.",
+          "verdict": "present"
+        },
+        {
+          "id": 3,
+          "fact": "Pas de motif à donner pour changer de syndic",
+          "reason": "The answer explicitly states that no justification is needed to change the syndic.",
+          "verdict": "present"
+        }
+      ],
+      "faithfulness": 1.0,
+      "citation_accuracy": 1.0,
+      "citation_precision": 0.8181818181818182,
+      "correctness": 1.0,
+      "judge_calls": 2,
+      "prompt_tokens": 3179,
+      "completion_tokens": 700,
+      "error": null
+    },
+    {
+      "question_id": "q021",
+      "question": "Je loue un bureau dans un immeuble en copropriété à Paris et j'aimerais le transformer en logement pour y habiter. Quelles démarches dois-je faire ?",
+      "category": "multi_hop",
+      "split": "dev",
+      "refused": false,
+      "sentences": [
+        {
+          "id": 1,
+          "text": "Pour transformer votre bureau en logement à Paris en tant que locataire dans un immeuble en copropriété, voici les démarches à suivre selon les sources :",
+          "cited": [],
+          "reason": "The sentence is a transition/introduction and does not state a fact.",
+          "verdict": "no_claim",
+          "supporting_blocks": []
+        },
+        {
+          "id": 2,
+          "text": "**Autorisation du propriétaire** : Vous devez obtenir son **autorisation écrite** pour changer l'affectation du local en habitation [2][3].",
+          "cited": [
+            2,
+            3
+          ],
+          "reason": "The source [3] explicitly states that the locataire must obtain written authorization from the propriétaire to transform the local.",
+          "verdict": "supported",
+          "supporting_blocks": [
+            3
+          ]
+        },
+        {
+          "id": 3,
+          "text": "**Démarches d'urbanisme** :",
+          "cited": [],
+          "reason": "The sentence is a heading and does not state a fact.",
+          "verdict": "no_claim",
+          "supporting_blocks": []
+        },
+        {
+          "id": 4,
+          "text": "Déposer une **déclaration préalable de travaux (DP)** ou une **demande de permis de construire (PC)** selon que le changement de destination implique ou non une modification de façade ou de structure porteuse [1].",
+          "cited": [
+            1
+          ],
+          "reason": "The source [1] confirms that a déclaration préalable de travaux (DP) or permis de construire (PC) is required depending on whether the change involves façade or structural modifications.",
+          "verdict": "supported",
+          "supporting_blocks": [
+            1
+          ]
+        },
+        {
+          "id": 5,
+          "text": "À Paris, le dossier doit être **transmis uniquement par voie dématérialisée** via le **Bureau accueil et service à l'usager (Basu)** [1][2].",
+          "cited": [
+            1,
+            2
+          ],
+          "reason": "The source [1] (Cas : À Paris) specifies that the dossier must be submitted exclusively via the Basu's digital platform.",
+          "verdict": "supported",
+          "supporting_blocks": [
+            1
+          ]
+        },
+        {
+          "id": 6,
+          "text": "**Démarches fiscales et cadastrales** :",
+          "cited": [],
+          "reason": "The sentence is a heading and does not state a fact.",
+          "verdict": "no_claim",
+          "supporting_blocks": []
+        },
+        {
+          "id": 7,
+          "text": "Déclarer le changement d'affectation dans les **90 jours** via le **formulaire modèle IL** (disponible en ligne ou par courrier RAR) [1].",
+          "cited": [
+            1
+          ],
+          "reason": "The source [2] states that the changement d'affectation must be declared within 90 days using the formulaire modèle IL.",
+          "verdict": "supported",
+          "supporting_blocks": [
+            2
+          ]
+        },
+        {
+          "id": 8,
+          "text": "Payer la **taxe d'aménagement** et vérifier les incidences sur les **impôts fonciers** (plus de CET) [1].",
+          "cited": [
+            1
+          ],
+          "reason": "The source [2] mentions the taxe d'aménagement and the impact on impôts fonciers (including the end of CET).",
+          "verdict": "supported",
+          "supporting_blocks": [
+            2
+          ]
+        },
+        {
+          "id": 9,
+          "text": "**Copropriété** :",
+          "cited": [],
+          "reason": "The sentence is a heading and does not state a fact.",
+          "verdict": "no_claim",
+          "supporting_blocks": []
+        },
+        {
+          "id": 10,
+          "text": "Vérifier que le **règlement de copropriété** autorise le changement d'usage (ex. : clause d'habitation bourgeoise exclusive) [5].",
+          "cited": [
+            5
+          ],
+          "reason": "The source [1] (copropriété section) and source [5] confirm that the règlement de copropriété must allow the change of use, including clauses like 'habitation bourgeoise exclusive'.",
+          "verdict": "supported",
+          "supporting_blocks": [
+            1,
+            5
+          ]
+        },
+        {
+          "id": 11,
+          "text": "Si le local est destiné à l'habitation, **aucune autorisation supplémentaire de la mairie n'est requise** (contrairement aux communes des 92, 93, 94 ou villes de +200 000 habitants) [4].",
+          "cited": [
+            4
+          ],
+          "reason": "The source [4] states that an additional mairie authorization is required for communes in 92, 93, 94 or cities with +200,000 inhabitants, but Paris is not mentioned in this context (implying it is not required).",
+          "verdict": "supported",
+          "supporting_blocks": [
+            4
+          ]
+        },
+        {
+          "id": 12,
+          "text": "*À noter* : Le bail professionnel/commercial doit être remplacé par un **contrat de location à usage de résidence principale** ou un autre type de bail adapté [3].",
+          "cited": [
+            3
+          ],
+          "reason": "The source [3] notes that the bail must be replaced by a contrat de location à usage de résidence principale or another adapted type of bail.",
+          "verdict": "supported",
+          "supporting_blocks": [
+            3
+          ]
+        }
+      ],
+      "key_facts": [
+        {
+          "id": 1,
+          "fact": "Déclaration préalable si pas de modification de façade ou de structure (sinon permis de construire)",
+          "reason": "The answer explicitly states that a déclaration préalable is required if there is no modification of façade or structure, otherwise a permis de construire is needed.",
+          "verdict": "present"
+        },
+        {
+          "id": 2,
+          "fact": "À Paris, dossier au Basu uniquement par voie dématérialisée",
+          "reason": "The answer mentions that the dossier must be transmitted exclusively via the Basu by dematerialized means in Paris.",
+          "verdict": "present"
+        },
+        {
+          "id": 3,
+          "fact": "Autorisation écrite du propriétaire pour un locataire",
+          "reason": "The answer clearly states that written authorization from the owner is required for a tenant to change the use of the premises.",
+          "verdict": "present"
+        },
+        {
+          "id": 4,
+          "fact": "Autorisation de l'AG à l'unanimité si le règlement de copropriété l'impose",
+          "reason": "The answer mentions checking the copropriété regulations but does not specify that authorization from the AG (Assemblée Générale) is required unanimously if the regulations impose it.",
+          "verdict": "partial"
+        },
+        {
+          "id": 5,
+          "fact": "Déclaration aux impôts dans les 90 jours",
+          "reason": "The answer states that the change of use must be declared to the tax authorities within 90 days using the modèle IL form.",
+          "verdict": "present"
+        }
+      ],
+      "faithfulness": 1.0,
+      "citation_accuracy": 0.75,
+      "citation_precision": 0.6,
+      "correctness": 0.9,
+      "judge_calls": 2,
+      "prompt_tokens": 3387,
+      "completion_tokens": 990,
+      "error": null
+    },
+    {
+      "question_id": "q022",
+      "question": "J'ai percé des trous de cheville pour accrocher des étagères. Mon propriétaire peut-il garder une partie de ma caution pour ça quand je pars ?",
+      "category": "multi_hop",
+      "split": "dev",
+      "refused": true,
+      "sentences": [],
+      "key_facts": [
+        {
+          "id": 1,
+          "fact": "Reboucher les trous est une réparation locative à la charge du locataire",
+          "reason": "The answer is a refusal.",
+          "verdict": "absent"
+        },
+        {
+          "id": 2,
+          "fact": "Retenue possible si justifiée par les états des lieux et des devis ou factures",
+          "reason": "The answer is a refusal.",
+          "verdict": "absent"
+        },
+        {
+          "id": 3,
+          "fact": "Restitution dans un délai maximum de 2 mois si l'état des lieux de sortie n'est pas conforme",
+          "reason": "The answer is a refusal.",
+          "verdict": "absent"
+        }
+      ],
+      "faithfulness": null,
+      "citation_accuracy": null,
+      "citation_precision": null,
+      "correctness": 0.0,
+      "judge_calls": 0,
+      "prompt_tokens": 0,
+      "completion_tokens": 0,
+      "error": null
+    },
+    {
+      "question_id": "q024",
+      "question": "Mon appartement est classé G au diagnostic énergie et mon locataire a signé son bail en 2023. Je peux augmenter le loyer avec l'indice chaque année, et renouveler son bail à l'échéance ?",
+      "category": "multi_hop",
+      "split": "dev",
+      "refused": false,
+      "sentences": [
+        {
+          "id": 1,
+          "text": "Pour un logement classé **G** (DPE) en **métropole** avec un bail signé en **2023** :",
+          "cited": [],
+          "reason": "The sentence is a heading and states no factual claim.",
+          "verdict": "no_claim",
+          "supporting_blocks": []
+        },
+        {
+          "id": 2,
+          "text": "**Augmentation annuelle du loyer via l'IRL** :",
+          "cited": [],
+          "reason": "The sentence is a subheading and states no factual claim.",
+          "verdict": "no_claim",
+          "supporting_blocks": []
+        },
+        {
+          "id": 3,
+          "text": "Non, il est interdit d'augmenter le loyer en fonction de l'IRL pour un logement classé **F ou G** depuis le **24 août 2022** (applicable aussi aux baux signés avant le 1er juillet 2024) [1][2][4][5].",
+          "cited": [
+            1,
+            2,
+            4,
+            5
+          ],
+          "reason": "The sources explicitly state that it is forbidden to revise the rent for a housing classified F or G since August 24, 2022, including for leases signed before July 1, 2024.",
+          "verdict": "supported",
+          "supporting_blocks": [
+            2,
+            4
+          ]
+        },
+        {
+          "id": 4,
+          "text": "**Renouvellement du bail** :",
+          "cited": [],
+          "reason": "The sentence is a subheading and states no factual claim.",
+          "verdict": "no_claim",
+          "supporting_blocks": []
+        },
+        {
+          "id": 5,
+          "text": "Oui, le bail peut être renouvelé à l'échéance, mais **aucune augmentation de loyer** n'est autorisée si le logement est classé **F ou G** [1][2][3][4][5].",
+          "cited": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "reason": "The sources confirm that the lease can be renewed, but no rent increase is allowed for housing classified F or G.",
+          "verdict": "supported",
+          "supporting_blocks": [
+            2,
+            4
+          ]
+        },
+        {
+          "id": 6,
+          "text": "**Je ne trouve pas cette information dans les sources disponibles** concernant les règles spécifiques pour les baux signés en 2023 après le 24 août 2022 (les sources mentionnent surtout les baux signés depuis le 1er juillet 2024).",
+          "cited": [],
+          "reason": "The sources do not provide specific rules for leases signed in 2023 after August 24, 2022, focusing mainly on leases signed from July 1, 2024.",
+          "verdict": "supported",
+          "supporting_blocks": []
+        }
+      ],
+      "key_facts": [
+        {
+          "id": 1,
+          "fact": "Révision du loyer interdite pour un logement F ou G (bail depuis le 24 août 2022)",
+          "reason": "The answer explicitly states that increasing the rent via the IRL is prohibited for a G-rated property since 24 August 2022.",
+          "verdict": "present"
+        },
+        {
+          "id": 2,
+          "fact": "Depuis le 1er janvier 2025, un logement classé G ne peut plus être loué",
+          "reason": "The answer does not mention the prohibition of renting G-rated properties starting from 1 January 2025.",
+          "verdict": "absent"
+        },
+        {
+          "id": 3,
+          "fact": "L'interdiction de louer concerne aussi le renouvellement et la reconduction tacite",
+          "reason": "The answer confirms that the lease can be renewed but does not explicitly state that the prohibition of renting G-rated properties also applies to renewal or tacit reconduction.",
+          "verdict": "partial"
+        }
+      ],
+      "faithfulness": 1.0,
+      "citation_accuracy": 1.0,
+      "citation_precision": 0.4444444444444444,
+      "correctness": 0.5,
+      "judge_calls": 2,
+      "prompt_tokens": 3550,
+      "completion_tokens": 528,
+      "error": null
+    },
+    {
+      "question_id": "q026",
+      "question": "On veut une piscine enterrée de 50 m² sans abri. Quelle autorisation faut-il, et va-t-on payer une taxe dessus ?",
+      "category": "multi_hop",
+      "split": "dev",
+      "refused": false,
+      "sentences": [
+        {
+          "id": 1,
+          "text": "Pour une **piscine enterrée de 50 m² sans abri** (cas général, hors secteur protégé) :",
+          "cited": [],
+          "reason": "The sentence is a heading or transition, not a factual claim.",
+          "verdict": "no_claim",
+          "supporting_blocks": []
+        },
+        {
+          "id": 2,
+          "text": "**Aucune autorisation d'urbanisme n'est nécessaire** si la surface dépasse 10 m² mais reste ≤ 100 m² **sans couverture** [1].",
+          "cited": [
+            1
+          ],
+          "reason": "The sources explicitly state that for a basin of more than 10 m² and up to 100 m² without coverage, no urban planning authorization is required in the general case (not in a protected sector).",
+          "verdict": "contradicted",
+          "supporting_blocks": [
+            2,
+            4
+          ]
+        },
+        {
+          "id": 3,
+          "text": "**Toutefois**, vous devez **déclarer la piscine dans les 90 jours suivant la fin des travaux** pour éviter une hausse d'impôts locaux [1].",
+          "cited": [
+            1
+          ],
+          "reason": "The sources confirm that the construction of a pool (including buried) can lead to a rise in local taxes and must be declared within 90 days following the end of the works.",
+          "verdict": "supported",
+          "supporting_blocks": [
+            1,
+            2,
+            3
+          ]
+        },
+        {
+          "id": 4,
+          "text": "**Pas de taxe d’aménagement** si aucune autorisation n’est requise [1].",
+          "cited": [
+            1
+          ],
+          "reason": "The sources state that the development tax (taxe d’aménagement) applies only if an urban planning authorization is required for the project.",
+          "verdict": "supported",
+          "supporting_blocks": [
+            1,
+            2,
+            3
+          ]
+        },
+        {
+          "id": 5,
+          "text": "*À vérifier* : Le **PLU (Plan Local d’Urbanisme)** peut imposer des règles spécifiques [1].",
+          "cited": [
+            1
+          ],
+          "reason": "The sources mention that the PLU may impose specific rules that must be respected, even if no authorization is required.",
+          "verdict": "supported",
+          "supporting_blocks": [
+            1,
+            2,
+            3,
+            4
+          ]
+        },
+        {
+          "id": 6,
+          "text": "Consultez votre mairie.",
+          "cited": [],
+          "reason": "The sentence is an instruction or suggestion, not a factual claim.",
+          "verdict": "no_claim",
+          "supporting_blocks": []
+        },
+        {
+          "id": 7,
+          "text": "**Je ne trouve pas cette information dans les sources disponibles** sur la taxe applicable dans ce cas précis (seule la mention d'une possible hausse d'impôts locaux est citée).",
+          "cited": [],
+          "reason": "The sentence correctly states that the sources do not provide specific information about the tax applicable in this case, only mentioning a possible rise in local taxes.",
+          "verdict": "supported",
+          "supporting_blocks": []
+        }
+      ],
+      "key_facts": [
+        {
+          "id": 1,
+          "fact": "Déclaration préalable pour un bassin de 10 à 100 m²",
+          "reason": "The answer incorrectly states that no urban planning authorization is necessary for a 50 m² pool, while the reference fact requires a prior declaration.",
+          "verdict": "contradicted"
+        },
+        {
+          "id": 2,
+          "fact": "Taxe d'aménagement due sur la piscine",
+          "reason": "The answer explicitly states that no development tax is due if no authorization is required, contradicting the reference fact that a development tax is due on the pool.",
+          "verdict": "contradicted"
+        },
+        {
+          "id": 3,
+          "fact": "Valeur forfaitaire de 251 € par m²",
+          "reason": "The answer does not mention the fixed value of €251 per m² for the development tax.",
+          "verdict": "absent"
+        },
+        {
+          "id": 4,
+          "fact": "Taux communal et départemental appliqués sur cette valeur",
+          "reason": "The answer does not mention the application of communal and departmental rates on the fixed value.",
+          "verdict": "absent"
+        }
+      ],
+      "faithfulness": 0.8,
+      "citation_accuracy": 0.75,
+      "citation_precision": 0.75,
+      "correctness": 0.0,
+      "judge_calls": 2,
+      "prompt_tokens": 3672,
+      "completion_tokens": 661,
+      "error": null
+    },
+    {
+      "question_id": "q028",
+      "question": "Je mets mon appartement en location vide pour la première fois. Quels diagnostics je dois donner au locataire, et qu'est-ce que je dois faire pour le détecteur de fumée ?",
+      "category": "multi_hop",
+      "split": "dev",
+      "refused": false,
+      "sentences": [
+        {
+          "id": 1,
+          "text": "Pour un **appartement en location vide**, vous devez fournir les diagnostics suivants au locataire :",
+          "cited": [],
+          "reason": "The sentence introduces the list of diagnostics required for a vacant apartment, which is the main topic of the sources.",
+          "verdict": "no_claim",
+          "supporting_blocks": []
+        },
+        {
+          "id": 2,
+          "text": "**Diagnostic de performance énergétique (DPE)** [1][3].",
+          "cited": [
+            1,
+            3
+          ],
+          "reason": "The DPE is explicitly listed as a required diagnostic for an apartment in source [1].",
+          "verdict": "supported",
+          "supporting_blocks": [
+            1
+          ]
+        },
+        {
+          "id": 3,
+          "text": "**Constat de risque d'exposition au plomb (Crep)** si le logement a été construit avant le 1er janvier 1949 [1][3].",
+          "cited": [
+            1,
+            3
+          ],
+          "reason": "The Crep is required for apartments built before January 1, 1949, as stated in source [1].",
+          "verdict": "supported",
+          "supporting_blocks": [
+            1
+          ]
+        },
+        {
+          "id": 4,
+          "text": "**État de l'installation intérieure de l'électricité** si l'installation a plus de 15 ans [1][3].",
+          "cited": [
+            1,
+            3
+          ],
+          "reason": "The state of the electrical installation is required if the installation is over 15 years old, as mentioned in source [1].",
+          "verdict": "supported",
+          "supporting_blocks": [
+            1
+          ]
+        },
+        {
+          "id": 5,
+          "text": "**État de l'installation intérieure du gaz** si l'installation a plus de 15 ans [1][3].",
+          "cited": [
+            1,
+            3
+          ],
+          "reason": "The state of the gas installation is required if the installation is over 15 years old, as mentioned in source [1].",
+          "verdict": "supported",
+          "supporting_blocks": [
+            1
+          ]
+        },
+        {
+          "id": 6,
+          "text": "**État des risques** (naturels, miniers, technologiques, sismiques, radon...) si le logement est situé dans une zone à risques [1][3].",
+          "cited": [
+            1,
+            3
+          ],
+          "reason": "The state of risks is required if the apartment is in a risk zone, as stated in source [1].",
+          "verdict": "supported",
+          "supporting_blocks": [
+            1
+          ]
+        },
+        {
+          "id": 7,
+          "text": "**Diagnostic bruit** si le logement est situé dans une zone d'exposition au bruit des aéroports [1][3].",
+          "cited": [
+            1,
+            3
+          ],
+          "reason": "The noise diagnostic is required if the apartment is in a noise exposure zone, as stated in source [1].",
+          "verdict": "supported",
+          "supporting_blocks": [
+            1
+          ]
+        },
+        {
+          "id": 8,
+          "text": "Ces diagnostics doivent être **réalisés par un diagnostiqueur certifié** avant la mise en location et regroupés dans un **dossier de diagnostic technique (DDT)** à annexer au bail [1][3].",
+          "cited": [
+            1,
+            3
+          ],
+          "reason": "The diagnostics must be done by a certified professional and included in a DDT to be annexed to the lease, as stated in sources [1] and [3].",
+          "verdict": "supported",
+          "supporting_blocks": [
+            1,
+            3
+          ]
+        },
+        {
+          "id": 9,
+          "text": "Pour le **détecteur de fumée** :",
+          "cited": [],
+          "reason": "The sentence introduces the section about smoke detectors, which is a transition.",
+          "verdict": "no_claim",
+          "supporting_blocks": []
+        },
+        {
+          "id": 10,
+          "text": "Vous devez **l'installer** dans le logement (de préférence dans la circulation desservant les chambres, ou dans le studio le plus loin possible de la cuisine et de la salle de bain) [2][4][5].",
+          "cited": [
+            2,
+            4,
+            5
+          ],
+          "reason": "The landlord must install the smoke detector in the specified locations, as stated in source [4].",
+          "verdict": "supported",
+          "supporting_blocks": [
+            4
+          ]
+        },
+        {
+          "id": 11,
+          "text": "Vous devez **vérifier son bon fonctionnement lors de l’état des lieux** [2][4].",
+          "cited": [
+            2,
+            4
+          ],
+          "reason": "The landlord must verify the smoke detector's functionality during the inventory, as stated in source [4].",
+          "verdict": "supported",
+          "supporting_blocks": [
+            4
+          ]
+        },
+        {
+          "id": 12,
+          "text": "L’**entretien et le remplacement** (si nécessaire) sont à la charge du locataire [2][4].",
+          "cited": [
+            2,
+            4
+          ],
+          "reason": "The tenant is responsible for maintenance and replacement of the smoke detector, as stated in source [4].",
+          "verdict": "supported",
+          "supporting_blocks": [
+            4
+          ]
+        },
+        {
+          "id": 13,
+          "text": "*Je ne trouve pas cette information dans les sources disponibles.* sur la déclaration à l'assureur (vous devez prévenir votre locataire de cette obligation).",
+          "cited": [],
+          "reason": "The sources explicitly state that the tenant must declare the smoke detector installation to their insurer, so the claim that this information is missing is contradicted.",
+          "verdict": "contradicted",
+          "supporting_blocks": []
+        }
+      ],
+      "key_facts": [
+        {
+          "id": 1,
+          "fact": "Dossier de diagnostic technique annexé au bail",
+          "reason": "The answer explicitly states that the diagnostics must be grouped into a dossier de diagnostic technique (DDT) and annexed to the bail.",
+          "verdict": "present"
+        },
+        {
+          "id": 2,
+          "fact": "Diagnostics dont DPE, plomb (avant 1949), électricité et gaz (plus de 15 ans), état des risques",
+          "reason": "The answer lists all required diagnostics (DPE, plomb for pre-1949 buildings, électricité and gaz for installations over 15 years, and état des risques) without missing any.",
+          "verdict": "present"
+        },
+        {
+          "id": 3,
+          "fact": "Le propriétaire installe le détecteur de fumée",
+          "reason": "The answer clearly states that the owner must install the smoke detector.",
+          "verdict": "present"
+        },
+        {
+          "id": 4,
+          "fact": "Il vérifie son fonctionnement lors de l'état des lieux",
+          "reason": "The answer explicitly mentions that the owner must verify the smoke detector's functionality during the état des lieux.",
+          "verdict": "present"
+        }
+      ],
+      "faithfulness": 0.9090909090909091,
+      "citation_accuracy": 1.0,
+      "citation_precision": 0.5238095238095238,
+      "correctness": 1.0,
+      "judge_calls": 2,
+      "prompt_tokens": 3794,
+      "completion_tokens": 957,
+      "error": null
+    },
+    {
+      "question_id": "q030",
+      "question": "Mon locataire touche l'APL, qui m'est versée directement, mais il ne paie plus sa part depuis trois mois. Je dois prévenir la Caf ? Et je peux le faire expulser cet hiver ?",
+      "category": "multi_hop",
+      "split": "dev",
+      "refused": false,
+      "sentences": [
+        {
+          "id": 1,
+          "text": "**Obligation de signaler l'impayé** :",
+          "cited": [],
+          "reason": "The sentence is a heading and states no factual claim.",
+          "verdict": "no_claim",
+          "supporting_blocks": []
+        },
+        {
+          "id": 2,
+          "text": "Vous devez avertir la Caf (ou la MSA) **dès que l'impayé équivaut à 2 fois le loyer net (loyer moins l'aide au logement) hors charges** [2].",
+          "cited": [
+            2
+          ],
+          "reason": "The source [2] explicitly states the obligation to notify the Caf when the unpaid amount equals 2 times the net rent (rent minus housing aid) excluding charges.",
+          "verdict": "supported",
+          "supporting_blocks": [
+            2
+          ]
+        },
+        {
+          "id": 3,
+          "text": "Pour un loyer de 430 € (hors charges) et une APL de 200 €, le seuil est **460 € de dette** [2].",
+          "cited": [
+            2
+          ],
+          "reason": "The source [2] provides the exact example of a 430 € rent and 200 € APL, leading to a 460 € debt threshold.",
+          "verdict": "supported",
+          "supporting_blocks": [
+            2
+          ]
+        },
+        {
+          "id": 4,
+          "text": "Vous devez le signaler **par lettre recommandée avec accusé de réception** [2].",
+          "cited": [
+            2
+          ],
+          "reason": "The source [2] specifies that the notification must be sent by registered letter with acknowledgment of receipt.",
+          "verdict": "supported",
+          "supporting_blocks": [
+            2
+          ]
+        },
+        {
+          "id": 5,
+          "text": "**Délai de signalement** : Dès que la dette atteint ce seuil, mais **au plus tard dans les 2 mois** après sa constatation [3].",
+          "cited": [
+            3
+          ],
+          "reason": "The source [3] states that the landlord has 2 months to report the unpaid rent to the Caf after it is established, but the initial obligation is to report as soon as the threshold is reached (source [2]). The sentence combines these two ideas, which is not fully accurate.",
+          "verdict": "partial",
+          "supporting_blocks": [
+            2,
+            3
+          ]
+        },
+        {
+          "id": 6,
+          "text": "**Sanction en cas de non-signalement** : Une amende de **8 010 €** est possible [2][3].",
+          "cited": [
+            2,
+            3
+          ],
+          "reason": "The source [2] explicitly mentions the 8,010 € fine for failing to report the unpaid rent.",
+          "verdict": "supported",
+          "supporting_blocks": [
+            2
+          ]
+        },
+        {
+          "id": 7,
+          "text": "**Procédure d'expulsion** :",
+          "cited": [],
+          "reason": "The sentence is a heading and states no factual claim.",
+          "verdict": "no_claim",
+          "supporting_blocks": []
+        },
+        {
+          "id": 8,
+          "text": "**Clauses résolutoires** : Depuis le **29 juillet 2023**, tous les baux contiennent une clause résolutoire [2].",
+          "cited": [
+            2
+          ],
+          "reason": "The source [2] confirms that all leases signed after July 29, 2023, contain a resolutory clause.",
+          "verdict": "supported",
+          "supporting_blocks": [
+            2
+          ]
+        },
+        {
+          "id": 9,
+          "text": "**Étapes** :",
+          "cited": [],
+          "reason": "The sentence is a heading and states no factual claim.",
+          "verdict": "no_claim",
+          "supporting_blocks": []
+        },
+        {
+          "id": 10,
+          "text": "**Commandement de payer** : Un commissaire de justice doit envoyer un commandement au locataire avec :",
+          "cited": [],
+          "reason": "The source [2] describes the requirement to send a formal demand for payment via a judicial officer (commissaire de justice).",
+          "verdict": "supported",
+          "supporting_blocks": [
+            2
+          ]
+        },
+        {
+          "id": 11,
+          "text": "Un délai de **6 semaines** pour payer [2].",
+          "cited": [
+            2
+          ],
+          "reason": "The source [2] specifies a 6-week deadline for the tenant to pay the debt after receiving the formal demand.",
+          "verdict": "supported",
+          "supporting_blocks": [
+            2
+          ]
+        },
+        {
+          "id": 12,
+          "text": "Le détail de la dette et du loyer [2].",
+          "cited": [
+            2
+          ],
+          "reason": "The source [2] states that the formal demand must include the debt breakdown and the amount of rent and charges.",
+          "verdict": "supported",
+          "supporting_blocks": [
+            2
+          ]
+        },
+        {
+          "id": 13,
+          "text": "**Si non-paiement** : Vous pouvez engager une procédure d'expulsion via le tribunal judiciaire.",
+          "cited": [],
+          "reason": "The source [2] implies that if the tenant does not pay, the landlord can initiate eviction proceedings, though it does not explicitly mention the tribunal judiciaire.",
+          "verdict": "partial",
+          "supporting_blocks": [
+            2
+          ]
+        },
+        {
+          "id": 14,
+          "text": "**Délai hivernal** : **Pas d'expulsion possible entre le 1er novembre et le 15 mars** (trêve hivernale), sauf exceptions (logement indigne, danger grave) [non mentionné dans les sources, mais règle générale du Code de la construction et de l'habitation].",
+          "cited": [],
+          "reason": "The sources do not mention the winter truce (trêve hivernale) or its exceptions. This information is unsupported by the provided sources.",
+          "verdict": "unsupported",
+          "supporting_blocks": []
+        },
+        {
+          "id": 15,
+          "text": "**À faire immédiatement** :",
+          "cited": [],
+          "reason": "The sentence is a heading and states no factual claim.",
+          "verdict": "no_claim",
+          "supporting_blocks": []
+        },
+        {
+          "id": 16,
+          "text": "Signaler l'impayé à la Caf **par LRAR** [2][3].",
+          "cited": [
+            2,
+            3
+          ],
+          "reason": "The source [2] confirms that the unpaid rent must be reported to the Caf by registered letter with acknowledgment of receipt.",
+          "verdict": "supported",
+          "supporting_blocks": [
+            2
+          ]
+        },
+        {
+          "id": 17,
+          "text": "Préparer le commandement de payer via un commissaire de justice [2].",
+          "cited": [
+            2
+          ],
+          "reason": "The source [2] states that a judicial officer must send a formal demand for payment to initiate the eviction process.",
+          "verdict": "supported",
+          "supporting_blocks": [
+            2
+          ]
+        },
+        {
+          "id": 18,
+          "text": "*Je ne trouve pas dans les sources si la trêve hivernale s'applique à votre cas précis.*",
+          "cited": [],
+          "reason": "The sentence states a fact about the absence of information in the sources, which is accurate.",
+          "verdict": "supported",
+          "supporting_blocks": []
+        }
+      ],
+      "key_facts": [
+        {
+          "id": 1,
+          "fact": "Impayé dès que la dette atteint 2 fois le montant mensuel net",
+          "reason": "The answer explicitly states the threshold for an impayé as 2 times the net rent (loyer moins l'aide au logement) and provides an example calculation.",
+          "verdict": "present"
+        },
+        {
+          "id": 2,
+          "fact": "Signalement à la Caf ou MSA dans les 2 mois",
+          "reason": "The answer mentions the obligation to report within 2 months of constatation, matching the reference fact.",
+          "verdict": "present"
+        },
+        {
+          "id": 3,
+          "fact": "Amende de 8 010 € en l'absence de signalement",
+          "reason": "The answer clearly states the fine of 8,010 € for failing to report the impayé.",
+          "verdict": "present"
+        },
+        {
+          "id": 4,
+          "fact": "Pas d'expulsion pendant la trêve hivernale (1er novembre - 31 mars)",
+          "reason": "The answer acknowledges the trêve hivernale but incorrectly states its duration as '1er novembre au 15 mars' instead of '1er novembre au 31 mars'.",
+          "verdict": "contradicted"
+        }
+      ],
+      "faithfulness": 0.7857142857142857,
+      "citation_accuracy": 1.0,
+      "citation_precision": 0.8333333333333334,
+      "correctness": 0.75,
+      "judge_calls": 2,
+      "prompt_tokens": 4491,
+      "completion_tokens": 1292,
+      "error": null
+    },
+    {
+      "question_id": "q032",
+      "question": "Je vends mon appartement en copropriété en cours d'année, et des travaux ont été votés à la dernière AG. Qui paie les charges et les travaux, moi ou l'acheteur ?",
+      "category": "multi_hop",
+      "split": "dev",
+      "refused": false,
+      "sentences": [
+        {
+          "id": 1,
+          "text": "**Charges courantes de copropriété** :",
+          "cited": [],
+          "reason": "The sentence is a heading and does not state a fact.",
+          "verdict": "no_claim",
+          "supporting_blocks": []
+        },
+        {
+          "id": 2,
+          "text": "Vous (vendeur) payez la **provision exigible du budget prévisionnel** (charges courantes comme maintenance, fonctionnement) jusqu’à la vente [1][2][4].",
+          "cited": [
+            1,
+            2,
+            4
+          ],
+          "reason": "The sources explicitly state that the vendor pays the provision exigible of the budget prévisionnel (charges courantes).",
+          "verdict": "supported",
+          "supporting_blocks": [
+            1,
+            2
+          ]
+        },
+        {
+          "id": 3,
+          "text": "L’**acquéreur** paie les provisions pour **dépenses non prévues dans le budget prévisionnel** (ex. : travaux d’amélioration) **à partir de la date où elles sont exigibles** [1][2][4].",
+          "cited": [
+            1,
+            2,
+            4
+          ],
+          "reason": "The sources state that the payment of provisions for dépenses non comprises dans le budget prévisionnel is the responsibility of the copropriétaire at the time the payment is due, which could be the acquéreur.",
+          "verdict": "supported",
+          "supporting_blocks": [
+            1,
+            2,
+            4
+          ]
+        },
+        {
+          "id": 4,
+          "text": "**Travaux votés avant la vente** :",
+          "cited": [],
+          "reason": "The sentence is a heading and does not state a fact.",
+          "verdict": "no_claim",
+          "supporting_blocks": []
+        },
+        {
+          "id": 5,
+          "text": "Vous payez les **appels de fonds émis avant la vente** (selon le calendrier voté en AG) [1][3].",
+          "cited": [
+            1,
+            3
+          ],
+          "reason": "The sources state that the vendor pays the appels de fonds established before the sale for travaux voted in AG.",
+          "verdict": "supported",
+          "supporting_blocks": [
+            1,
+            3
+          ]
+        },
+        {
+          "id": 6,
+          "text": "L’**acquéreur** paie les **appels de fonds émis après la vente** [1][3].",
+          "cited": [
+            1,
+            3
+          ],
+          "reason": "The sources state that the acquéreur pays the appels de fonds emitted after the sale for travaux voted in AG.",
+          "verdict": "supported",
+          "supporting_blocks": [
+            1,
+            3
+          ]
+        },
+        {
+          "id": 7,
+          "text": "**Régularisation annuelle** :",
+          "cited": [],
+          "reason": "The sentence is a heading and does not state a fact.",
+          "verdict": "no_claim",
+          "supporting_blocks": []
+        },
+        {
+          "id": 8,
+          "text": "Si un **trop-perçu ou un manque** apparaît lors de la régularisation, c’est **vous (vendeur)** qui êtes redevable ou crédité **à la date d’approbation des comptes** (sauf accord contraire dans l’acte de vente) [1][2][4][5].",
+          "cited": [
+            1,
+            2,
+            4,
+            5
+          ],
+          "reason": "The sources state that the vendor is responsible for any trop-perçu or manque at the date of approval of accounts, unless otherwise agreed in the sale deed.",
+          "verdict": "supported",
+          "supporting_blocks": [
+            1,
+            2,
+            4,
+            5
+          ]
+        },
+        {
+          "id": 9,
+          "text": "*Un accord entre vous et l’acquéreur peut modifier cette répartition, mais il ne s’applique pas au syndic* [1][2][4][5].",
+          "cited": [
+            1,
+            2,
+            4,
+            5
+          ],
+          "reason": "The sources confirm that an agreement between vendor and acquéreur can modify the charge distribution but does not apply to the syndic.",
+          "verdict": "supported",
+          "supporting_blocks": [
+            1,
+            2,
+            4
+          ]
+        }
+      ],
+      "key_facts": [
+        {
+          "id": 1,
+          "fact": "Provision du budget prévisionnel à la charge du vendeur",
+          "reason": "The answer explicitly states that the seller pays the 'provision exigible du budget prévisionnel' (provision of the forecast budget).",
+          "verdict": "present"
+        },
+        {
+          "id": 2,
+          "fact": "Travaux : le vendeur paie les appels de fonds avant la vente, l'acheteur ceux d'après",
+          "reason": "The answer clearly states that the seller pays the calls for funds issued before the sale, and the buyer pays those issued after the sale.",
+          "verdict": "present"
+        },
+        {
+          "id": 3,
+          "fact": "Une répartition différente peut être convenue entre vendeur et acheteur",
+          "reason": "The answer mentions that an agreement between the seller and buyer can modify this distribution, but it does not explicitly state that this agreement does not apply to the syndic, which is part of the reference fact.",
+          "verdict": "partial"
+        },
+        {
+          "id": 4,
+          "fact": "Ces informations figurent dans l'état daté",
+          "reason": "The answer does not mention that these details are included in the 'état daté'.",
+          "verdict": "absent"
+        }
+      ],
+      "faithfulness": 1.0,
+      "citation_accuracy": 1.0,
+      "citation_precision": 0.8888888888888888,
+      "correctness": 0.625,
+      "judge_calls": 2,
+      "prompt_tokens": 3192,
+      "completion_tokens": 762,
+      "error": null
+    },
+    {
+      "question_id": "q033",
+      "question": "Combien coûte un passeport ?",
+      "category": "unanswerable",
+      "split": "dev",
+      "refused": true,
+      "sentences": [],
+      "key_facts": [],
+      "faithfulness": null,
+      "citation_accuracy": null,
+      "citation_precision": null,
+      "correctness": null,
+      "judge_calls": 0,
+      "prompt_tokens": 0,
+      "completion_tokens": 0,
+      "error": null
+    },
+    {
+      "question_id": "q035",
+      "question": "Quels sont les horaires de la déchetterie de Rennes ?",
+      "category": "unanswerable",
+      "split": "dev",
+      "refused": true,
+      "sentences": [],
+      "key_facts": [],
+      "faithfulness": null,
+      "citation_accuracy": null,
+      "citation_precision": null,
+      "correctness": null,
+      "judge_calls": 0,
+      "prompt_tokens": 0,
+      "completion_tokens": 0,
+      "error": null
+    },
+    {
+      "question_id": "q036",
+      "question": "Quel est le taux d'intérêt moyen d'un prêt immobilier en ce moment ?",
+      "category": "unanswerable",
+      "split": "dev",
+      "refused": true,
+      "sentences": [],
+      "key_facts": [],
+      "faithfulness": null,
+      "citation_accuracy": null,
+      "citation_precision": null,
+      "correctness": null,
+      "judge_calls": 0,
+      "prompt_tokens": 0,
+      "completion_tokens": 0,
+      "error": null
+    },
+    {
+      "question_id": "q038",
+      "question": "Quel est le prix moyen du mètre carré pour acheter un appartement à Bordeaux ?",
+      "category": "unanswerable",
+      "split": "dev",
+      "refused": true,
+      "sentences": [],
+      "key_facts": [],
+      "faithfulness": null,
+      "citation_accuracy": null,
+      "citation_precision": null,
+      "correctness": null,
+      "judge_calls": 0,
+      "prompt_tokens": 0,
+      "completion_tokens": 0,
+      "error": null
+    },
+    {
+      "question_id": "q040",
+      "question": "Quel est le numéro de téléphone de l'ADIL de Nantes ?",
+      "category": "unanswerable",
+      "split": "dev",
+      "refused": true,
+      "sentences": [],
+      "key_facts": [],
+      "faithfulness": null,
+      "citation_accuracy": null,
+      "citation_precision": null,
+      "correctness": null,
+      "judge_calls": 0,
+      "prompt_tokens": 0,
+      "completion_tokens": 0,
+      "error": null
+    },
+    {
+      "question_id": "q041",
+      "question": "Combien ça coûte de récupérer sa voiture à la fourrière ?",
+      "category": "unanswerable",
+      "split": "dev",
+      "refused": true,
+      "sentences": [],
+      "key_facts": [],
+      "faithfulness": null,
+      "citation_accuracy": null,
+      "citation_precision": null,
+      "correctness": null,
+      "judge_calls": 0,
+      "prompt_tokens": 0,
+      "completion_tokens": 0,
+      "error": null
+    },
+    {
+      "question_id": "q043",
+      "question": "Combien mon propriétaire peut-il me demander comme caution ?",
+      "category": "ambiguous",
+      "split": "dev",
+      "refused": true,
+      "sentences": [],
+      "key_facts": [
+        {
+          "id": 1,
+          "fact": "Logement vide : 1 mois de loyer hors charges maximum",
+          "reason": "The answer is a refusal.",
+          "verdict": "absent"
+        },
+        {
+          "id": 2,
+          "fact": "Logement meublé : 2 mois de loyer hors charges maximum",
+          "reason": "The answer is a refusal.",
+          "verdict": "absent"
+        },
+        {
+          "id": 3,
+          "fact": "Bail mobilité : dépôt de garantie interdit",
+          "reason": "The answer is a refusal.",
+          "verdict": "absent"
+        }
+      ],
+      "faithfulness": null,
+      "citation_accuracy": null,
+      "citation_precision": null,
+      "correctness": 0.0,
+      "judge_calls": 0,
+      "prompt_tokens": 0,
+      "completion_tokens": 0,
+      "error": null
+    },
+    {
+      "question_id": "q045",
+      "question": "Je veux partir de mon logement, combien de temps à l'avance je dois prévenir ?",
+      "category": "ambiguous",
+      "split": "dev",
+      "refused": false,
+      "sentences": [
+        {
+          "id": 1,
+          "text": "Pour un **logement vide** (cas général) :",
+          "cited": [],
+          "reason": "The sentence is a heading and does not state a fact.",
+          "verdict": "no_claim",
+          "supporting_blocks": []
+        },
+        {
+          "id": 2,
+          "text": "Le délai de préavis est de **3 mois** [1][3][5].",
+          "cited": [
+            1,
+            3,
+            5
+          ],
+          "reason": "The sources explicitly state that the general preavis for an empty housing is 3 months (blocks 1, 3, and 5).",
+          "verdict": "supported",
+          "supporting_blocks": [
+            1,
+            3,
+            5
+          ]
+        },
+        {
+          "id": 3,
+          "text": "Pour un **logement meublé** :",
+          "cited": [],
+          "reason": "The sentence is a heading and does not state a fact.",
+          "verdict": "no_claim",
+          "supporting_blocks": []
+        },
+        {
+          "id": 4,
+          "text": "Le délai de préavis est de **1 mois** [2][4].",
+          "cited": [
+            2,
+            4
+          ],
+          "reason": "The sources explicitly state that the preavis for a furnished housing is 1 month (blocks 2 and 4).",
+          "verdict": "supported",
+          "supporting_blocks": [
+            2,
+            4
+          ]
+        },
+        {
+          "id": 5,
+          "text": "*Je ne trouve pas cette information dans les sources disponibles* pour les cas spécifiques (ex. : logement social, RSA, santé, violences).",
+          "cited": [],
+          "reason": "The sources do mention specific cases (e.g., social housing, RSA, health issues, violence) where the preavis can be reduced to 1 month, so the information is not missing.",
+          "verdict": "contradicted",
+          "supporting_blocks": []
+        }
+      ],
+      "key_facts": [
+        {
+          "id": 1,
+          "fact": "Logement vide : 3 mois",
+          "reason": "The answer explicitly states the 3-month notice period for an empty (non-furnished) property.",
+          "verdict": "present"
+        },
+        {
+          "id": 2,
+          "fact": "1 mois dans certains cas (zone tendue notamment), à indiquer dans la lettre",
+          "reason": "The answer does not mention the 1-month notice period for specific cases like 'zone tendue' or the requirement to indicate it in the letter.",
+          "verdict": "absent"
+        },
+        {
+          "id": 3,
+          "fact": "Meublé ou bail mobilité : 1 mois",
+          "reason": "The answer correctly states the 1-month notice period for furnished properties but does not mention the 'bail mobilité' case.",
+          "verdict": "partial"
+        }
+      ],
+      "faithfulness": 0.6666666666666666,
+      "citation_accuracy": 1.0,
+      "citation_precision": 1.0,
+      "correctness": 0.5,
+      "judge_calls": 2,
+      "prompt_tokens": 3570,
+      "completion_tokens": 461,
+      "error": null
+    },
+    {
+      "question_id": "q046",
+      "question": "On aimerait poser une petite cabane en bois au fond du jardin pour ranger les outils. On doit demander quelque chose à la mairie ?",
+      "category": "ambiguous",
+      "split": "dev",
+      "refused": false,
+      "sentences": [
+        {
+          "id": 1,
+          "text": "Pour une **cabane en bois de moins de 5 m²** (surface de plancher ou emprise au sol) installée **de manière indépendante** (non accolée à la maison), **aucune formalité n'est nécessaire** [1][3][4].",
+          "cited": [
+            1,
+            3,
+            4
+          ],
+          "reason": "The sources explicitly state that an independent abri de jardin (cabane) of up to 5 m² does not require any formalities.",
+          "verdict": "supported",
+          "supporting_blocks": [
+            3,
+            4
+          ]
+        },
+        {
+          "id": 2,
+          "text": "Cependant, si :",
+          "cited": [],
+          "reason": "This sentence is a transition and does not state a fact.",
+          "verdict": "no_claim",
+          "supporting_blocks": []
+        },
+        {
+          "id": 3,
+          "text": "La cabane **modifie l’aspect extérieur de votre maison** (ex. : accolée), une **déclaration préalable (DP)** est obligatoire [1][3][4].",
+          "cited": [
+            1,
+            3,
+            4
+          ],
+          "reason": "The sources confirm that if the installation modifies the exterior aspect of the building (e.g., attached), a déclaration préalable (DP) is required.",
+          "verdict": "supported",
+          "supporting_blocks": [
+            3,
+            4
+          ]
+        },
+        {
+          "id": 4,
+          "text": "La cabane **dépasse 5 m²**, une **DP** est requise [1][3][4].",
+          "cited": [
+            1,
+            3,
+            4
+          ],
+          "reason": "The sources state that a DP is required for an abri de jardin exceeding 5 m² up to 20 m².",
+          "verdict": "supported",
+          "supporting_blocks": [
+            3,
+            4
+          ]
+        },
+        {
+          "id": 5,
+          "text": "**À vérifier** :",
+          "cited": [],
+          "reason": "This sentence is a heading and does not state a fact.",
+          "verdict": "no_claim",
+          "supporting_blocks": []
+        },
+        {
+          "id": 6,
+          "text": "Le **PLU (Plan Local d’Urbanisme)** de votre commune, qui peut imposer des règles supplémentaires (matériaux, distances par rapport aux limites de propriété) [2][3][4].",
+          "cited": [
+            2,
+            3,
+            4
+          ],
+          "reason": "The sources mention that the PLU may impose additional rules on materials and implantation.",
+          "verdict": "supported",
+          "supporting_blocks": [
+            2,
+            4
+          ]
+        },
+        {
+          "id": 7,
+          "text": "Les **règles locales** (ex. : secteur protégé, copropriété) [1][3].",
+          "cited": [
+            1,
+            3
+          ],
+          "reason": "The sources refer to local rules such as protected sectors or copropriété regulations.",
+          "verdict": "supported",
+          "supporting_blocks": [
+            2,
+            3
+          ]
+        },
+        {
+          "id": 8,
+          "text": "**Cas particulier** :",
+          "cited": [],
+          "reason": "This sentence is a heading and does not state a fact.",
+          "verdict": "no_claim",
+          "supporting_blocks": []
+        },
+        {
+          "id": 9,
+          "text": "**À Paris** : toute demande doit être faite **uniquement en ligne** via le BASU [1][5].",
+          "cited": [
+            1,
+            5
+          ],
+          "reason": "The sources confirm that in Paris, all requests must be submitted online via the BASU.",
+          "verdict": "supported",
+          "supporting_blocks": [
+            1,
+            5
+          ]
+        },
+        {
+          "id": 10,
+          "text": "*Je ne trouve pas cette information dans les sources disponibles.* (pour les règles spécifiques à votre commune ou les exceptions liées à votre terrain).",
+          "cited": [],
+          "reason": "The sentence correctly states that the information is not found in the sources, which is accurate for specific local exceptions.",
+          "verdict": "supported",
+          "supporting_blocks": []
+        }
+      ],
+      "key_facts": [
+        {
+          "id": 1,
+          "fact": "Jusqu'à 5 m² : dispensé de formalité",
+          "reason": "The answer explicitly states that no formalities are required for a wooden cabin of less than 5 m².",
+          "verdict": "present"
+        },
+        {
+          "id": 2,
+          "fact": "De 5 à 20 m² : déclaration préalable",
+          "reason": "The answer mentions that a declaration préalable (DP) is required if the cabin exceeds 5 m² but does not specify the upper limit of 20 m².",
+          "verdict": "partial"
+        },
+        {
+          "id": 3,
+          "fact": "Plus de 20 m² : permis de construire",
+          "reason": "The answer does not mention the requirement for a permis de construire for cabins larger than 20 m².",
+          "verdict": "absent"
+        }
+      ],
+      "faithfulness": 1.0,
+      "citation_accuracy": 1.0,
+      "citation_precision": 0.6875,
+      "correctness": 0.5,
+      "judge_calls": 2,
+      "prompt_tokens": 3582,
+      "completion_tokens": 713,
+      "error": null
+    },
+    {
+      "question_id": "q048",
+      "question": "Dans un logement loué, qui doit payer les réparations ?",
+      "category": "ambiguous",
+      "split": "dev",
+      "refused": false,
+      "sentences": [
+        {
+          "id": 1,
+          "text": "Dans un logement loué, la répartition des réparations dépend de leur nature :",
+          "cited": [],
+          "reason": "The sentence introduces the topic and states no specific fact.",
+          "verdict": "no_claim",
+          "supporting_blocks": []
+        },
+        {
+          "id": 2,
+          "text": "**À la charge du locataire** (réparations locatives) :",
+          "cited": [],
+          "reason": "The sentence is a heading and states no specific fact.",
+          "verdict": "no_claim",
+          "supporting_blocks": []
+        },
+        {
+          "id": 3,
+          "text": "Détériorations causées par **négligence ou manque d’entretien** (trous dans les murs, porte enfoncée, moquette brûlée, parquet abîmé) [1].",
+          "cited": [
+            1
+          ],
+          "reason": "The sentence is fully supported by the examples and responsibility rules in source [1].",
+          "verdict": "supported",
+          "supporting_blocks": [
+            1
+          ]
+        },
+        {
+          "id": 4,
+          "text": "**Entretien courant et petites réparations** :",
+          "cited": [],
+          "reason": "The sentence is a heading and states no specific fact.",
+          "verdict": "no_claim",
+          "supporting_blocks": []
+        },
+        {
+          "id": 5,
+          "text": "Parquet : cirer, remplacer quelques lames [2][4].",
+          "cited": [
+            2,
+            4
+          ],
+          "reason": "The sentence is fully supported by the details in source [2] about parquet maintenance.",
+          "verdict": "supported",
+          "supporting_blocks": [
+            2
+          ]
+        },
+        {
+          "id": 6,
+          "text": "Menuiseries : remplacer tablettes de placard, fixer raccords, remplacer pointes [2][4].",
+          "cited": [
+            2,
+            4
+          ],
+          "reason": "The sentence is fully supported by the details in source [2] about menuiseries.",
+          "verdict": "supported",
+          "supporting_blocks": [
+            2
+          ]
+        },
+        {
+          "id": 7,
+          "text": "Plomberie : dégorger canalisations, remplacer joints des robinets [2].",
+          "cited": [
+            2
+          ],
+          "reason": "The sentence is fully supported by the details in source [2] about plomberie.",
+          "verdict": "supported",
+          "supporting_blocks": [
+            2
+          ]
+        },
+        {
+          "id": 8,
+          "text": "Chauffage/eau chaude : remplacer joints, clapets, nettoyer corps de chauffe [2].",
+          "cited": [
+            2
+          ],
+          "reason": "The sentence is fully supported by the details in source [2] about chauffage, eau chaude, and robinetterie.",
+          "verdict": "supported",
+          "supporting_blocks": [
+            2
+          ]
+        },
+        {
+          "id": 9,
+          "text": "Serrures, vitres, stores, grilles de portail : entretien et petites réparations [2][4].",
+          "cited": [
+            2,
+            4
+          ],
+          "reason": "The sentence is fully supported by the details in sources [2] and [4] about serrures, vitres, stores, and grilles de portail.",
+          "verdict": "supported",
+          "supporting_blocks": [
+            2,
+            4
+          ]
+        },
+        {
+          "id": 10,
+          "text": "Plafonds/murs : petits raccords de peinture, reboucher trous [4].",
+          "cited": [
+            4
+          ],
+          "reason": "The sentence is fully supported by the details in source [4] about plafonds, murs, and cloisons.",
+          "verdict": "supported",
+          "supporting_blocks": [
+            4
+          ]
+        },
+        {
+          "id": 11,
+          "text": "*Le locataire est aussi responsable des dégradations causées par les personnes qu’il héberge ou mandate (artisans, sous-locataires) [1].*",
+          "cited": [
+            1
+          ],
+          "reason": "The sentence is fully supported by the details in source [1] about the locataire's responsibility for damages caused by hosted persons or subtenants.",
+          "verdict": "supported",
+          "supporting_blocks": [
+            1
+          ]
+        },
+        {
+          "id": 12,
+          "text": "**À la charge du propriétaire** (grosses réparations) :",
+          "cited": [],
+          "reason": "The sentence is a heading and states no specific fact.",
+          "verdict": "no_claim",
+          "supporting_blocks": []
+        },
+        {
+          "id": 13,
+          "text": "**Vétusté** (usure naturelle) : peinture écaillée, revêtements de sol usés [1][5].",
+          "cited": [
+            1,
+            5
+          ],
+          "reason": "The sentence is fully supported by the details in sources [1] and [5] about vétusté.",
+          "verdict": "supported",
+          "supporting_blocks": [
+            1,
+            5
+          ]
+        },
+        {
+          "id": 14,
+          "text": "**Cas de force majeure** (tempête, inondation) [1][5].",
+          "cited": [
+            1,
+            5
+          ],
+          "reason": "The sentence is fully supported by the details in source [5] about force majeure.",
+          "verdict": "supported",
+          "supporting_blocks": [
+            5
+          ]
+        },
+        {
+          "id": 15,
+          "text": "**Dégâts liés à un cambriolage** (remboursés par l’assurance du locataire, mais le propriétaire peut être tenu de restaurer l’état des lieux initial) [1].",
+          "cited": [
+            1
+          ],
+          "reason": "The sentence is partially supported: the sources state the locataire must use their insurance for cambriolage, but do not explicitly mention the propriétaire's obligation to restore the initial state.",
+          "verdict": "partial",
+          "supporting_blocks": [
+            5
+          ]
+        },
+        {
+          "id": 16,
+          "text": "**Grosses réparations structurelles** (toiture, canalisations vétustes provoquant des fuites, fosse septique à curer) [2][3].",
+          "cited": [
+            2,
+            3
+          ],
+          "reason": "The sentence is fully supported by the details in sources [3] and [5] about grosses réparations structurelles and vétusté.",
+          "verdict": "supported",
+          "supporting_blocks": [
+            3,
+            5
+          ]
+        },
+        {
+          "id": 17,
+          "text": "*Exemple : Si la vétusté des canalisations cause une fuite, le propriétaire doit réparer [2].*",
+          "cited": [
+            2
+          ],
+          "reason": "The sentence is fully supported by the details in source [2] about vétusté des canalisations.",
+          "verdict": "supported",
+          "supporting_blocks": [
+            2
+          ]
+        },
+        {
+          "id": 18,
+          "text": "**Procédure si le propriétaire ne fait pas les réparations qui lui incombent** :",
+          "cited": [],
+          "reason": "The sentence is a heading and states no specific fact.",
+          "verdict": "no_claim",
+          "supporting_blocks": []
+        },
+        {
+          "id": 19,
+          "text": "Le locataire doit :",
+          "cited": [],
+          "reason": "The sentence is a transition and states no specific fact.",
+          "verdict": "no_claim",
+          "supporting_blocks": []
+        },
+        {
+          "id": 20,
+          "text": "L’avertir par écrit (lettre recommandée) [3].",
+          "cited": [
+            3
+          ],
+          "reason": "The sentence is fully supported by the details in source [3] about the procedure if the propriétaire does not perform repairs.",
+          "verdict": "supported",
+          "supporting_blocks": [
+            3
+          ]
+        },
+        {
+          "id": 21,
+          "text": "Si pas de réponse sous 2 mois, saisir la **commission départementale de conciliation (CDC)** ou un **conciliateur de justice** (obligatoire pour les litiges ≤ 5 000 €) [3].",
+          "cited": [
+            3
+          ],
+          "reason": "The sentence is fully supported by the details in source [3] about the procedure after no response from the propriétaire.",
+          "verdict": "supported",
+          "supporting_blocks": [
+            3
+          ]
+        },
+        {
+          "id": 22,
+          "text": "À défaut, saisir le **juge des contentieux de la protection** [3].",
+          "cited": [
+            3
+          ],
+          "reason": "The sentence is fully supported by the details in source [3] about the final step of the procedure.",
+          "verdict": "supported",
+          "supporting_blocks": [
+            3
+          ]
+        },
+        {
+          "id": 23,
+          "text": "**Je ne trouve pas cette information dans les sources disponibles.**",
+          "cited": [],
+          "reason": "The sentence correctly states that the information is not in the sources, which is true.",
+          "verdict": "supported",
+          "supporting_blocks": []
+        },
+        {
+          "id": 24,
+          "text": "→ *Précisions sur les règles spécifiques à Paris ou les communes avec des conventions particulières (ex. : grilles de vétusté locales).*",
+          "cited": [],
+          "reason": "The sentence states a fact not present in the sources (specific rules for Paris or local conventions).",
+          "verdict": "unsupported",
+          "supporting_blocks": []
+        }
+      ],
+      "key_facts": [
+        {
+          "id": 1,
+          "fact": "Locataire : entretien courant et petites réparations",
+          "reason": "The answer explicitly lists 'entretien courant et petites réparations' as the locataire's responsibility, matching the reference fact.",
+          "verdict": "present"
+        },
+        {
+          "id": 2,
+          "fact": "Propriétaire : tous les autres travaux, dont le maintien en état",
+          "reason": "The answer states that the propriétaire is responsible for 'grosses réparations' and 'tous les autres travaux, dont le maintien en état,' which aligns with the reference fact.",
+          "verdict": "present"
+        },
+        {
+          "id": 3,
+          "fact": "Réparations dues à la vétusté ou à la force majeure : propriétaire",
+          "reason": "The answer explicitly mentions that repairs due to 'vétusté' (usure naturelle) or 'force majeure' (e.g., tempête, inondation) are the propriétaire's responsibility.",
+          "verdict": "present"
+        }
+      ],
+      "faithfulness": 0.8888888888888888,
+      "citation_accuracy": 0.9375,
+      "citation_precision": 0.7727272727272727,
+      "correctness": 1.0,
+      "judge_calls": 2,
+      "prompt_tokens": 4284,
+      "completion_tokens": 1484,
+      "error": null
+    },
+    {
+      "question_id": "q049",
+      "question": "Mon proprio a le droit d'augmenter mon loyer ?",
+      "category": "ambiguous",
+      "split": "dev",
+      "refused": false,
+      "sentences": [
+        {
+          "id": 1,
+          "text": "Je ne trouve pas cette information dans les sources disponibles pour votre situation spécifique (sans connaître votre commune, la classe énergétique du logement, ou les travaux éventuels).",
+          "cited": [],
+          "reason": "The sentence states that the information is missing from the sources for the specific situation, which is accurate as the sources do not provide a direct answer without additional details.",
+          "verdict": "supported",
+          "supporting_blocks": []
+        },
+        {
+          "id": 2,
+          "text": "Cependant, voici les **conditions générales** d'augmentation du loyer en zone tendue (métropole) selon les sources :",
+          "cited": [],
+          "reason": "The sentence is a transition and does not state a factual claim.",
+          "verdict": "no_claim",
+          "supporting_blocks": []
+        },
+        {
+          "id": 3,
+          "text": "**Logement classé F ou G (DPE)** : Il est interdit d'augmenter le loyer [1][2][3][4].",
+          "cited": [
+            1,
+            2,
+            3,
+            4
+          ],
+          "reason": "The sources explicitly state that it is forbidden to increase the rent for a housing classified F or G (DPE).",
+          "verdict": "supported",
+          "supporting_blocks": [
+            1,
+            2,
+            3,
+            4
+          ]
+        },
+        {
+          "id": 4,
+          "text": "**Travaux d'amélioration** :",
+          "cited": [],
+          "reason": "The sentence is a heading and does not state a factual claim.",
+          "verdict": "no_claim",
+          "supporting_blocks": []
+        },
+        {
+          "id": 5,
+          "text": "Si les travaux sont ≥ **50 % de la dernière année de loyer** (hors charges), le loyer peut être augmenté de **15 % du montant des travaux TTC** [1][2][3][4].",
+          "cited": [
+            1,
+            2,
+            3,
+            4
+          ],
+          "reason": "The sources confirm that if the works amount to at least 50% of the last year's rent (excluding charges), the rent can be increased by 15% of the total cost of the works (including tax).",
+          "verdict": "supported",
+          "supporting_blocks": [
+            1,
+            2,
+            3,
+            4
+          ]
+        },
+        {
+          "id": 6,
+          "text": "Si les travaux sont ≥ **la dernière année de loyer** et réalisés depuis **moins de 6 mois**, le nouveau loyer est fixé **librement** (sous conditions énergétiques en métropole : consommation < 331 kWh/m²/an) [2][3][4].",
+          "cited": [
+            2,
+            3,
+            4
+          ],
+          "reason": "The sources state that if the works amount to at least the last year's rent and were done in the last 6 months, the new rent can be freely set, with additional energy conditions in metropolitan France (consumption < 331 kWh/m²/year).",
+          "verdict": "supported",
+          "supporting_blocks": [
+            2,
+            4
+          ]
+        },
+        {
+          "id": 7,
+          "text": "**Loyer manifestement sous-évalué** :",
+          "cited": [],
+          "reason": "The sentence is a heading and does not state a factual claim.",
+          "verdict": "no_claim",
+          "supporting_blocks": []
+        },
+        {
+          "id": 8,
+          "text": "Augmentation possible, mais limitée à **50 % de la différence** entre le loyer du voisinage et l'ancien loyer (si le logement est en classe énergétique acceptable en métropole) [1][2][3][4].",
+          "cited": [
+            1,
+            2,
+            3,
+            4
+          ],
+          "reason": "The sources confirm that if the rent is undervalued, the increase is possible but limited to 50% of the difference between the neighborhood rent and the old rent, with energy conditions in metropolitan France.",
+          "verdict": "supported",
+          "supporting_blocks": [
+            1,
+            2,
+            3,
+            4
+          ]
+        },
+        {
+          "id": 9,
+          "text": "**Bail signé entre le 24/08/2022 et le 30/06/2024** :",
+          "cited": [],
+          "reason": "The sentence is a heading and does not state a factual claim.",
+          "verdict": "no_claim",
+          "supporting_blocks": []
+        },
+        {
+          "id": 10,
+          "text": "Si le loyer n'a pas été révisé dans les **12 derniers mois**, une augmentation de la **variation annuelle de l'IRL** est possible [2][3].",
+          "cited": [
+            2,
+            3
+          ],
+          "reason": "The sources state that if the rent has not been revised in the last 12 months, the landlord can increase it by the annual variation of the IRL (Rent Reference Index).",
+          "verdict": "supported",
+          "supporting_blocks": [
+            1,
+            2,
+            3
+          ]
+        },
+        {
+          "id": 11,
+          "text": "**Pour une réponse précise**, précisez :",
+          "cited": [],
+          "reason": "The sentence is a transition and does not state a factual claim.",
+          "verdict": "no_claim",
+          "supporting_blocks": []
+        },
+        {
+          "id": 12,
+          "text": "Votre commune (Paris vs. autre zone tendue).",
+          "cited": [],
+          "reason": "The sentence is a request for information and does not state a factual claim.",
+          "verdict": "no_claim",
+          "supporting_blocks": []
+        },
+        {
+          "id": 13,
+          "text": "La classe énergétique du logement (DPE).",
+          "cited": [],
+          "reason": "The sentence is a request for information and does not state a factual claim.",
+          "verdict": "no_claim",
+          "supporting_blocks": []
+        },
+        {
+          "id": 14,
+          "text": "Si des travaux ont été réalisés et leur coût.",
+          "cited": [],
+          "reason": "The sentence is a request for information and does not state a factual claim.",
+          "verdict": "no_claim",
+          "supporting_blocks": []
+        },
+        {
+          "id": 15,
+          "text": "Si le loyer actuel est considéré comme sous-évalué.",
+          "cited": [],
+          "reason": "The sentence is a request for information and does not state a factual claim.",
+          "verdict": "no_claim",
+          "supporting_blocks": []
+        }
+      ],
+      "key_facts": [
+        {
+          "id": 1,
+          "fact": "Révision annuelle seulement si une clause du bail la prévoit",
+          "reason": "The answer does not mention the requirement of a clause in the lease for annual rent revision.",
+          "verdict": "absent"
+        },
+        {
+          "id": 2,
+          "fact": "Hausse plafonnée par l'évolution annuelle de l'IRL",
+          "reason": "The answer mentions the possibility of increasing the rent based on the annual variation of the IRL for leases signed between 24/08/2022 and 30/06/2024, but does not explicitly state that the increase is capped by the annual evolution of the IRL in general.",
+          "verdict": "partial"
+        },
+        {
+          "id": 3,
+          "fact": "Révision interdite pour un logement classé F ou G",
+          "reason": "The answer explicitly states that it is forbidden to increase the rent for a property classified F or G (DPE).",
+          "verdict": "present"
+        }
+      ],
+      "faithfulness": 1.0,
+      "citation_accuracy": 1.0,
+      "citation_precision": 0.9411764705882353,
+      "correctness": 0.5,
+      "judge_calls": 2,
+      "prompt_tokens": 4225,
+      "completion_tokens": 1011,
+      "error": null
+    }
+  ]
+}

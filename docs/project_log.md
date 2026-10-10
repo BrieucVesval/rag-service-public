@@ -199,3 +199,54 @@ Newest entries at the bottom. Each entry: date, phase, what, why (alternatives c
   - Metric: **citation accuracy** = share of cited claims supported by their source. Also usable at runtime to drop or flag unsupported sentences before showing the answer.
   - Pitfall: the judge is itself an LLM and can be wrong. Its verdicts must be checked by hand on a sample to measure its own agreement with a human before trusting the metric.
 - **Interview narrative**: "My first version cited its sources and correctly refused out-of-scope questions, so it looked reliable. Testing showed it attached citations to claims the source did not contain. Checking that a citation exists is not enough; it must support the sentence. I added LLM-as-judge verification and measured citation accuracy before and after." (Fill in the measured numbers once step 6 is done.)
+
+## Step 6 — Golden set
+
+- **Goal**: a fixed set of ~50 questions with reference answers, used to evaluate every version of the pipeline. Without it, "strategy A is better than B" is an opinion; with it, it is a measured difference.
+- **Composition target**: 20 lookup, 12 multi-hop, 10 unanswerable, 8 ambiguous; 30 `dev` / 20 `test` with the same category proportions. `test` questions are never looked at while tuning (avoids overfitting the pipeline to the exam).
+- **Method**:
+  - Fiches sampled across sub-themes (breadcrumb level 3: urbanisme, bail, loyer, copropriété, diagnostics, aides…) so questions do not cluster on one topic.
+  - Claude drafts questions in batches of 10, phrased as a user's situation ("mon proprio", "ma caution"), never copying the fiche title; reference answers and quotes come from the fiche text.
+  - The user reviews each batch for realism and lexical overlap with the fiches, without reading the fiches. Answer correctness is guaranteed mechanically instead (verbatim evidence quotes).
+  - Unanswerable questions are checked against the corpus (text search and index) before being accepted.
+- **Known limitation**: all questions are drafted by an LLM, then reviewed. LLM-drafted questions tend to reuse the corpus vocabulary, which makes retrieval look easier than with real users. Handwritten questions by the user, written without looking at the corpus, would reduce this bias; they are optional for now and the limitation will be stated in the case study.
+
+### 6a — Format and validator
+
+- **Date**: 2026-10-09
+- **What**:
+  - `src/rag/evaluation/golden_set.py`: pydantic models `GoldenItem` / `GoldenSet` (category, split, origin as enums; unknown fields rejected; unanswerable questions must have no docs/evidence, others must have key facts, expected docs and evidence from those docs; unique IDs), `load_golden_set` (YAML), `check_against_corpus` (expected docs exist, every quote appears in its fiche, ignoring whitespace, case and typographic apostrophes), `composition`.
+  - `scripts/validate_golden_set.py`: runs all checks, compares `corpus_snapshot` with the processed data, prints the category × split table; exit code 1 on any problem.
+  - File `data/golden_set/golden_set.yaml` (versioned).
+- **Why**:
+  - `key_facts`: atomic facts are easier and more reliable for a judge to check one by one than comparing whole answers.
+  - `expected_docs`: retrieval metrics (Recall@k, MRR) without any LLM, so free and deterministic.
+  - `evidence` quotes checked mechanically: reference answers cannot be invented, including by the LLM that drafts them. This is what lets the user review questions without reading the fiches.
+  - `corpus_snapshot`: Service-Public changes daily; a reference answer is only valid for the snapshot it was written on.
+  - YAML rather than JSON: readable and editable by hand, supports comments. Alternative: JSONL (easier to append programmatically, harder to review).
+- **Dependencies added**: `pyyaml` (read the golden set), `types-PyYAML` (dev, type stubs for mypy).
+- **Tests**: `tests/evaluation/test_golden_set.py` (10 tests: valid items, required fields per category, unanswerable without docs, evidence from expected docs, unknown field/category, duplicate IDs, tolerant quote matching, missing doc and invented quote reported, YAML loading). 71 tests pass.
+- **Reproduce**: `uv run python scripts/validate_golden_set.py`
+
+### 6b — 50 questions drafted, validated and rebalanced
+
+- **Date**: 2026-10-09
+- **What**: 50 questions in `data/golden_set/golden_set.yaml`, in 5 batches: 20 lookup, 12 multi-hop, 10 unanswerable, 8 ambiguous; 30 dev / 20 test with the same proportions. 128 verbatim evidence quotes, all found in the corpus by `scripts/validate_golden_set.py`.
+- **Review**: the user chose to trust the drafted questions without line-by-line review ("le but étant d'avoir un benchmark le plus fiable possible, avec le moins de biais"). Bias controls were therefore made mechanical and measured instead of relying on human review:
+  - **Evidence quotes**: every key fact is backed by a verbatim quote checked against the fiche text.
+  - **Lexical overlap with fiche titles** (`title_overlap`: share of the question's content words found in the expected fiche's title), reported by the validator. First pass: mean 0.19, one question at 0.75 (q046, rephrased). Final: **mean 0.16, max 0.40**.
+  - **Sub-theme coverage** (breadcrumb level 3), reported by the validator. First pass: 15/28, rental topics over-represented and urbanism (the largest sub-theme, 52 fiches) under-represented. Six questions were replaced, same IDs, categories and splits (q005, q011, q012, q013, q018, q019 → noise, renovation aids, decennial guarantee, urbanism certificate, social housing, syndic). Final: **20/28**; uncovered sub-themes are small (3–10 fiches each).
+  - **Answer depth**: lookups were deliberately taken deep in long fiches (up to ~95% of a 23k-character fiche) and from tables, since answers in the first paragraph are easy for any chunking.
+  - **Unanswerable questions**: absence verified by text search over all 333 fiches. One candidate ("prix d'un DPE") was rejected because the corpus does answer it ("le prix du DPE n'est pas réglementé").
+  - **No selection by the system under test**: questions were never run through the pipeline while being written, to avoid keeping only the ones the current retriever handles.
+- **Design of the categories**:
+  - Multi-hop: answers combine 2–3 fiches (e.g. deposit + tenant repairs, squat + winter truce, G-rated DPE + rent revision + rental ban). q021 and q022 come from the two v0 failures of step 5c.
+  - Unanswerable: out of domain (passport, impound), false premise (non-existent "Ma Maison Verte" aid), local or contact data (Rennes recycling centre, ADIL Nantes), future value (IRL Q4 2027), near-domain traps (Bordeaux sale price vs. reference rents, taxe foncière amounts).
+  - Ambiguous: under-specified questions whose answer depends on the lease type or the size of the project; the reference answer lists the cases.
+- **Time-sensitive references**: q030 (rules change on 2027-01-01) and q031 (IRL table updated quarterly) are tied to the corpus snapshot.
+- **Bug found while drafting**: the XML loader ignores merged table cells (`fusionHorizontale`, `fusionVerticale`; ~400 occurrences in the corpus). Columns shift: in F1165 the "Révision du loyer" row renders "Interdit" under "meublé" instead of "bail mobilité". This silently corrupts table facts given to the LLM. Questions avoid quoting affected rows; fixing the loader is the next fix (re-ingestion and re-indexing are free).
+- **Known limitations**: all questions are LLM-drafted (no handwritten user questions yet); 50 questions give coarse metrics (one question = 2 points); the test split is small (20).
+- **Tests**: 2 new tests for `content_words` and `title_overlap`. 73 tests pass.
+- **Reproduce**: `uv run python scripts/validate_golden_set.py`
+- **Files**: `data/golden_set/golden_set.yaml`, `src/rag/evaluation/golden_set.py`, `scripts/validate_golden_set.py`, `tests/evaluation/test_golden_set.py`
+- **Open points**: fix merged table cells in the loader; evaluation harness and v0 baseline; optional handwritten questions.

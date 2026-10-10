@@ -1,0 +1,995 @@
+# Golden set: fixed evaluation questions for the RAG pipeline.
+#
+# Rules (see docs/project_log.md, step 6):
+# - Questions are phrased as a real user would ask them, never by copying the fiche title.
+# - Every key fact is backed by a verbatim `evidence` quote (checked by
+#   scripts/validate_golden_set.py against the processed corpus).
+# - `test` questions are never looked at while tuning the pipeline.
+# - Reference answers are valid for `corpus_snapshot`; the feed changes daily.
+
+corpus_snapshot: "2026-10-07T16:35:15+00:00"
+
+questions:
+  # ---------------------------------------------------------------- batch 1: lookup
+  - id: q001
+    question: "Mon voisin fait brûler ses feuilles mortes et ses branches dans son jardin tous les week-ends. Il a le droit ?"
+    category: lookup
+    split: dev
+    expected_answer: >-
+      Non. Il est interdit de brûler des déchets verts chez soi, à l'air libre comme avec un
+      incinérateur de jardin. La personne qui le fait risque une amende de 750 €. Des dérogations
+      peuvent exister dans les communes sans déchetterie ni collecte des déchets verts.
+    key_facts:
+      - "Brûler des déchets verts chez soi est interdit"
+      - "Amende de 750 €"
+    expected_docs: [F31858]
+    evidence:
+      - doc_id: F31858
+        quote: "il est interdit de brûler des déchets verts chez soi"
+      - doc_id: F31858
+        quote: "peut avoir à payer une amende de 750 €"
+    origin: drafted_reviewed
+
+  - id: q002
+    question: "Il a neigé cette nuit : c'est à moi de dégager le trottoir devant ma maison ou c'est à la mairie ?"
+    category: lookup
+    split: dev
+    expected_answer: >-
+      Cela dépend de la commune. Si un arrêté du maire le prévoit (affiché en mairie), l'occupant
+      doit déneiger le trottoir devant son habitation, sous peine d'une amende de 150 € au maximum.
+      Sans arrêté, c'est la mairie (service voirie) qui s'en charge.
+    key_facts:
+      - "Obligation de déneiger si un arrêté du maire le prévoit"
+      - "Sans arrêté, la mairie s'en charge"
+      - "Amende de 150 € au maximum en cas de non-respect"
+    expected_docs: [F15133]
+    evidence:
+      - doc_id: F15133
+        quote: "vous devez déneiger le trottoir situé devant votre habitation si un arrêté du maire le prévoit"
+      - doc_id: F15133
+        quote: "Sinon, c'est la mairie (le service voirie) qui s'en charge"
+      - doc_id: F15133
+        quote: "peut entraîner une amende d’au maximum 150 €"
+    origin: drafted_reviewed
+    notes: "The answer depends on a condition (municipal order); a good answer states both cases."
+
+  - id: q003
+    question: "Je loue un appartement non meublé. Qui doit installer le détecteur de fumée, et qui doit le changer quand il ne marche plus ?"
+    category: lookup
+    split: test
+    expected_answer: >-
+      Le propriétaire doit installer le détecteur de fumée ; l'occupant (le locataire) s'occupe de
+      son entretien et, si besoin, de son remplacement. Dans une location meublée, c'est le
+      propriétaire qui assume tout.
+    key_facts:
+      - "Le propriétaire installe le détecteur"
+      - "Le locataire (occupant) l'entretient et le remplace"
+    expected_docs: [F19950]
+    evidence:
+      - doc_id: F19950
+        quote: "Le propriétaire doit installer le détecteur de fumée, tandis que l’occupant s’occupe de son entretien, et, si besoin, de son remplacement."
+    origin: drafted_reviewed
+    notes: "Unfurnished is specified on purpose: furnished rentals follow a different rule."
+
+  - id: q004
+    question: "J'ai quitté mon appart il y a deux ans et mon ancien proprio me réclame des loyers impayés. Il peut encore le faire ?"
+    category: lookup
+    split: dev
+    expected_answer: >-
+      Oui. Le propriétaire peut réclamer les loyers et charges impayés pendant 3 ans, y compris
+      après le départ du locataire. Une dette d'il y a deux ans peut donc encore être réclamée.
+    key_facts:
+      - "Délai de 3 ans pour réclamer les loyers et charges impayés"
+      - "Le délai s'applique aussi après le départ du locataire"
+    expected_docs: [F479]
+    evidence:
+      - doc_id: F479
+        quote: "peut récupérer les charges et loyers impayés pendant 3 ans, y compris après le départ du locataire"
+    origin: drafted_reviewed
+
+  - id: q005
+    question: "Mes voisins du dessus font la fête jusqu'à 3 h du matin presque tous les samedis. Qu'est-ce qu'ils risquent ?"
+    category: lookup
+    split: dev
+    expected_answer: >-
+      C'est du tapage nocturne (bruit entre 22h et 7h). Il est puni d'une amende de 450 € au
+      maximum ; il peut aussi faire l'objet d'une amende forfaitaire de 68 € si elle est réglée
+      immédiatement ou dans les 45 jours.
+    key_facts:
+      - "Tapage nocturne entre 22h et 7h"
+      - "Amende de 450 € maximum"
+      - "Amende forfaitaire de 68 € si payée dans les 45 jours"
+    expected_docs: [F612]
+    evidence:
+      - doc_id: F612
+        quote: "à l’exception du tapage nocturne compris entre 22h et 7h"
+      - doc_id: F612
+        quote: "sont punis par une amende de 450 € maximum"
+      - doc_id: F612
+        quote: "68 € si l'auteur du bruit règle l'amende immédiatement ou dans les 45 jours"
+    origin: drafted_reviewed
+    notes: "Replaces a rent-receipt question (sub-theme rebalancing, 2026-10-09)."
+  - id: q006
+    question: "Notre immeuble en copropriété est à Lyon. Tous les combien sommes-nous obligés de refaire la façade ?"
+    category: lookup
+    split: test
+    expected_answer: >-
+      Dans les communes soumises à un arrêté préfectoral, ce qui concerne notamment Paris, Lyon et
+      Nantes, le ravalement doit être fait au moins une fois tous les 10 ans. Il faut vérifier
+      auprès du service de l'urbanisme de la mairie si l'immeuble est concerné.
+    key_facts:
+      - "Au moins une fois tous les 10 ans en présence d'un arrêté préfectoral"
+      - "Lyon fait partie des villes concernées"
+    expected_docs: [F640]
+    evidence:
+      - doc_id: F640
+        quote: "Cela concerne notamment Paris, Lyon, Nantes."
+      - doc_id: F640
+        quote: "Le ravalement doit être réalisé au moins 1 fois tous les 10 ans."
+    origin: drafted_reviewed
+
+  - id: q007
+    question: "Je suis locataire avec une chaudière au gaz. Tous les combien dois-je la faire contrôler, et quel papier dois-je garder ?"
+    category: lookup
+    split: dev
+    expected_answer: >-
+      L'entretien doit être fait chaque année civile par un chauffagiste qualifié (choisi par le
+      locataire, sauf si le bail prévoit que c'est le bailleur). Le chauffagiste remet une
+      attestation d'entretien dans les 15 jours, à conserver au moins 2 ans.
+    key_facts:
+      - "Entretien chaque année civile"
+      - "Attestation d'entretien remise dans les 15 jours"
+      - "Attestation à conserver au moins 2 ans"
+    expected_docs: [F20760]
+    evidence:
+      - doc_id: F20760
+        quote: "L'entretien de la chaudière doit être fait chaque année civile."
+      - doc_id: F20760
+        quote: "remettre une attestation d'entretien dans un délai de 15 jours suivant sa visite"
+      - doc_id: F20760
+        quote: "Il doit être conservé pendant une durée minimale de 2 ans."
+    origin: drafted_reviewed
+
+  - id: q008
+    question: "Mon propriétaire menace de me mettre dehors en décembre parce que j'ai des retards de loyer. Il peut ?"
+    category: lookup
+    split: dev
+    expected_answer: >-
+      Non, pas en décembre : pendant la trêve hivernale, du 1er novembre au 31 mars inclus, aucun
+      locataire ne peut être expulsé (sauf s'il existe une solution de relogement adaptée). Le
+      propriétaire peut toutefois engager la procédure pendant cette période ; si le juge ordonne
+      l'expulsion, elle s'appliquera à la fin de la trêve.
+    key_facts:
+      - "Pas d'expulsion du 1er novembre au 31 mars (trêve hivernale)"
+      - "La procédure peut être engagée pendant la trêve, l'expulsion a lieu après"
+    expected_docs: [F34736]
+    evidence:
+      - doc_id: F34736
+        quote: "Cette période va du 1er novembre au 31 mars (inclus) de l'année suivante."
+      - doc_id: F34736
+        quote: "Si le juge ordonne l'expulsion, alors elle sera effective dès la fin de la trêve hivernale."
+    origin: drafted_reviewed
+
+  - id: q009
+    question: "Je veux planter une haie qui fera 3 mètres de haut le long du terrain de mon voisin. À quelle distance de la limite dois-je la planter ?"
+    category: lookup
+    split: test
+    expected_answer: >-
+      Sauf règles locales (à vérifier en mairie), une plantation de plus de 2 mètres de haut doit
+      être à au moins 2 mètres de la limite séparative. Une haie de 3 mètres doit donc être plantée
+      à 2 mètres minimum.
+    key_facts:
+      - "Au moins 2 mètres de la limite pour une plantation de plus de 2 mètres"
+      - "Des règles locales peuvent fixer une autre distance"
+    expected_docs: [F614]
+    evidence:
+      - doc_id: F614
+        quote: "Si vous plantez un végétal dont la hauteur dépasse 2 mètres, vous devez respecter une distance minimale de 2 mètres jusqu’à la limite séparative de la propriété voisine."
+      - doc_id: F614
+        quote: "Cette distance peut être fixée par des règles locales"
+    origin: drafted_reviewed
+
+  - id: q010
+    question: "Le vendeur de la maison qu'on veut acheter nous demande un chèque pour réserver notre offre. On doit le faire ?"
+    category: lookup
+    split: test
+    expected_answer: >-
+      Non. Il est interdit de verser un acompte au vendeur au stade de l'offre d'achat, et le
+      versement d'une somme d'argent rend l'offre nulle.
+    key_facts:
+      - "Interdit de verser un acompte au vendeur"
+      - "Un versement rend l'offre d'achat nulle"
+    expected_docs: [F2753]
+    evidence:
+      - doc_id: F2753
+        quote: "Il est interdit de verser un acompte au vendeur."
+      - doc_id: F2753
+        quote: "Le versement d'une somme d'argent rend l'offre d'achat nulle."
+    origin: drafted_reviewed
+
+  # ---------------------------------------------------------------- batch 2: lookup
+  # Answers deliberately taken deep inside long fiches and from tables.
+  - id: q011
+    question: "J'ai obtenu MaPrimeRénov' pour changer ma chaudière. Est-ce que je peux en plus prendre un éco-prêt à taux zéro pour payer ce qui reste ?"
+    category: lookup
+    split: dev
+    expected_answer: >-
+      Oui. L'éco-PTZ et MaPrimeRénov' sont cumulables, mais uniquement pour financer le reste à
+      charge des travaux de rénovation énergétique qui ont ouvert droit à MaPrimeRénov'.
+    key_facts:
+      - "Éco-PTZ et MaPrimeRénov' sont cumulables"
+      - "Uniquement pour le reste à charge des travaux aidés par MaPrimeRénov'"
+    expected_docs: [F36448]
+    evidence:
+      - doc_id: F36448
+        quote: "vous pouvez cumuler l'éco-PTZ et MaPrimeRénov' (MPR), mais uniquement pour financer le reste à charge des travaux de rénovation énergétique ayant ouvert droit à l’aide MPR"
+    origin: drafted_reviewed
+    notes: "Replaces a DPE question (sub-theme rebalancing, 2026-10-09)."
+  - id: q012
+    question: "Cinq ans après la construction de notre maison, de grosses fissures apparaissent dans les murs porteurs. Le constructeur doit-il encore réparer ?"
+    category: lookup
+    split: dev
+    expected_answer: >-
+      Oui, au titre de la garantie décennale : le constructeur est responsable des dommages
+      apparus dans les 10 ans suivant la réception des travaux, lorsqu'ils menacent la solidité de
+      la construction ou la rendent impropre à sa destination, ce qui est le cas de fissures
+      importantes.
+    key_facts:
+      - "Garantie décennale : dommages apparus dans les 10 ans après la réception des travaux"
+      - "Elle couvre les désordres qui menacent la solidité ou rendent la construction impropre à sa destination"
+    expected_docs: [F2034]
+    evidence:
+      - doc_id: F2034
+        quote: "La garantie décennale assure la responsabilité du constructeur en cas de dommage apparu dans les 10 ans à compter de la réception de travaux de construction."
+      - doc_id: F2034
+        quote: "Elle s’applique aux désordres dont l’importance représente un risque pour la solidité de la construction ou la rend impropre à sa destination."
+    origin: drafted_reviewed
+    notes: "Replaces a sublet question (sub-theme rebalancing, 2026-10-09)."
+  - id: q013
+    question: "On a obtenu un certificat d'urbanisme pour le terrain qu'on veut acheter. Il est valable combien de temps, et à quoi ça nous sert ?"
+    category: lookup
+    split: test
+    expected_answer: >-
+      Il est valable 18 mois à compter de sa délivrance. Une autorisation d'urbanisme déposée
+      pendant cette période sera instruite selon les règles en vigueur à la délivrance du
+      certificat, et le taux des taxes n'augmentera pas.
+    key_facts:
+      - "Validité de 18 mois à compter de la délivrance"
+      - "Les règles d'urbanisme et le taux des taxes sont figés pendant cette période"
+    expected_docs: [F1633]
+    evidence:
+      - doc_id: F1633
+        quote: "La durée de validité d'un certificat d'urbanisme (CU) est de 18 mois à compter de sa délivrance."
+      - doc_id: F1633
+        quote: "sera instruite selon les règles en vigueur à la délivrance du certificat et le taux des taxes ne subira pas d'augmentation"
+    origin: drafted_reviewed
+    notes: "Replaces a sales-agreement question (sub-theme rebalancing, 2026-10-09)."
+  - id: q014
+    question: "J'ai déposé mon permis de construire pour une maison. La mairie a combien de temps pour me répondre, et que se passe-t-il si elle ne répond pas ?"
+    category: lookup
+    split: dev
+    expected_answer: >-
+      Pour une maison individuelle, le délai d'instruction est de 2 mois à partir du dépôt du
+      dossier complet. Sans réponse de la mairie à la fin de ce délai, le projet est accepté :
+      c'est un permis de construire tacite.
+    key_facts:
+      - "Délai d'instruction de 2 mois pour une maison individuelle"
+      - "Le délai part du dépôt du dossier complet"
+      - "Sans réponse, le permis est accordé tacitement"
+    expected_docs: [F1986]
+    evidence:
+      - doc_id: F1986
+        quote: "Pour une maison individuelle, le délai d'instruction est de 2 mois à partir de la date de dépôt du dossier complet en mairie."
+      - doc_id: F1986
+        quote: "Si vous ne recevez pas de réponse de la mairie à la fin du délai d'instruction, votre projet est accepté. Il s'agit d'un permis de construire tacite."
+    origin: drafted_reviewed
+
+  - id: q015
+    question: "J'ai reçu mon chèque énergie en mai. Jusqu'à quand je peux l'utiliser ?"
+    category: lookup
+    split: dev
+    expected_answer: >-
+      La date de fin de validité est inscrite sur le chèque. Un chèque émis avant le 1er septembre
+      est valable jusqu'au 31 mars de l'année civile suivante ; reçu en mai, il est donc utilisable
+      jusqu'au 31 mars de l'année suivante.
+    key_facts:
+      - "Valable jusqu'au 31 mars de l'année suivante s'il est émis avant le 1er septembre"
+      - "La date de fin de validité est inscrite sur le chèque"
+    expected_docs: [F33667]
+    evidence:
+      - doc_id: F33667
+        quote: "31 mars de l'année civile suivante, lorsqu'il est émis avant le 1er septembre"
+      - doc_id: F33667
+        quote: "La date de fin de validité est inscrite sur le recto de votre chèque énergie."
+    origin: drafted_reviewed
+    notes: "Answer is at ~95% of a 23k-character fiche."
+
+  - id: q016
+    question: "On veut faire creuser une piscine de 4 m sur 8 m dans le jardin, sans abri. Il faut demander une autorisation ?"
+    category: lookup
+    split: test
+    expected_answer: >-
+      Oui. Un bassin de 32 m² (plus de 10 m² et jusqu'à 100 m²) sans couverture nécessite une
+      déclaration préalable en mairie. Au-delà de 100 m², il faudrait un permis de construire.
+    key_facts:
+      - "Déclaration préalable pour un bassin de plus de 10 m² et jusqu'à 100 m²"
+      - "Permis de construire au-delà de 100 m²"
+    expected_docs: [F31404]
+    evidence:
+      - doc_id: F31404
+        quote: "Cas : Bassin de plus de 10 m² et jusqu'à 100 m²"
+      - doc_id: F31404
+        quote: "Vous devez faire une déclaration préalable en mairie"
+      - doc_id: F31404
+        quote: "Vous devez demander un permis de construire en mairie"
+    origin: drafted_reviewed
+    notes: "Requires a computation (4 x 8 = 32 m²) and picking the right case among several."
+
+  - id: q017
+    question: "On veut virer notre syndic à la prochaine AG. Il faut quelle majorité pour voter ça ?"
+    category: lookup
+    split: dev
+    expected_answer: >-
+      La révocation (comme la désignation) du syndic se vote à la majorité absolue dite de
+      l'article 25, c'est-à-dire la majorité des voix de tous les copropriétaires de l'immeuble
+      (présents, représentés et absents).
+    key_facts:
+      - "Majorité absolue de l'article 25"
+      - "Majorité des voix de tous les copropriétaires, y compris absents"
+    expected_docs: [F2137]
+    evidence:
+      - doc_id: F2137
+        quote: "Désignation ou révocation du syndic de copropriété et des membres du conseil syndical | Majorité absolue dite de l'article 25"
+      - doc_id: F2137
+        quote: "correspond à la majorité des voix de tous les copropriétaires de l'immeuble (présents, représentés et absents)"
+    origin: drafted_reviewed
+    notes: "Answer is in a Markdown table row."
+
+  - id: q018
+    question: "J'ai fait une demande de HLM il y a 11 mois et toujours rien. Est-ce que je dois refaire une démarche ?"
+    category: lookup
+    split: test
+    expected_answer: >-
+      Oui. Sans attribution, la demande de logement social doit être renouvelée chaque année,
+      sinon elle est annulée. Le renouvellement se fait entre le 10e et le 12e mois après la
+      création de la demande (ou son dernier renouvellement) : à 11 mois, il faut le faire
+      maintenant.
+    key_facts:
+      - "La demande doit être renouvelée chaque année, sinon elle est annulée"
+      - "Renouvellement entre le 10e et le 12e mois"
+    expected_docs: [F32880]
+    evidence:
+      - doc_id: F32880
+        quote: "Une demande de logement social doit être renouvelée chaque année. Sinon, elle est annulée."
+      - doc_id: F32880
+        quote: "Vous devez faire votre renouvellement entre le 10e et le 12e mois à compter de la date de création de votre demande ou de son dernier renouvellement."
+    origin: drafted_reviewed
+    notes: "Replaces an insurance question (sub-theme rebalancing, 2026-10-09). F32880 is the longest fiche (~145k characters)."
+  - id: q019
+    question: "Notre syndic a été désigné il y a bientôt 3 ans. Son contrat s'arrête quand, et qu'est-ce qu'on peut faire à la fin ?"
+    category: lookup
+    split: dev
+    expected_answer: >-
+      Le contrat de syndic dure en principe 3 ans et prend fin à son terme. À cette date, les
+      copropriétaires peuvent soit renouveler le même syndic (avec un nouveau contrat approuvé en
+      assemblée générale), soit désigner un nouveau syndic, sans avoir à donner de motif.
+    key_facts:
+      - "Contrat de syndic de 3 ans en principe"
+      - "À l'échéance : renouveler le même syndic ou en désigner un nouveau"
+      - "Pas de motif à donner pour changer de syndic"
+    expected_docs: [F1548]
+    evidence:
+      - doc_id: F1548
+        quote: "La durée du contrat de syndic est, en principe, de 3 ans."
+      - doc_id: F1548
+        quote: "Désigner le même syndic (renouvellement de son mandat)"
+      - doc_id: F1548
+        quote: "Ou désigner un nouveau syndic. Dans ce cas, il n'y a aucun motif particulier à déclarer."
+    origin: drafted_reviewed
+    notes: "Replaces a caretaker-salary question (sub-theme rebalancing, 2026-10-09)."
+  - id: q020
+    question: "J'ai fait ma demande d'APL le 10 mars. À partir de quand elle compte, et quel jour elle est payée ?"
+    category: lookup
+    split: test
+    expected_answer: >-
+      L'APL est due à partir du 1er jour du mois qui suit la demande (donc à partir du 1er avril
+      pour une demande le 10 mars). Le paiement a lieu le 5 de chaque mois, en général directement
+      au bailleur.
+    key_facts:
+      - "L'APL est due à partir du 1er jour du mois suivant la demande"
+      - "Paiement le 5 du mois"
+    expected_docs: [F12006]
+    evidence:
+      - doc_id: F12006
+        quote: "L’APL est due à partir du 1er jour qui suit le mois de votre demande."
+      - doc_id: F12006
+        quote: "Le paiement a lieu quant à lui tous les 5 du mois."
+    origin: drafted_reviewed
+
+  # ---------------------------------------------------------------- batch 3: multi-hop
+  # Answers combine several fiches, or several cases of one fiche.
+  - id: q021
+    question: "Je loue un bureau dans un immeuble en copropriété à Paris et j'aimerais le transformer en logement pour y habiter. Quelles démarches dois-je faire ?"
+    category: multi_hop
+    split: dev
+    expected_answer: >-
+      Plusieurs démarches se cumulent. Urbanisme : c'est un changement de destination, soumis à
+      déclaration préalable s'il n'y a pas de modification de façade ni de structure (permis de
+      construire sinon) ; à Paris, le dossier se dépose au Bureau accueil et service à l'usager
+      (Basu), uniquement en ligne. Location : il faut l'autorisation écrite du propriétaire.
+      Copropriété : si le règlement ne permet pas cette destination, il faut une autorisation de
+      l'assemblée générale, votée à l'unanimité. Impôts : déclarer le changement (formulaire IL)
+      dans les 90 jours, et une taxe d'aménagement est due.
+    key_facts:
+      - "Déclaration préalable si pas de modification de façade ou de structure (sinon permis de construire)"
+      - "À Paris, dossier au Basu uniquement par voie dématérialisée"
+      - "Autorisation écrite du propriétaire pour un locataire"
+      - "Autorisation de l'AG à l'unanimité si le règlement de copropriété l'impose"
+      - "Déclaration aux impôts dans les 90 jours"
+    expected_docs: [F2416, F35336]
+    evidence:
+      - doc_id: F2416
+        quote: "Un changement de destination sans modification de la façade ou de la structure porteuse est soumis à DP."
+      - doc_id: F2416
+        quote: "Vous devez remplir et transmettre votre dossier au Bureau accueil et service à l'usager (Basu) uniquement par voie dématérialisée"
+      - doc_id: F2416
+        quote: "vous devez obtenir l'autorisation écrite du propriétaire pour transformer votre local professionnel ou commercial en habitation"
+      - doc_id: F2416
+        quote: "La décision est prise à l'unanimité de l'ensemble des copropriétaires."
+      - doc_id: F2416
+        quote: "dans les 90 jours de la réalisation du changement de destination"
+      - doc_id: F35336
+        quote: "Si vous devez compenser, vous pouvez, par exemple, transformer un local commercial, professionnel ou un bureau en habitation."
+    origin: drafted_reviewed
+    notes: >-
+      Derived from the v0 failure (2026-10-09): the model claimed Paris had no compensation
+      requirement and confused "changement d'usage" with "changement de destination".
+      Turning an office into housing is itself a way to compensate, not something that needs one.
+
+  - id: q022
+    question: "J'ai percé des trous de cheville pour accrocher des étagères. Mon propriétaire peut-il garder une partie de ma caution pour ça quand je pars ?"
+    category: multi_hop
+    split: dev
+    expected_answer: >-
+      Reboucher les trous faits par exemple pour poser des tableaux ou des miroirs fait partie des
+      réparations locatives à la charge du locataire. S'il ne le fait pas, le propriétaire peut
+      déduire les frais du dépôt de garantie, à condition de s'appuyer sur les états des lieux
+      d'entrée et de sortie et de justifier les sommes (devis, factures). Si l'état des lieux de
+      sortie n'est pas conforme à celui d'entrée, il a 2 mois au maximum pour rendre le solde.
+    key_facts:
+      - "Reboucher les trous est une réparation locative à la charge du locataire"
+      - "Retenue possible si justifiée par les états des lieux et des devis ou factures"
+      - "Restitution dans un délai maximum de 2 mois si l'état des lieux de sortie n'est pas conforme"
+    expected_docs: [F31697, F31269]
+    evidence:
+      - doc_id: F31697
+        quote: "Reboucher les trous éventuellement faits par exemple à la suite de la pose de tableaux, de miroirs."
+      - doc_id: F31269
+        quote: "il doit s’appuyer sur les états des lieux d’entrée et de sortie, et être en mesure de justifier les sommes déduites par la présentation d’un devis ou de factures"
+      - doc_id: F31269
+        quote: "doit rendre le dépôt de garantie (parfois appelé par erreur caution) dans un délai maximum de 2 mois"
+    origin: drafted_reviewed
+    notes: >-
+      Derived from the v0 failure (2026-10-09): v0 only retrieved F31269 and answered "Oui" without
+      a source mentioning holes. "Cheville" never appears in the corpus; the answer requires F31697.
+
+  - id: q023
+    question: "Je rends mon appartement vide situé en zone tendue, et l'état des lieux de sortie s'est bien passé. Combien de préavis dois-je donner, et sous quel délai je récupère ma caution ?"
+    category: multi_hop
+    split: test
+    expected_answer: >-
+      En zone tendue, le préavis est d'1 mois à condition de l'indiquer dans la lettre de congé
+      (sinon c'est 3 mois). Si l'état des lieux de sortie est conforme à celui d'entrée, le dépôt
+      de garantie doit être rendu dans un délai maximum d'1 mois à partir de la remise des clés.
+    key_facts:
+      - "Préavis d'1 mois en zone tendue, à indiquer dans la lettre de congé"
+      - "Sinon, préavis de 3 mois"
+      - "Dépôt de garantie rendu sous 1 mois maximum si l'état des lieux est conforme"
+      - "Le délai court à partir de la remise des clés"
+    expected_docs: [F1168, F31269]
+    evidence:
+      - doc_id: F1168
+        quote: "Le préavis est de 1 mois à la condition d'indiquer dans la lettre de congé l'adresse du logement loué et le fait de bénéficier d'un délai de préavis réduit à un mois"
+      - doc_id: F1168
+        quote: "Si vous ne le faites pas, le délai de préavis est de 3 mois."
+      - doc_id: F31269
+        quote: "doit rendre le dépôt de garantie (parfois appelé par erreur caution) dans un délai maximum de 1 mois"
+      - doc_id: F31269
+        quote: "Le délai commence à partir du jour où le locataire rend les clés du logement"
+    origin: drafted_reviewed
+
+  - id: q024
+    question: "Mon appartement est classé G au diagnostic énergie et mon locataire a signé son bail en 2023. Je peux augmenter le loyer avec l'indice chaque année, et renouveler son bail à l'échéance ?"
+    category: multi_hop
+    split: dev
+    expected_answer: >-
+      Non dans les deux cas. En métropole, la révision annuelle du loyer est interdite pour un
+      logement classé F ou G lorsque le bail a été signé, renouvelé ou reconduit depuis le 24 août
+      2022. Et depuis le 1er janvier 2025, un logement classé G ne peut plus être loué, ce qui
+      concerne aussi le renouvellement du bail et sa reconduction tacite.
+    key_facts:
+      - "Révision du loyer interdite pour un logement F ou G (bail depuis le 24 août 2022)"
+      - "Depuis le 1er janvier 2025, un logement classé G ne peut plus être loué"
+      - "L'interdiction de louer concerne aussi le renouvellement et la reconduction tacite"
+    expected_docs: [F1311, F479, F16096]
+    evidence:
+      - doc_id: F1311
+        quote: "lorsque le bail est signé, renouvelé ou tacitement reconduit depuis le 24 août 2022, et qu'il concerne un logement classé F ou G"
+      - doc_id: F16096
+        quote: "Depuis le 1er janvier 2025, il n'est plus possible de louer un logement ayant un DPE classé G (cela concerne aussi le renouvellement du bail ou sa reconduction tacite)."
+    origin: drafted_reviewed
+
+  - id: q025
+    question: "Des squatteurs se sont installés dans ma résidence secondaire en janvier. Je dois attendre la fin de l'hiver pour les faire partir ?"
+    category: multi_hop
+    split: test
+    expected_answer: >-
+      Non. La trêve hivernale ne s'applique pas aux squatteurs, y compris dans une résidence
+      secondaire : l'expulsion peut avoir lieu à toute période de l'année. Il faut porter plainte
+      et demander l'évacuation au préfet, qui doit rendre sa décision dans un délai de 48 heures.
+      Il est interdit de déloger soi-même les squatteurs.
+    key_facts:
+      - "La trêve hivernale ne s'applique pas aux squatteurs"
+      - "Cela vaut aussi pour une résidence secondaire"
+      - "Porter plainte et demander l'évacuation au préfet"
+      - "Le préfet décide dans les 48 heures"
+    expected_docs: [F34736, F35254]
+    evidence:
+      - doc_id: F34736
+        quote: "Lorsqu'un squatteur occupe un logement (résidence principale ou résidence secondaire), l'expulsion peut avoir lieu, quelle que soit la période de l'année."
+      - doc_id: F34736
+        quote: "il faut porter plainte et demander l'évacuation du squatteur"
+      - doc_id: F35254
+        quote: "En cas de squat, la trêve hivernale ne s'applique pas."
+      - doc_id: F35254
+        quote: "Il doit rendre sa décision dans un délai de 48 heures, à partir de la réception de la demande."
+    origin: drafted_reviewed
+
+  - id: q026
+    question: "On veut une piscine enterrée de 50 m² sans abri. Quelle autorisation faut-il, et va-t-on payer une taxe dessus ?"
+    category: multi_hop
+    split: dev
+    expected_answer: >-
+      Un bassin de plus de 10 m² et jusqu'à 100 m² sans couverture nécessite une déclaration
+      préalable en mairie. La piscine est soumise à la taxe d'aménagement : sa valeur taxable est
+      forfaitaire (251 € par m²), à laquelle on applique les taux communal et départemental.
+    key_facts:
+      - "Déclaration préalable pour un bassin de 10 à 100 m²"
+      - "Taxe d'aménagement due sur la piscine"
+      - "Valeur forfaitaire de 251 € par m²"
+      - "Taux communal et départemental appliqués sur cette valeur"
+    expected_docs: [F31404, F23263]
+    evidence:
+      - doc_id: F31404
+        quote: "Cas : Bassin de plus de 10 m² et jusqu'à 100 m²"
+      - doc_id: F31404
+        quote: "Vous devez faire une déclaration préalable en mairie"
+      - doc_id: F23263
+        quote: "| Piscine | 251 € par m² |"
+      - doc_id: F23263
+        quote: "Les pourcentages (taux) communal et départemental sont appliqués sur cette valeur."
+    origin: drafted_reviewed
+    notes: "Shares F31404 with q016 (test); the tax part requires a second fiche with a table."
+
+  - id: q027
+    question: "Je vends mon appartement qui est dans une copropriété. Quels documents techniques et financiers dois-je donner à l'acheteur ?"
+    category: multi_hop
+    split: test
+    expected_answer: >-
+      Le vendeur doit fournir le dossier de diagnostic technique (DDT), joint à la promesse ou à
+      l'acte de vente : DPE, plomb si construit avant 1949, amiante si permis délivré avant le 1er
+      juillet 1997, électricité et gaz si installations de plus de 15 ans, état des risques, etc.
+      L'acte doit indiquer la surface privative (loi Carrez). En copropriété, il doit aussi
+      remettre un état daté, qui précise la situation financière du lot.
+    key_facts:
+      - "Dossier de diagnostic technique (DDT) joint à la promesse ou à l'acte"
+      - "Diagnostics dont DPE, plomb (avant 1949), amiante (permis avant juillet 1997), électricité et gaz (plus de 15 ans)"
+      - "Surface privative loi Carrez indiquée"
+      - "État daté obligatoire en copropriété"
+    expected_docs: [F10798, F37294]
+    evidence:
+      - doc_id: F10798
+        quote: "Le propriétaire vendeur doit joindre le DDT à la promesse de vente ou à l'acte de vente."
+      - doc_id: F10798
+        quote: "Constat de risque d'exposition au plomb (Crep) si le logement a été construit avant le 1er janvier 1949"
+      - doc_id: F10798
+        quote: "La promesse de vente ou l'acte de vente doit aussi indiquer la surface privative du lot de copropriété (Loi Carrez)."
+      - doc_id: F37294
+        quote: "si vous souhaitez vendre votre logement en copropriété, vous devez remettre à l'acquéreur un état daté"
+    origin: drafted_reviewed
+
+  - id: q028
+    question: "Je mets mon appartement en location vide pour la première fois. Quels diagnostics je dois donner au locataire, et qu'est-ce que je dois faire pour le détecteur de fumée ?"
+    category: multi_hop
+    split: dev
+    expected_answer: >-
+      Le bailleur doit annexer au bail un dossier de diagnostic technique : DPE, plomb si le
+      logement date d'avant 1949, électricité et gaz si les installations ont plus de 15 ans, état
+      des risques et diagnostic bruit selon la zone (l'amiante est seulement tenu à disposition).
+      Pour le détecteur de fumée, le propriétaire doit l'installer et vérifier qu'il fonctionne
+      lors de l'état des lieux ; ensuite, l'entretien revient au locataire.
+    key_facts:
+      - "Dossier de diagnostic technique annexé au bail"
+      - "Diagnostics dont DPE, plomb (avant 1949), électricité et gaz (plus de 15 ans), état des risques"
+      - "Le propriétaire installe le détecteur de fumée"
+      - "Il vérifie son fonctionnement lors de l'état des lieux"
+    expected_docs: [F33463, F19950]
+    evidence:
+      - doc_id: F33463
+        quote: "Le bailleur doit annexer ce dossier au bail au moment de la signature du bail et en cas de renouvellement."
+      - doc_id: F33463
+        quote: "État de l'installation intérieure de l'électricité si l'installation électrique du logement a plus de 15 ans"
+      - doc_id: F19950
+        quote: "Le propriétaire doit installer le détecteur de fumée"
+      - doc_id: F19950
+        quote: "Lorsque le logement est loué, le propriétaire doit également vérifier le bon fonctionnement du détecteur de fumée lors de l’état des lieux."
+    origin: drafted_reviewed
+
+  - id: q029
+    question: "Je suis étudiant et mes parents me louent le studio qu'ils possèdent. Est-ce que je peux toucher les APL ?"
+    category: multi_hop
+    split: test
+    expected_answer: >-
+      Non. Un locataire dont le propriétaire est son père ou sa mère ne peut pas bénéficier de
+      l'APL, de l'ALF ni de l'ALS. Plus généralement, ne pas avoir de lien de parenté avec le
+      propriétaire fait partie des conditions pour un étudiant (certains liens, comme frère ou
+      sœur, restent toutefois compatibles).
+    key_facts:
+      - "Pas d'aide au logement si le propriétaire est le père ou la mère"
+      - "L'absence de lien de parenté avec le propriétaire est une condition"
+    expected_docs: [F32384, F1563]
+    evidence:
+      - doc_id: F32384
+        quote: "Le propriétaire est votre père/mère"
+      - doc_id: F32384
+        quote: "Non, vous ne pouvez pas bénéficier de l'aide personnalisée au logement (APL)"
+      - doc_id: F1563
+        quote: "Vous n'avez pas de lien de parenté avec le propriétaire du logement"
+    origin: drafted_reviewed
+
+  - id: q030
+    question: "Mon locataire touche l'APL, qui m'est versée directement, mais il ne paie plus sa part depuis trois mois. Je dois prévenir la Caf ? Et je peux le faire expulser cet hiver ?"
+    category: multi_hop
+    split: dev
+    expected_answer: >-
+      Il y a impayé dès que la dette atteint au moins 2 fois le montant mensuel net du loyer et des
+      charges. Le bailleur doit alors le signaler à la Caf (ou à la MSA) dans les 2 mois, sous
+      peine d'une amende de 8 010 €. En revanche, aucune expulsion n'est possible pendant la trêve
+      hivernale (du 1er novembre au 31 mars) ; une procédure peut être engagée, mais l'expulsion
+      n'aura lieu qu'après.
+    key_facts:
+      - "Impayé dès que la dette atteint 2 fois le montant mensuel net"
+      - "Signalement à la Caf ou MSA dans les 2 mois"
+      - "Amende de 8 010 € en l'absence de signalement"
+      - "Pas d'expulsion pendant la trêve hivernale (1er novembre - 31 mars)"
+    expected_docs: [F32037, F34736]
+    evidence:
+      - doc_id: F32037
+        quote: "Il y a impayé de loyer lorsque le locataire a une dette au moins égale à 2 fois le montant mensuel net du loyer et des charges."
+      - doc_id: F32037
+        quote: "Dès que l'impayé est établi, le bailleur a 2 mois pour le signaler à la Caf (ou la MSA)."
+      - doc_id: F32037
+        quote: "le bailleur risque une amende de 8 010,00 € s'il ne signale pas l'impayé de loyer"
+      - doc_id: F34736
+        quote: "Cette période va du 1er novembre au 31 mars (inclus) de l'année suivante."
+    origin: drafted_reviewed
+    notes: "F32037 announces rule changes from 2027-01-01: the reference answer is tied to the snapshot."
+
+  - id: q031
+    question: "Mon bail prévoit une révision annuelle du loyer. Comment la hausse est-elle limitée, et quel est le dernier indice publié ?"
+    category: multi_hop
+    split: test
+    expected_answer: >-
+      L'augmentation annuelle est plafonnée par l'évolution sur un an de l'indice de référence des
+      loyers (IRL). Le dernier IRL publié est celui du 2e trimestre 2026 : 148,37, soit +1,15 % sur
+      un an.
+    key_facts:
+      - "La hausse est plafonnée par l'évolution annuelle de l'IRL"
+      - "IRL du 2e trimestre 2026 : 148,37"
+      - "Variation annuelle : +1,15 %"
+    expected_docs: [F1311, F13723]
+    evidence:
+      - doc_id: F1311
+        quote: "L'augmentation annuelle du loyer est plafonnée par l'évolution sur un an de l'IRL."
+      - doc_id: F13723
+        quote: "| 2026 | 2e trimestre | 148,37 | + 1,15 %"
+    origin: drafted_reviewed
+    notes: "Time-sensitive: the IRL table is updated every quarter; valid for the corpus snapshot only."
+
+  - id: q032
+    question: "Je vends mon appartement en copropriété en cours d'année, et des travaux ont été votés à la dernière AG. Qui paie les charges et les travaux, moi ou l'acheteur ?"
+    category: multi_hop
+    split: dev
+    expected_answer: >-
+      Les provisions du budget prévisionnel sont dues par le vendeur lorsqu'elles sont exigibles
+      (le 1er jour de chaque trimestre) avant la vente. Pour les travaux votés avant la vente, le
+      vendeur paie les appels de fonds émis avant la vente et l'acheteur ceux émis après. Les
+      parties peuvent convenir d'une autre répartition entre elles. Ces informations figurent
+      dans l'état daté, obligatoire pour vendre en copropriété.
+    key_facts:
+      - "Provision du budget prévisionnel à la charge du vendeur"
+      - "Travaux : le vendeur paie les appels de fonds avant la vente, l'acheteur ceux d'après"
+      - "Une répartition différente peut être convenue entre vendeur et acheteur"
+      - "Ces informations figurent dans l'état daté"
+    expected_docs: [F32920, F37294]
+    evidence:
+      - doc_id: F32920
+        quote: "Le paiement de la provision exigible du budget prévisionnel est à la charge du copropriétaire vendeur."
+      - doc_id: F32920
+        quote: "Le vendeur paye les appels de fonds établis avant la vente, conformément au calendrier voté en assemblée générale"
+      - doc_id: F32920
+        quote: "L'acquéreur paye les appels de fonds émis après la vente."
+      - doc_id: F37294
+        quote: "vous devez remettre à l'acquéreur un état daté"
+    origin: drafted_reviewed
+
+  # ---------------------------------------------------------------- batch 4: unanswerable
+  # Absence of an answer verified by text search over the 333 processed fiches (2026-10-09).
+  # Expected behavior: say the information is not in the sources; never invent a figure.
+  - id: q033
+    question: "Combien coûte un passeport ?"
+    category: unanswerable
+    split: dev
+    expected_answer: "Refus : le corpus (logement) ne contient pas le prix d'un passeport."
+    origin: drafted_reviewed
+    notes: "Out of domain. 'Passeport' appears only as an identity document in housing files."
+
+  - id: q034
+    question: "Quel est le montant de la prime « Ma Maison Verte » pour isoler ses combles ?"
+    category: unanswerable
+    split: test
+    expected_answer: "Refus : aucune aide de ce nom n'existe dans les sources."
+    origin: drafted_reviewed
+    notes: "False premise: the aid does not exist. Tempting to answer with MaPrimeRénov' amounts."
+
+  - id: q035
+    question: "Quels sont les horaires de la déchetterie de Rennes ?"
+    category: unanswerable
+    split: dev
+    expected_answer: "Refus : les sources ne donnent pas d'informations locales sur les déchetteries de Rennes."
+    origin: drafted_reviewed
+    notes: "Local information; 'Rennes' never appears in the corpus."
+
+  - id: q036
+    question: "Quel est le taux d'intérêt moyen d'un prêt immobilier en ce moment ?"
+    category: unanswerable
+    split: dev
+    expected_answer: "Refus : les sources ne contiennent pas de taux de marché des crédits immobiliers."
+    origin: drafted_reviewed
+    notes: "Near-domain (housing purchase, loans) but market data is absent."
+
+  - id: q037
+    question: "Quel sera l'indice de référence des loyers au 4e trimestre 2027 ?"
+    category: unanswerable
+    split: test
+    expected_answer: "Refus : cet indice n'est pas encore publié ; les sources s'arrêtent au 2e trimestre 2026."
+    origin: drafted_reviewed
+    notes: "Future value. The IRL table is in the corpus and invites extrapolation."
+
+  - id: q038
+    question: "Quel est le prix moyen du mètre carré pour acheter un appartement à Bordeaux ?"
+    category: unanswerable
+    split: dev
+    expected_answer: "Refus : les sources ne donnent pas de prix de vente au m² à Bordeaux."
+    origin: drafted_reviewed
+    notes: >-
+      Near-domain trap: F36487 gives reference RENTS per m² in Bordeaux, not sale prices.
+      A model that confuses the two will answer with a wrong figure.
+
+  - id: q039
+    question: "Jusqu'à quelle date peut-on faire sa déclaration de revenus en ligne cette année ?"
+    category: unanswerable
+    split: test
+    expected_answer: "Refus : les sources ne donnent pas les dates de la déclaration de revenus."
+    origin: drafted_reviewed
+    notes: "Tax topic outside housing; 'déclaration de revenus' only appears as a supporting document."
+
+  - id: q040
+    question: "Quel est le numéro de téléphone de l'ADIL de Nantes ?"
+    category: unanswerable
+    split: dev
+    expected_answer: "Refus : les sources ne contiennent pas les coordonnées de l'ADIL de Nantes."
+    origin: drafted_reviewed
+    notes: "Contact details; must not invent a phone number."
+
+  - id: q041
+    question: "Combien ça coûte de récupérer sa voiture à la fourrière ?"
+    category: unanswerable
+    split: dev
+    expected_answer: "Refus : le sujet (fourrière) n'est pas couvert par les sources."
+    origin: drafted_reviewed
+    notes: "Out of domain; 'fourrière' never appears in the corpus."
+
+  - id: q042
+    question: "Combien vais-je payer de taxe foncière pour un T3 à Marseille ?"
+    category: unanswerable
+    split: test
+    expected_answer: "Refus : les sources ne donnent ni taux ni montant de taxe foncière pour Marseille."
+    origin: drafted_reviewed
+    notes: "Near-domain: taxe foncière is mentioned in the corpus, but never with amounts or rates."
+
+  # ---------------------------------------------------------------- batch 5: ambiguous
+  # Under-specified questions: a good answer covers the main cases (or asks which one applies).
+  - id: q043
+    question: "Combien mon propriétaire peut-il me demander comme caution ?"
+    category: ambiguous
+    split: dev
+    expected_answer: >-
+      Cela dépend du bail. Pour un logement vide, le dépôt de garantie est d'1 mois de loyer hors
+      charges au maximum ; pour un meublé, 2 mois hors charges au maximum ; pour un bail mobilité,
+      il est interdit.
+    key_facts:
+      - "Logement vide : 1 mois de loyer hors charges maximum"
+      - "Logement meublé : 2 mois de loyer hors charges maximum"
+      - "Bail mobilité : dépôt de garantie interdit"
+    expected_docs: [F1165, F31269]
+    evidence:
+      - doc_id: F1165
+        quote: "Dépôt de garantie | Montant maximum : 1 mois de loyer (hors charges) | Montant maximum : 2 mois de loyer (hors charges) | Interdit"
+      - doc_id: F31269
+        quote: "Le montant du dépôt de garantie ne doit pas dépasser 1 mois de loyer (hors charges)"
+    origin: drafted_reviewed
+    notes: "Missing information: furnished or not. Users often say 'caution' for 'dépôt de garantie'."
+
+  - id: q044
+    question: "Un bail de location, ça dure combien de temps ?"
+    category: ambiguous
+    split: test
+    expected_answer: >-
+      Cela dépend du type de bail : 3 ans minimum pour un logement vide (sauf cas particulier),
+      1 an minimum pour un meublé (9 mois si le locataire est étudiant), et entre 1 et 10 mois
+      pour un bail mobilité.
+    key_facts:
+      - "Logement vide : 3 ans minimum"
+      - "Meublé : 1 an minimum, 9 mois pour un étudiant"
+      - "Bail mobilité : de 1 à 10 mois"
+    expected_docs: [F1165]
+    evidence:
+      - doc_id: F1165
+        quote: "3 ans minimum, sauf cas particulier"
+      - doc_id: F1165
+        quote: "1 an minimum(9 mois si le locataire est étudiant)"
+      - doc_id: F1165
+        quote: "Minimum : 1 mois ; Maximum : 10 mois"
+    origin: drafted_reviewed
+
+  - id: q045
+    question: "Je veux partir de mon logement, combien de temps à l'avance je dois prévenir ?"
+    category: ambiguous
+    split: dev
+    expected_answer: >-
+      Pour un logement vide, le préavis est de 3 mois, réduit à 1 mois dans certains cas (par
+      exemple en zone tendue, à condition de l'indiquer dans la lettre de congé). Pour un meublé
+      ou un bail mobilité, le préavis est d'1 mois.
+    key_facts:
+      - "Logement vide : 3 mois"
+      - "1 mois dans certains cas (zone tendue notamment), à indiquer dans la lettre"
+      - "Meublé ou bail mobilité : 1 mois"
+    expected_docs: [F1168, F1165]
+    evidence:
+      - doc_id: F1165
+        quote: "Congé à donner avec un délai de préavis de 3 mois (1 mois si cas particulier)"
+      - doc_id: F1165
+        quote: "À tout moment ; Congé à donner avec un délai de préavis de 1 mois"
+      - doc_id: F1168
+        quote: "Le préavis est de 1 mois à la condition d'indiquer dans la lettre de congé"
+    origin: drafted_reviewed
+    notes: "Close to q023 (test) but without the zone or furnished information."
+
+  - id: q046
+    question: "On aimerait poser une petite cabane en bois au fond du jardin pour ranger les outils. On doit demander quelque chose à la mairie ?"
+    category: ambiguous
+    split: dev
+    expected_answer: >-
+      Cela dépend de sa surface (cas général, hors secteur protégé) : jusqu'à 5 m², pas de
+      formalité ; de plus de 5 m² à 20 m², une déclaration préalable ; au-delà de 20 m², un permis
+      de construire. Il faut aussi respecter le PLU de la commune.
+    key_facts:
+      - "Jusqu'à 5 m² : dispensé de formalité"
+      - "De 5 à 20 m² : déclaration préalable"
+      - "Plus de 20 m² : permis de construire"
+    expected_docs: [F31471]
+    evidence:
+      - doc_id: F31471
+        quote: "L'installation d'une annexe jusqu'à 5 m² de surface de plancher ou d'emprise au sol est dispensée de formalité."
+      - doc_id: F31471
+        quote: "L'installation d'une annexe de plus de 5 m² jusqu'à 20 m² de surface de plancher ou d'emprise au sol est soumise à DP."
+      - doc_id: F31471
+        quote: "L'installation d'une annexe de plus de 20 m² de surface de plancher ou d'emprise au sol est soumise à PC."
+    origin: drafted_reviewed
+    notes: "Missing information: surface and protected area."
+
+  - id: q047
+    question: "Je suis locataire, j'ai le droit de faire des travaux dans mon appartement ?"
+    category: ambiguous
+    split: test
+    expected_answer: >-
+      Cela dépend des travaux. Le locataire peut aménager librement le logement (changer la
+      moquette, rafraîchir les peintures...). En revanche, les gros travaux de transformation
+      (abattre une cloison par exemple) nécessitent l'accord écrit du propriétaire.
+    key_facts:
+      - "Aménagements libres (moquette, peintures)"
+      - "Gros travaux de transformation : accord écrit du propriétaire"
+    expected_docs: [F1874]
+    evidence:
+      - doc_id: F1874
+        quote: "Le locataire a le droit d'aménager librement le logement qu'il occupe (changement de moquette, rafraîchissement des peintures murales...)."
+      - doc_id: F1874
+        quote: "il ne peut pas faire de gros travaux de transformation du local ou de ses équipements sans l'accord écrit du propriétaire"
+    origin: drafted_reviewed
+
+  - id: q048
+    question: "Dans un logement loué, qui doit payer les réparations ?"
+    category: ambiguous
+    split: dev
+    expected_answer: >-
+      Le locataire prend en charge l'entretien courant et les petites réparations (réparations
+      locatives). Le propriétaire doit faire tous les autres travaux, notamment ceux nécessaires
+      au maintien en état du logement ; il prend aussi en charge les réparations locatives dues à
+      la vétusté ou à la force majeure.
+    key_facts:
+      - "Locataire : entretien courant et petites réparations"
+      - "Propriétaire : tous les autres travaux, dont le maintien en état"
+      - "Réparations dues à la vétusté ou à la force majeure : propriétaire"
+    expected_docs: [F31697, F31699]
+    evidence:
+      - doc_id: F31697
+        quote: "Il s'agit de l'entretien courant et des petites réparations qui sont à la charge du locataire pendant toute la durée du bail."
+      - doc_id: F31699
+        quote: "le propriétaire doit faire tous les travaux qui ne sont pas à la charge du locataire, c'est-à-dire tous les travaux qui ne sont pas des réparations locatives"
+      - doc_id: F31699
+        quote: "Lorsqu'elles sont occasionnées par la vétusté ou la force majeure, les réparations locatives sont à la charge du propriétaire."
+    origin: drafted_reviewed
+
+  - id: q049
+    question: "Mon proprio a le droit d'augmenter mon loyer ?"
+    category: ambiguous
+    split: dev
+    expected_answer: >-
+      En cours de bail, seulement par la révision annuelle, et seulement si une clause du bail la
+      prévoit ; la hausse est plafonnée par l'évolution sur un an de l'indice de référence des
+      loyers (IRL). La révision est interdite pour un logement classé F ou G au DPE (bail signé ou
+      renouvelé depuis le 24 août 2022, en métropole).
+    key_facts:
+      - "Révision annuelle seulement si une clause du bail la prévoit"
+      - "Hausse plafonnée par l'évolution annuelle de l'IRL"
+      - "Révision interdite pour un logement classé F ou G"
+    expected_docs: [F1311, F1165]
+    evidence:
+      - doc_id: F1165
+        quote: "Révision annuelle du loyer, si une clause du bail la prévoit"
+      - doc_id: F1311
+        quote: "L'augmentation annuelle du loyer est plafonnée par l'évolution sur un an de l'IRL."
+      - doc_id: F1311
+        quote: "lorsque le bail est signé, renouvelé ou tacitement reconduit depuis le 24 août 2022, et qu'il concerne un logement classé F ou G"
+    origin: drafted_reviewed
+    notes: >-
+      The F1165 table row for this rule has a merged cell that the loader currently drops
+      (see project log, open point on table cell spans): the rendered row wrongly shows
+      "Interdit" under the furnished column. Evidence quotes only the cell text.
+
+  - id: q050
+    question: "Combien de temps à l'avance mon propriétaire doit-il me prévenir s'il veut récupérer son logement ?"
+    category: ambiguous
+    split: test
+    expected_answer: >-
+      Cela dépend du bail. Pour un logement vide, le propriétaire doit donner congé au moins
+      6 mois avant l'échéance, et pour un motif autorisé (reprise pour habiter, pour vendre, ou
+      motif légitime et sérieux). Pour un meublé, au moins 3 mois avant l'échéance, pour les
+      mêmes motifs. Pour un bail mobilité, il n'y a pas de congé à donner.
+    key_facts:
+      - "Logement vide : au moins 6 mois avant l'échéance"
+      - "Meublé : au moins 3 mois avant l'échéance"
+      - "Motif obligatoire (reprise pour habiter, pour vendre, motif légitime et sérieux)"
+      - "Bail mobilité : pas de congé à donner"
+    expected_docs: [F1165]
+    evidence:
+      - doc_id: F1165
+        quote: "Congé à donner avec un délai de préavis d'au moins 6 mois"
+      - doc_id: F1165
+        quote: "Congé à donner avec un délai de préavis d'au moins 3 mois"
+      - doc_id: F1165
+        quote: "reprise pour habiter, reprise pour vendre, ou motif légitime et sérieux"
+      - doc_id: F1165
+        quote: "Pas de congé à donner ni de délai de préavis à respecter"
+    origin: drafted_reviewed

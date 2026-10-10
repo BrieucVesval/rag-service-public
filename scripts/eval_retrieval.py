@@ -22,8 +22,8 @@ from rag.chunking.fixed import FixedSizeChunker
 from rag.config import get_settings
 from rag.evaluation.experiment import make_run_info, write_run
 from rag.evaluation.golden_set import Split, load_golden_set
+from rag.evaluation.grouping import OVERALL
 from rag.evaluation.retrieval_eval import (
-    OVERALL,
     RetrievalSummary,
     evaluate_retrieval,
     summarize_by_group,

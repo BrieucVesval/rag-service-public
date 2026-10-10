@@ -30,3 +30,11 @@ def test_resolve_citations_flags_numbers_outside_context(
 
     assert [c.number for c in citations] == [2]
     assert invalid == [0, 7]
+
+
+def test_strip_citations_keeps_french_spacing() -> None:
+    from rag.generation.citations import strip_citations
+
+    assert strip_citations("Trois mois [1][2], sauf exception [3] : voir [4, 5].") == (
+        "Trois mois, sauf exception : voir."
+    )

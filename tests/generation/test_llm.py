@@ -59,3 +59,15 @@ def test_generate_joins_chunked_content() -> None:
 def test_generate_without_choice_raises() -> None:
     with pytest.raises(RuntimeError, match="no message"):
         make_llm(FakeChatAPI("x", choices=False)).generate("s", "u")
+
+
+def test_text_mode_by_default_json_mode_on_request() -> None:
+    chat = FakeChatAPI('{"ok": true}')
+    make_llm(chat).generate("s", "u")
+    assert chat.kwargs["response_format"] is None
+
+    client: Any = SimpleNamespace(chat=chat)
+    limiter = RateLimiter(60_000, clock=lambda: 0.0, sleep=lambda _: None)
+    judge = MistralLLM(client, "judge", 0.0, 256, 7, limiter, json_output=True)
+    judge.generate("s", "u")
+    assert chat.kwargs["response_format"].type == "json_object"

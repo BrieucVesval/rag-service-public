@@ -102,7 +102,7 @@ def check_against_corpus(golden: GoldenSet, documents: Mapping[str, Document]) -
                 problems.append(f"{item.id}: expected doc {doc_id} not in corpus")
         for evidence in item.evidence:
             document = documents.get(evidence.doc_id)
-            if document is not None and _normalize(evidence.quote) not in _normalize(document.text):
+            if document is not None and not quote_in_text(evidence.quote, document.text):
                 problems.append(
                     f"{item.id}: quote not found in {evidence.doc_id}: {evidence.quote!r}"
                 )
@@ -114,9 +114,14 @@ def composition(golden: GoldenSet) -> Counter[tuple[str, str]]:
     return Counter((item.category.value, item.split.value) for item in golden.questions)
 
 
-def _normalize(text: str) -> str:
+def normalize_text(text: str) -> str:
     """Whitespace-insensitive and case-insensitive matching, typographic apostrophes unified."""
     return _WHITESPACE.sub(" ", text.replace("’", "'")).strip().lower()
+
+
+def quote_in_text(quote: str, text: str) -> bool:
+    """True if the quote appears in the text, ignoring whitespace, case and apostrophe style."""
+    return normalize_text(quote) in normalize_text(text)
 
 
 # French function words of 4+ letters, ignored when measuring lexical overlap.
@@ -172,7 +177,7 @@ def content_words(text: str) -> set[str]:
     """Lower-cased words of 4+ letters that are not French function words."""
     return {
         word
-        for word in _WORD.findall(_normalize(text))
+        for word in _WORD.findall(normalize_text(text))
         if len(word) >= _MIN_WORD_LENGTH and word not in _STOPWORDS
     }
 

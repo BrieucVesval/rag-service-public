@@ -231,7 +231,7 @@ Newest entries at the bottom. Each entry: date, phase, what, why (alternatives c
 ### 6b — 50 questions drafted, validated and rebalanced
 
 - **Date**: 2026-10-09
-- **What**: 50 questions in `data/golden_set/golden_set.yaml`, in 5 batches: 20 lookup, 12 multi-hop, 10 unanswerable, 8 ambiguous; 30 dev / 20 test with the same proportions. 128 verbatim evidence quotes, all found in the corpus by `scripts/validate_golden_set.py`.
+- **What**: 50 questions in `data/golden_set/golden_set.yaml`, in 5 batches: 20 lookup, 12 multi-hop, 10 unanswerable, 8 ambiguous; 30 dev / 20 test with the same proportions. 109 verbatim evidence quotes (113 key facts), all found in the corpus by `scripts/validate_golden_set.py`. (Corrected on 2026-10-10: this entry first said 128, a miscount found while building the evaluation harness.)
 - **Review**: the user chose to trust the drafted questions without line-by-line review ("le but étant d'avoir un benchmark le plus fiable possible, avec le moins de biais"). Bias controls were therefore made mechanical and measured instead of relying on human review:
   - **Evidence quotes**: every key fact is backed by a verbatim quote checked against the fiche text.
   - **Lexical overlap with fiche titles** (`title_overlap`: share of the question's content words found in the expected fiche's title), reported by the validator. First pass: mean 0.19, one question at 0.75 (q046, rephrased). Final: **mean 0.16, max 0.40**.
@@ -271,7 +271,7 @@ Newest entries at the bottom. Each entry: date, phase, what, why (alternatives c
   - Merged header vs. two header rows: one explicit name per column, at the cost of longer labels.
   - Rejected for now: linearizing each row into sentences ("Révision du loyer – bail meublé : …"). Very readable for an LLM but verbose and changes every table; a possible chunking experiment later.
 - **Result**:
-  - Re-ingestion: 333 documents, 0 parser warnings, word statistics unchanged (median 1,303, total 802,413: repeated cells add characters within tables, the word count script is per document text… see note below); **exactly the 17 expected fiches changed**, only their `text` field. Characters added per fiche: F33453 +2,853, F31290 +1,957, F1351 +1,924, F31601 +753, F2315 +615, F2559 +503, F21051 +490, F1165 +368, F35083 +208, F929 +208, F34825 +203, F1317 +156, F1219 +132, F17709 +132, F36961 +130, F35323 +46, F35784 +32. Corpus total 4,857,991 → 4,868,701 characters (+10,710, +0.22%).
+  - Re-ingestion: 333 documents, 0 parser warnings, total words 800,548 → 802,413 (+1,865), median unchanged (1,303); **exactly the 17 expected fiches changed**, only their `text` field. Characters added per fiche: F33453 +2,853, F31290 +1,957, F1351 +1,924, F31601 +753, F2315 +615, F2559 +503, F21051 +490, F1165 +368, F35083 +208, F929 +208, F34825 +203, F1317 +156, F1219 +132, F17709 +132, F36961 +130, F35323 +46, F35784 +32. Corpus total 4,857,991 → 4,868,701 characters (+10,710, +0.22%).
   - Before / after (F1165, comparison table):
     ```
     before | Révision du loyer en cours de bail | Révision annuelle du loyer, si une clause du bail la prévoit | Interdit |  |
@@ -286,7 +286,9 @@ Newest entries at the bottom. Each entry: date, phase, what, why (alternatives c
     ```
   - Re-indexing: 2,832 chunks (was 2,828), 1,740,254 tokens, 109 s, cost 0. **242 chunks changed (8.5%)** although only 5% of fiches changed: with fixed-size chunking, inserting text shifts every later window of the fiche.
   - F1165 checked in the Chroma index (`F1165:fixed:0001`): `| Révision du loyer en cours de bail | Révision annuelle … | Révision annuelle … | Interdit |`.
-  - Golden set: all 128 evidence quotes still found; q049's note updated.
+  - Golden set: all 109 evidence quotes still found ("All checks passed"); composition and bias indicators unchanged (title overlap mean 0.16, max 0.40; 20/28 sub-themes); q049's note updated.
+  - Run times: re-ingestion a few seconds; rebuild 109 s of embedding (1 min 52 s wall clock including chunking and Chroma writes).
+  - Checks: 78 unit tests pass, `ruff check` and `mypy src` clean.
 - **Incident**: the first rebuild failed after 142 s with `RemoteProtocolError: Server disconnected without sending a response` (Mistral API), after SDK retries. No harm done: `build_index.py` embeds everything before `store.reset()`, so the previous index stayed intact; the second run succeeded.
 - **Production pitfalls**:
   - Any upstream change (loader, chunking) makes everything downstream stale: processed documents, chunks, embeddings, and later the BM25 index. Rebuilding everything is fine here (free, ~2 min); with paid embeddings, re-embed only chunks whose content hash changed (incremental indexing).
@@ -301,3 +303,63 @@ Newest entries at the bottom. Each entry: date, phase, what, why (alternatives c
   ```
 - **Files**: `src/rag/ingestion/service_public.py`, `tests/ingestion/test_service_public.py`, `data/golden_set/golden_set.yaml` (q049 note), `docs/project_log.md`, `docs/project_overview.md`
 - **Open points**: incremental indexing (content hashes); resumable embedding runs; the evaluation harness and v0 baseline are next.
+
+## Step 8 — Evaluation harness
+
+- **Goal**: turn the golden set into numbers. Every later change (chunking, hybrid search, reranking, prompts, models) is judged by the difference it makes on these numbers, measured the same way.
+- **Sub-steps**: 8a retrieval metrics (no LLM, deterministic, free); 8b generation metrics with an LLM judge (correctness, faithfulness, citation accuracy).
+
+### 8a — Retrieval metrics and the v0 retrieval baseline
+
+- **Date**: 2026-10-10
+- **What**:
+  - `src/rag/evaluation/retrieval_metrics.py` (pure functions on ranked chunks): `recall_at_k`, `all_found_at_k`, `reciprocal_rank` / `first_relevant_rank`, `evidence_recall_at_k`, `first_rank_per_doc`.
+  - `src/rag/evaluation/retrieval_eval.py`: `evaluate_retrieval` (one query per question at the deepest k), per-question `QuestionRetrieval` (hits with chunk IDs and scores, metrics, top similarity, latency) and `summarize_by_group` (overall, per category, per split).
+  - `src/rag/evaluation/experiment.py`: `RunInfo` and `write_run`: one JSON file per run in `experiments/`, named `<UTC time>-<kind>-<retriever>-<collection>-<split>.json`, never overwritten.
+  - `src/rag/provenance.py`: `git_commit`, `git_is_dirty`, `file_sha256`; shared with `scripts/build_index.py`, which now also records `git_dirty` in the index metadata.
+  - `scripts/eval_retrieval.py --split dev|test|all` (default `dev`).
+  - New settings: `golden_set_path`, `experiments_dir`, `eval_k_values` (default `[1, 3, 5, 10]`, `retrieval_top_k` always added). `validate_golden_set.py` reads the golden set path from settings.
+  - `pyproject.toml`: `pythonpath = ["."]` for pytest, so tests share helpers (`tests.conftest.make_retrieved`, golden set item factories).
+- **Metrics** (answerable questions only; unanswerable ones have no expected fiche):
+  - **Recall@k**: share of expected fiches with at least one chunk in the top-k chunks. Recall@5 is the headline: top-5 is what the LLM receives.
+  - **All@k**: share of questions whose expected fiches are *all* in the top-k. The one that matters for multi-hop questions.
+  - **MRR** (mean reciprocal rank): mean of 1 / rank of the first chunk from an expected fiche (1.0 if first, 0.5 if second, 0 if absent in the top-10).
+  - **Evidence recall@k**: share of the golden set's evidence quotes found verbatim (whitespace/case-insensitive) in a top-k chunk of their fiche. Fiche-level recall says "the right fiche was found"; evidence recall says "the sentence that answers was given to the LLM".
+  - **Top similarity**: kept for every question, including unanswerable ones, to test whether retrieval scores can flag out-of-corpus questions.
+- **Why** (and alternatives):
+  - Fiche level rather than chunk level: chunk IDs change with the chunking strategy, fiche IDs do not, so strategies can be compared on the same golden set without re-annotating. Evidence recall recovers the passage-level view without chunk annotations.
+  - One query per question at k = 10, all cut-offs computed from the same ranking: 1 embedding call per question instead of one per k.
+  - The test split stays held out: default `dev`, `test` only for final reported numbers, to avoid tuning the pipeline on the exam.
+  - Each run file records the git commit and whether the tree had uncommitted changes, the full settings (API key excluded), the index metadata (strategy, model, build date and commit), the golden set SHA-256 and corpus snapshot. Any number in the case study can be traced back to the code, config, index and exam that produced it.
+  - Not used: libraries such as `ragas` or `ranx`. These metrics are ~60 lines, fully tested and transparent; a library would add a dependency and hide the definitions that will be discussed in interviews.
+- **Check of the evidence-recall metric**: a quote cut by a chunk boundary could never be found, which would bias the metric. Verified: all 109 quotes fit inside at least one chunk (median 82 characters, max 171, chunk overlap 200). A zero evidence recall is therefore a real retrieval miss.
+- **Result: v0 retrieval baseline, dev split** (30 questions, 24 answerable; dense `mistral-embed`, fixed chunks 2,000/200, top-k 5; run `experiments/20261010T162454Z-retrieval-dense-fixed-2000-200-mistral-embed-dev.json`, 36 s, cost 0):
+
+  | Group | n | R@1 | R@3 | R@5 | R@10 | All@5 | Evid@5 | MRR | Top sim. |
+  |---|---|---|---|---|---|---|---|---|---|
+  | All (answerable) | 24 | 0.42 | 0.67 | **0.67** | 0.73 | 0.54 | **0.50** | 0.65 | 0.872 (all 30) |
+  | Lookup | 12 | 0.58 | 0.83 | 0.83 | 0.92 | 0.83 | 0.65 | 0.69 | 0.885 |
+  | Multi-hop | 7 | 0.36 | 0.50 | 0.50 | 0.57 | **0.14** | 0.60 | 0.76 | 0.896 |
+  | Ambiguous | 5 | 0.10 | 0.50 | 0.50 | 0.50 | 0.40 | **0.00** | 0.40 | 0.874 |
+  | Unanswerable | 6 | – | – | – | – | – | – | – | 0.815 |
+
+- **Analysis**:
+  - **One answerable question in three does not get its fiche into the LLM's context** (R@5 0.67), and only half of the answering sentences reach it (Evid@5 0.50). This bounds what generation can achieve: the LLM cannot cite what it was not given.
+  - **Multi-hop is the weak spot**: only 1 of 7 questions gets all its fiches in the top-5 (All@5 0.14). A single query embedding lands near one of the topics, not all of them. Candidate fixes: more diverse results (one fiche filling several slots), query decomposition, hybrid search.
+  - **Right fiche, wrong passage**: in q012, q045, q046 and q048 the fiche is in the top-5 but not the chunk with the answer (Evid@5 0, sometimes found at rank 6–10). Long fiches split into many 2,000-character chunks make this frequent; structure-aware chunking and reranking target it.
+  - **Lack of diversity confirmed**: top-5 contains on average 2.77 distinct fiches out of 5 chunks; 2 questions get a top-5 from a single fiche.
+  - **Total misses** (no expected fiche in top-5): q008 (lookup), q017 (lookup, expected fiche at rank 6), q024 (multi-hop, 0/3 fiches; neighbouring rent fiches F1310/F1314 retrieved instead of F1311 *révision du loyer*), q043 and q049 (ambiguous; both expect F1165, the generic lease comparison table, which is never retrieved).
+  - **Out-of-corpus signal**: unanswerable questions have top similarity 0.788–0.840 (mean 0.815), answerable ones 0.846–0.917 (mean 0.886). On dev, a threshold around 0.843 separates them perfectly. With 6 vs. 24 questions this is a hint, not a calibrated threshold: to be validated on test before any use in the confidence score (step 5 of the roadmap).
+  - **Latency**: 1.2 s mean per query (max 2.4 s), but this is dominated by the client-side rate limiter (50 requests/minute = one request every 1.2 s), not by the API or Chroma. Latency must be measured without the limiter to be meaningful; noted for the latency breakdown.
+- **Clean reference run**: the first run (`20261010T162454Z-…`) was made with uncommitted changes (the harness itself) and is flagged `git_dirty: true`. It was re-run on commit `47e657e` with a clean tree: **`experiments/20261010T162928Z-retrieval-dense-fixed-2000-200-mistral-embed-dev.json` is the v0 retrieval reference**, with identical metrics. The index itself was built during step 7 before its commit (index metadata commit `2b6900d`; `git_dirty` was not recorded then, it is now).
+- **Embeddings are not bit-deterministic**: between the two runs, 6 of 30 question embeddings returned by `mistral-embed` differed slightly (max cosine score drift 0.0056; the other 24 were identical). Two rankings changed (q038 from rank 2, q040 at rank 10, both unanswerable, so no metric changed): a swap happens whenever two chunks are closer than the drift (gap 0.0027 for q038). Likely cause: non-deterministic batched inference on the provider side. Consequences:
+  - A difference between two configurations smaller than run-to-run noise is not a result. Before claiming a gain, compare it with the variation between repeated runs of the same configuration.
+  - Caching question embeddings (keyed by model and text) would make evaluation runs exactly repeatable and cut API calls; to consider when comparing retrievers that share the same embeddings (dense vs. hybrid).
+- **Tests**: `tests/evaluation/test_retrieval_metrics.py` (8: rank per fiche, recall counts fiches not chunks, all-found, reciprocal rank ×3, evidence recall with tolerant matching, evidence from another fiche ignored), `tests/evaluation/test_retrieval_eval.py` (4: single query at deepest k, unanswerable keeps top score, summary over answerable only, grouping), `tests/evaluation/test_experiment.py` (3: run ID, provenance without secrets, JSON written and never overwritten), `tests/test_provenance.py` (3), `tests/test_config.py` (+2: k values sorted with top-k, must be positive). 98 tests pass, no network.
+- **Reproduce**:
+  ```bash
+  uv run python scripts/eval_retrieval.py              # dev split
+  uv run python scripts/eval_retrieval.py --split test # final numbers only
+  ```
+- **Files**: `src/rag/evaluation/retrieval_metrics.py`, `src/rag/evaluation/retrieval_eval.py`, `src/rag/evaluation/experiment.py`, `src/rag/provenance.py`, `src/rag/config.py`, `src/rag/indexing/chroma_store.py` (`metadata` property), `src/rag/evaluation/golden_set.py` (`quote_in_text` made public), `scripts/eval_retrieval.py`, `scripts/build_index.py`, `scripts/validate_golden_set.py`, `tests/evaluation/`, `tests/test_provenance.py`, `tests/test_config.py`, `.env.example`, `pyproject.toml`, `experiments/`
+- **Open points**: query-embedding cache for repeatable runs; 8b generation metrics (LLM judge, choice of judge model); latency measured without the rate limiter; out-of-corpus threshold to validate on test.

@@ -32,3 +32,19 @@ def test_overlap_must_be_smaller_than_chunk_size(monkeypatch: pytest.MonkeyPatch
 
     with pytest.raises(ValidationError, match="chunk_overlap"):
         Settings(_env_file=None)  # type: ignore[call-arg]
+
+
+def test_eval_k_values_are_sorted_and_include_top_k(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("RAG_EVAL_K_VALUES", "[10, 1, 3]")
+    monkeypatch.setenv("RAG_RETRIEVAL_TOP_K", "5")
+
+    settings = Settings(_env_file=None)  # type: ignore[call-arg]
+
+    assert settings.eval_k_values == [1, 3, 5, 10]
+
+
+def test_eval_k_values_must_be_positive(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("RAG_EVAL_K_VALUES", "[0, 5]")
+
+    with pytest.raises(ValidationError):
+        Settings(_env_file=None)  # type: ignore[call-arg]

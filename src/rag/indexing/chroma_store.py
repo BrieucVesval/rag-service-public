@@ -54,6 +54,11 @@ class ChromaStore:
     def count(self) -> int:
         return self._collection.count()
 
+    @property
+    def metadata(self) -> dict[str, Any]:
+        """How and from what the collection was built (set by scripts/build_index.py)."""
+        return dict(self._collection.metadata or {})
+
     def reset(self) -> None:
         """Drop every chunk of this collection (used before a full rebuild)."""
         if self.name in {collection.name for collection in self._client.list_collections()}:

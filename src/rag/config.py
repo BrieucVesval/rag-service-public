@@ -46,10 +46,23 @@ class Settings(BaseSettings):
     llm_max_tokens: int = Field(default=1024, gt=0)
     llm_random_seed: int = 0
 
+    # Evaluation. Retrieval metrics are reported at several cut-offs from a single query
+    # per question (the deepest k is retrieved once); retrieval_top_k is always included.
+    golden_set_path: Path = Path("data/golden_set/golden_set.yaml")
+    experiments_dir: Path = Path("experiments")
+    eval_k_values: list[int] = Field(default_factory=lambda: [1, 3, 5, 10])
+
     @model_validator(mode="after")
     def _overlap_smaller_than_chunk(self) -> "Settings":
         if self.chunk_overlap >= self.chunk_size:
             raise ValueError("chunk_overlap must be smaller than chunk_size")
+        return self
+
+    @model_validator(mode="after")
+    def _valid_k_values(self) -> "Settings":
+        if not self.eval_k_values or min(self.eval_k_values) <= 0:
+            raise ValueError("eval_k_values must be a non-empty list of positive integers")
+        self.eval_k_values = sorted({*self.eval_k_values, self.retrieval_top_k})
         return self
 
 

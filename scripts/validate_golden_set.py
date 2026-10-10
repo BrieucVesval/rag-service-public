@@ -26,7 +26,6 @@ from rag.evaluation.golden_set import (
 from rag.ingestion.processed import MANIFEST_NAME, load_processed_documents
 from rag.models import Document
 
-DEFAULT_PATH = Path("data/golden_set/golden_set.yaml")
 # Questions sharing more than this share of content words with a fiche title are listed.
 HIGH_TITLE_OVERLAP = 0.5
 SUBTHEME_LEVEL = 2  # breadcrumb: Accueil > Logement > sub-theme > ...
@@ -67,11 +66,12 @@ def print_bias_report(golden: GoldenSet, documents: dict[str, Document]) -> None
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    parser.add_argument("--path", type=Path, default=DEFAULT_PATH)
+    parser.add_argument("--path", type=Path, help="Defaults to settings.golden_set_path")
     args = parser.parse_args()
 
     settings = get_settings()
-    golden = load_golden_set(args.path)
+    path = args.path or settings.golden_set_path
+    golden = load_golden_set(path)
     documents = {doc.doc_id: doc for doc in load_processed_documents(settings.processed_dir)}
     problems = check_against_corpus(golden, documents)
 
@@ -85,7 +85,7 @@ def main() -> int:
             )
 
     counts = composition(golden)
-    print(f"{len(golden.questions)} questions ({args.path})")
+    print(f"{len(golden.questions)} questions ({path})")
     print(f"{'category':<14}{'dev':>5}{'test':>6}{'total':>7}")
     for category in Category:
         dev, test = counts[(category, Split.DEV)], counts[(category, Split.TEST)]

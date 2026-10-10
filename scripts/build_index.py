@@ -11,7 +11,6 @@ Usage:
 import argparse
 import json
 import logging
-import subprocess
 import sys
 import time
 from datetime import UTC, datetime
@@ -21,16 +20,7 @@ from rag.config import get_settings
 from rag.indexing.chroma_store import ChromaStore, collection_name
 from rag.indexing.embedder import MistralEmbedder
 from rag.ingestion.processed import MANIFEST_NAME, load_processed_documents
-
-
-def git_commit() -> str:
-    try:
-        result = subprocess.run(
-            ["git", "rev-parse", "--short", "HEAD"], capture_output=True, text=True, check=True
-        )
-    except (OSError, subprocess.CalledProcessError):
-        return "unknown"
-    return result.stdout.strip()
+from rag.provenance import git_commit, git_is_dirty
 
 
 def main() -> int:
@@ -49,6 +39,7 @@ def main() -> int:
 
     manifest_path = settings.processed_dir / MANIFEST_NAME
     processed_manifest = json.loads(manifest_path.read_text()) if manifest_path.exists() else {}
+    dirty = git_is_dirty()
     metadata = {
         "chunk_strategy": chunker.name,
         "chunk_size": settings.chunk_size,
@@ -56,6 +47,8 @@ def main() -> int:
         "embedding_model": settings.embedding_model,
         "built_at": datetime.now(UTC).isoformat(timespec="seconds"),
         "git_commit": git_commit(),
+        # Chroma metadata cannot hold None: "unknown" when git is unavailable.
+        "git_dirty": "unknown" if dirty is None else str(dirty).lower(),
         "processed_at": processed_manifest.get("processed_at", "unknown"),
         "raw_downloaded_at": processed_manifest.get("raw_downloaded_at") or "unknown",
     }

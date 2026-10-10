@@ -7,8 +7,8 @@ Details, alternatives and reproduction commands are in [`project_log.md`](projec
 
 ## Status
 
-- **Current**: v0 works end to end (question → dense retrieval → cited answer); golden set of 50 questions ready; merged table cells fixed in the loader.
-- **Next**: the evaluation harness (Recall@5, MRR, LLM judge) and the v0 baseline.
+- **Current**: retrieval evaluation in place; v0 retrieval baseline measured on dev (Recall@5 0.67, evidence recall@5 0.50, MRR 0.65).
+- **Next**: generation metrics with an LLM judge (correctness, faithfulness, citation accuracy), then the full v0 baseline.
 
 ## Roadmap
 
@@ -17,8 +17,8 @@ Details, alternatives and reproduction commands are in [`project_log.md`](projec
 | 1 | Corpus and ingestion (incl. merged table cells fix) | ✅ Done |
 | 2 | Minimal end-to-end RAG (v0) | ✅ Done |
 | 3 | Golden set (50 questions) | ✅ Done |
-| 3b | Evaluation harness | ⬜ Next |
-| 4 | Baseline evaluation of v0 | ⬜ |
+| 3b | Evaluation harness | 🟡 Retrieval done, generation next |
+| 4 | Baseline evaluation of v0 | 🟡 Retrieval measured |
 | 5 | Citation verification (LLM-as-judge) and confidence score | ⬜ |
 | 6 | Chunking comparison (fixed vs. headers vs. semantic) | ⬜ |
 | 7 | Hybrid retrieval (dense + BM25, RRF) and reranking | ⬜ |
@@ -40,15 +40,18 @@ Details, alternatives and reproduction commands are in [`project_log.md`](projec
 | 2026-10-09 | 5c. Retrieval + generation | Top-5 dense retrieval, grounded prompt, citations, `ask` CLI | `ministral-14b` (Mistral Small not available on the free plan) |
 | 2026-10-09 | 6. Golden set | 50 questions (20 lookup, 12 multi-hop, 10 unanswerable, 8 ambiguous), 30 dev / 20 test | Every reference fact backed by a verbatim quote checked automatically; bias measured (title overlap 0.16, 20/28 sub-themes) |
 | 2026-10-10 | 7. Table cells fix | Merged cells (colspan/rowspan) laid out on a grid, two-row headers merged; 17 fiches, 242 chunks re-embedded | Repeat merged text in every covered cell so each row reads on its own |
+| 2026-10-10 | 8a. Retrieval evaluation | Recall@k, All@k, MRR, evidence recall; one JSON run file per run with commit, config, index and golden set hash. v0 dev: R@5 0.67, Evid@5 0.50, multi-hop All@5 0.14 | Fiche-level metrics (independent of chunking) plus evidence recall for the passage level |
 
 ## Key numbers so far
 
 - Corpus: 333 documents, 800k words, median 1,303 words per fiche, max ~40k.
 - Index: 2,832 chunks, vectors of 1,024 dimensions, 61 MB. Full rebuild: 1.74M tokens, ~2 min, cost 0.
 - v0 on 4 manual questions: 1 correct, 1 correct refusal, 2 with unsupported claims. Latency 2–5 s, cost 0.
-- Golden set: 50 questions, 128 verified evidence quotes, mean title overlap 0.16, 20/28 sub-themes covered.
+- Golden set: 50 questions, 109 verified evidence quotes (113 key facts), mean title overlap 0.16, 20/28 sub-themes covered.
 - Merged table cells: 405 in 90 tables (17 fiches); the fix changed 5% of fiches but 8.5% of chunks.
-- Tests: 78 unit tests, no network.
+- v0 retrieval, dev (24 answerable questions): Recall@5 0.67 (lookup 0.83, multi-hop 0.50, ambiguous 0.50), evidence recall@5 0.50, MRR 0.65, multi-hop All@5 0.14; 2.77 distinct fiches per top-5.
+- Top similarity: answerable 0.846–0.917, unanswerable 0.788–0.840 (dev).
+- Tests: 98 unit tests, no network.
 
 ## Key lessons
 
@@ -59,3 +62,5 @@ Details, alternatives and reproduction commands are in [`project_log.md`](projec
 5. **Building the benchmark found a data bug**: merged table cells were dropped by the loader, shifting columns (fixed in step 7). Looking closely at the data while writing reference answers is a quality check in itself.
 6. **Bias in an evaluation set can be measured, not only discussed**: lexical overlap with titles and topic coverage are reported by the validator.
 7. **An upstream fix invalidates everything downstream, and fixed-size chunking amplifies it**: a loader fix on 17 fiches changed 242 chunks, because inserted text shifts every later window. Incremental indexing needs content hashes, and structure-aware chunking would confine changes to their section.
+8. **Finding the right fiche is not finding the right passage**: v0 retrieves an expected fiche for 67% of questions but only 50% of the answering sentences. Measuring both (fiche recall and evidence recall) separates a search problem from a chunking problem.
+9. **Check the metric before trusting it**: evidence recall could have been biased by quotes cut at chunk boundaries; all 109 quotes were verified to fit in a chunk. Building the harness also exposed a miscount in the docs (128 quotes reported, 109 real).

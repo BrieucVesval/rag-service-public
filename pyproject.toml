@@ -22,6 +22,7 @@ packages = ["src/rag"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+pythonpath = ["."]  # lets tests share helpers, e.g. `from tests.conftest import make_retrieved`
 addopts = "-m 'not integration'"
 markers = ["integration: tests hitting real APIs (cost money, deselected by default)"]
 

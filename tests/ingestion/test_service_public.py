@@ -156,6 +156,79 @@ def test_table_with_caption_header_and_list_cell() -> None:
     ) in doc.text
 
 
+def table_lines(body: str) -> list[str]:
+    """Render a <Tableau> body and return its Markdown table lines."""
+    text = parse_fiche(make_fiche(f"<Texte><Tableau>{body}</Tableau></Texte>")).text
+    return [line for line in text.splitlines() if line.startswith("|")]
+
+
+def cell(text: str, attrs: str = "") -> str:
+    return f"<Cellule {attrs}><Paragraphe>{text}</Paragraphe></Cellule>"
+
+
+def test_table_colspan_repeats_text_in_covered_columns() -> None:
+    # F1165: the revision rule covers both "vide" and "meublé"; "Interdit" is for "mobilité".
+    body = f"""
+      <Rangée type="header">{cell("Règle")}{cell("Vide")}{cell("Meublé")}{cell("Mobilité")}</Rangée>
+      <Rangée type="normal">{cell("Révision")}{cell("Annuelle", 'fusionHorizontale="2"')}
+        {cell("Interdit")}</Rangée>"""
+
+    assert table_lines(body)[2] == "| Révision | Annuelle | Annuelle | Interdit |"
+
+
+def test_table_rowspan_repeats_text_in_covered_rows() -> None:
+    body = f"""
+      <Rangée type="header">{cell("Foyer")}{cell("Cas")}{cell("Plafond")}</Rangée>
+      <Rangée type="normal">{cell("1", 'fusionVerticale="2"')}{cell("Seul")}{cell("10 €")}</Rangée>
+      <Rangée type="normal">{cell("Handicapé")}{cell("20 €")}</Rangée>
+      <Rangée type="normal">{cell("2")}{cell("Couple")}{cell("30 €")}</Rangée>"""
+
+    assert table_lines(body)[2:] == [
+        "| 1 | Seul | 10 € |",
+        "| 1 | Handicapé | 20 € |",
+        "| 2 | Couple | 30 € |",
+    ]
+
+
+def test_table_rowspan_in_middle_column() -> None:
+    body = f"""
+      <Rangée type="header">{cell("A")}{cell("B")}{cell("C")}</Rangée>
+      <Rangée type="normal">{cell("a1")}{cell("b", 'fusionVerticale="2"')}{cell("c1")}</Rangée>
+      <Rangée type="normal">{cell("a2")}{cell("c2")}</Rangée>"""
+
+    assert table_lines(body)[2:] == ["| a1 | b | c1 |", "| a2 | b | c2 |"]
+
+
+def test_table_two_header_rows_are_merged_with_both_spans() -> None:
+    # F2559 / F34825: an empty corner cell spanning two rows, a group label spanning columns.
+    body = f"""
+      <Rangée type="header"><Cellule fusionVerticale="2"/>
+        {cell("Revenu", 'fusionHorizontale="2"')}</Rangée>
+      <Rangée type="header">{cell("Paris")}{cell("Province")}</Rangée>
+      <Rangée type="normal">{cell("Seul")}{cell("35 €")}{cell("30 €")}</Rangée>
+      <Rangée type="normal">{cell("Couple", 'fusionHorizontale="2" fusionVerticale="2"')}
+        {cell("52 €")}</Rangée>
+      <Rangée type="normal">{cell("40 €")}</Rangée>"""
+
+    assert table_lines(body) == [
+        "|  | Revenu – Paris | Revenu – Province |",
+        "| --- | --- | --- |",
+        "| Seul | 35 € | 30 € |",
+        "| Couple | Couple | 52 € |",
+        "| Couple | Couple | 40 € |",
+    ]
+
+
+def test_table_header_label_spanning_two_rows_is_not_duplicated() -> None:
+    body = f"""
+      <Rangée type="header">{cell("Foyer", 'fusionVerticale="2"')}
+        {cell("Île-de-France", 'fusionHorizontale="2"')}</Rangée>
+      <Rangée type="header">{cell("Paris")}{cell("Autre")}</Rangée>
+      <Rangée type="normal">{cell("1")}{cell("10 €")}{cell("9 €")}</Rangée>"""
+
+    assert table_lines(body)[0] == "| Foyer | Île-de-France – Paris | Île-de-France – Autre |"
+
+
 def test_callout_is_rendered_as_blockquote() -> None:
     body = """<Texte><ASavoir><Titre>À savoir</Titre>
       <Paragraphe>Point important.</Paragraphe>

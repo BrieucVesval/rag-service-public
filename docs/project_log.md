@@ -250,3 +250,54 @@ Newest entries at the bottom. Each entry: date, phase, what, why (alternatives c
 - **Reproduce**: `uv run python scripts/validate_golden_set.py`
 - **Files**: `data/golden_set/golden_set.yaml`, `src/rag/evaluation/golden_set.py`, `scripts/validate_golden_set.py`, `tests/evaluation/test_golden_set.py`
 - **Open points**: fix merged table cells in the loader; evaluation harness and v0 baseline; optional handwritten questions.
+
+## Step 7 — Fix merged table cells in the loader
+
+- **Date**: 2026-10-10
+- **Phase**: 1 (ingestion quality)
+- **Problem**: the XML loader ignored the span attributes of `<Cellule>`: `fusionHorizontale="N"` (colspan) and `fusionVerticale="N"` (rowspan). Cells after a merged cell shifted left, so values ended up under the wrong column. In F1165, "Révision du loyer en cours de bail" showed "Interdit" under the furnished lease instead of the mobility lease, and the "Locataire" row put the mobility-lease conditions under the furnished lease. The LLM was given wrong table facts with nothing to flag them.
+- **Inspection of the corpus** (`data/raw/service_public/`, 297 tables):
+  - 405 merged cells in 90 tables across 17 fiches: 300 rowspan, 101 colspan, 4 both; spans from 2 to 5. Two are empty self-closing cells (`<Cellule fusionVerticale="2"/>`, the top-left corner of a two-row header).
+  - Span values: rowspan 2 (280), rowspan 3 (19), rowspan 5 (1); colspan 2 (90), colspan 3 (8), colspan 4 (3); colspan 2 + rowspan 2 (4, in F1351, F2559, F31290, F34825).
+  - Row types: 1,579 normal rows, 365 header rows; 229 tables with one header row, 68 with two.
+  - Semantics are the same as HTML: covered cells are absent from the XML. Rebuilding the grid with this rule gives exactly the number of declared `<Colonne>` for every row of all 90 tables.
+  - 68 tables have two header rows (never header rows mid-table), and that is where most spans are, e.g. F929: "Île-de-France" spanning "Paris ou ville limitrophe" and "Autre commune". Markdown tables allow a single header row, so the second one was rendered as a data row.
+- **What**:
+  - `_table_grid` lays cells out on a grid (standard HTML algorithm: skip columns still occupied by a rowspan from above, place each cell over its colspan × rowspan). The merged cell's text is **repeated in every covered position**.
+  - Leading header rows are **merged column by column** into one Markdown header: distinct labels joined with " – " ("Île-de-France – Paris ou ville limitrophe de Paris"; a label spanning both rows is not duplicated).
+  - Malformed span values fall back to 1 instead of raising.
+- **Why** (and alternatives):
+  - Repeat the text vs. leave covered cells empty (or a "↑" marker): repetition makes every row self-contained, which matters for the LLM and for chunking (a chunk can start mid-table and lose the row above). Cost: duplicated text (+10.7k characters, +0.22% of the corpus) and a repeated term weighs slightly more in BM25. An empty cell would be visually faithful but ambiguous ("empty" vs. "not applicable").
+  - Merged header vs. two header rows: one explicit name per column, at the cost of longer labels.
+  - Rejected for now: linearizing each row into sentences ("Révision du loyer – bail meublé : …"). Very readable for an LLM but verbose and changes every table; a possible chunking experiment later.
+- **Result**:
+  - Re-ingestion: 333 documents, 0 parser warnings, word statistics unchanged (median 1,303, total 802,413: repeated cells add characters within tables, the word count script is per document text… see note below); **exactly the 17 expected fiches changed**, only their `text` field. Characters added per fiche: F33453 +2,853, F31290 +1,957, F1351 +1,924, F31601 +753, F2315 +615, F2559 +503, F21051 +490, F1165 +368, F35083 +208, F929 +208, F34825 +203, F1317 +156, F1219 +132, F17709 +132, F36961 +130, F35323 +46, F35784 +32. Corpus total 4,857,991 → 4,868,701 characters (+10,710, +0.22%).
+  - Before / after (F1165, comparison table):
+    ```
+    before | Révision du loyer en cours de bail | Révision annuelle du loyer, si une clause du bail la prévoit | Interdit |  |
+    after  | Révision du loyer en cours de bail | Révision annuelle du loyer, si une clause du bail la prévoit | Révision annuelle du loyer, si une clause du bail la prévoit | Interdit |
+    before | Locataire | Toute personne peut être locataire | Le locataire doit être dans au moins 1 des situations suivantes : … |  |
+    after  | Locataire | Toute personne peut être locataire | Toute personne peut être locataire | Le locataire doit être dans au moins 1 des situations suivantes : … |
+    ```
+  - Before / after (F929, two-row header):
+    ```
+    before | Nombre de personnes | Types de personnes | Île-de-France | Autre région |  |
+    after  | Nombre de personnes | Types de personnes | Île-de-France – Paris ou ville limitrophe de Paris | Île-de-France – Autre commune | Autre région |
+    ```
+  - Re-indexing: 2,832 chunks (was 2,828), 1,740,254 tokens, 109 s, cost 0. **242 chunks changed (8.5%)** although only 5% of fiches changed: with fixed-size chunking, inserting text shifts every later window of the fiche.
+  - F1165 checked in the Chroma index (`F1165:fixed:0001`): `| Révision du loyer en cours de bail | Révision annuelle … | Révision annuelle … | Interdit |`.
+  - Golden set: all 128 evidence quotes still found; q049's note updated.
+- **Incident**: the first rebuild failed after 142 s with `RemoteProtocolError: Server disconnected without sending a response` (Mistral API), after SDK retries. No harm done: `build_index.py` embeds everything before `store.reset()`, so the previous index stayed intact; the second run succeeded.
+- **Production pitfalls**:
+  - Any upstream change (loader, chunking) makes everything downstream stale: processed documents, chunks, embeddings, and later the BM25 index. Rebuilding everything is fine here (free, ~2 min); with paid embeddings, re-embed only chunks whose content hash changed (incremental indexing).
+  - Fixed-size chunking amplifies small edits (17 fiches → 242 chunks). Structure-aware chunking (by headers) would confine a change to its section, a point in favour of it for incremental updates.
+  - Embedding the whole corpus in one all-or-nothing pass: a network failure near the end loses the whole run. Batching with checkpoints (or upserting batch by batch into a staging collection) would make rebuilds resumable.
+- **Tests**: 5 new tests in `tests/ingestion/test_service_public.py` (colspan on the F1165 case, rowspan in first and middle column, colspan + rowspan with an empty self-closing corner and two header rows, no duplicated label in a merged header). 78 tests pass.
+- **Reproduce**:
+  ```bash
+  uv run python scripts/ingest.py --overwrite
+  uv run python scripts/build_index.py --rebuild
+  uv run python scripts/validate_golden_set.py
+  ```
+- **Files**: `src/rag/ingestion/service_public.py`, `tests/ingestion/test_service_public.py`, `data/golden_set/golden_set.yaml` (q049 note), `docs/project_log.md`, `docs/project_overview.md`
+- **Open points**: incremental indexing (content hashes); resumable embedding runs; the evaluation harness and v0 baseline are next.

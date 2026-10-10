@@ -7,14 +7,14 @@ Details, alternatives and reproduction commands are in [`project_log.md`](projec
 
 ## Status
 
-- **Current**: v0 works end to end (question → dense retrieval → cited answer); golden set of 50 questions ready.
-- **Next**: fix merged table cells in the loader, then the evaluation harness and the v0 baseline.
+- **Current**: v0 works end to end (question → dense retrieval → cited answer); golden set of 50 questions ready; merged table cells fixed in the loader.
+- **Next**: the evaluation harness (Recall@5, MRR, LLM judge) and the v0 baseline.
 
 ## Roadmap
 
 | # | Milestone | Status |
 |---|---|---|
-| 1 | Corpus and ingestion | ✅ Done |
+| 1 | Corpus and ingestion (incl. merged table cells fix) | ✅ Done |
 | 2 | Minimal end-to-end RAG (v0) | ✅ Done |
 | 3 | Golden set (50 questions) | ✅ Done |
 | 3b | Evaluation harness | ⬜ Next |
@@ -39,14 +39,16 @@ Details, alternatives and reproduction commands are in [`project_log.md`](projec
 | 2026-10-09 | 5b. Indexing | `mistral-embed` vectors in ChromaDB (1.7M tokens, 155 s) | One collection per configuration, batch size measured |
 | 2026-10-09 | 5c. Retrieval + generation | Top-5 dense retrieval, grounded prompt, citations, `ask` CLI | `ministral-14b` (Mistral Small not available on the free plan) |
 | 2026-10-09 | 6. Golden set | 50 questions (20 lookup, 12 multi-hop, 10 unanswerable, 8 ambiguous), 30 dev / 20 test | Every reference fact backed by a verbatim quote checked automatically; bias measured (title overlap 0.16, 20/28 sub-themes) |
+| 2026-10-10 | 7. Table cells fix | Merged cells (colspan/rowspan) laid out on a grid, two-row headers merged; 17 fiches, 242 chunks re-embedded | Repeat merged text in every covered cell so each row reads on its own |
 
 ## Key numbers so far
 
 - Corpus: 333 documents, 800k words, median 1,303 words per fiche, max ~40k.
-- Index: 2,828 chunks, vectors of 1,024 dimensions, 61 MB.
+- Index: 2,832 chunks, vectors of 1,024 dimensions, 61 MB. Full rebuild: 1.74M tokens, ~2 min, cost 0.
 - v0 on 4 manual questions: 1 correct, 1 correct refusal, 2 with unsupported claims. Latency 2–5 s, cost 0.
 - Golden set: 50 questions, 128 verified evidence quotes, mean title overlap 0.16, 20/28 sub-themes covered.
-- Tests: 73 unit tests, no network.
+- Merged table cells: 405 in 90 tables (17 fiches); the fix changed 5% of fiches but 8.5% of chunks.
+- Tests: 78 unit tests, no network.
 
 ## Key lessons
 
@@ -54,5 +56,6 @@ Details, alternatives and reproduction commands are in [`project_log.md`](projec
 2. **Embedding similarities are compressed** (`mistral-embed`: 0.85–0.88 in-domain). Thresholds must be calibrated on this model, not copied; out-of-domain questions still show a gap (~0.80).
 3. **Measure limits instead of guessing them**: embedding batch size and free-plan model access were both found by testing the API, not from documentation.
 4. **One fiche often fills the whole top-5**, which limits context diversity.
-5. **Building the benchmark found a data bug**: merged table cells are dropped by the loader, shifting columns. Looking closely at the data while writing reference answers is a quality check in itself.
+5. **Building the benchmark found a data bug**: merged table cells were dropped by the loader, shifting columns (fixed in step 7). Looking closely at the data while writing reference answers is a quality check in itself.
 6. **Bias in an evaluation set can be measured, not only discussed**: lexical overlap with titles and topic coverage are reported by the validator.
+7. **An upstream fix invalidates everything downstream, and fixed-size chunking amplifies it**: a loader fix on 17 fiches changed 242 chunks, because inserted text shifts every later window. Incremental indexing needs content hashes, and structure-aware chunking would confine changes to their section.

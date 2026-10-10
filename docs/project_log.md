@@ -363,3 +363,52 @@ Newest entries at the bottom. Each entry: date, phase, what, why (alternatives c
   ```
 - **Files**: `src/rag/evaluation/retrieval_metrics.py`, `src/rag/evaluation/retrieval_eval.py`, `src/rag/evaluation/experiment.py`, `src/rag/provenance.py`, `src/rag/config.py`, `src/rag/indexing/chroma_store.py` (`metadata` property), `src/rag/evaluation/golden_set.py` (`quote_in_text` made public), `scripts/eval_retrieval.py`, `scripts/build_index.py`, `scripts/validate_golden_set.py`, `tests/evaluation/`, `tests/test_provenance.py`, `tests/test_config.py`, `.env.example`, `pyproject.toml`, `experiments/`
 - **Open points**: query-embedding cache for repeatable runs; 8b generation metrics (LLM judge, choice of judge model); latency measured without the rate limiter; out-of-corpus threshold to validate on test.
+
+### 8b — Generation metrics
+
+#### 8b-0 — Choice of the judge model (measured access and cost)
+
+- **Date**: 2026-10-10
+- **Free plan probe** (1-token calls, reading `x-ratelimit-*` headers): `mistral-large-latest` → 403; `mistral-medium` (3, 3.5, 2604, latest), `magistral-medium`, `magistral-small`, `mistral-small` (2603, latest), `mistral-vibe-cli` → 429 with a limit of 0 requests/minute; only the Ministral family (3B/8B/14B) and `codestral-2508` (a code model) are callable. No judge stronger than the generator was available for free.
+- **Why a stronger judge than the generator**: a model judging its own outputs tends to be lenient with its own errors (self-preference bias). The judge's task (does this short passage support this claim?) is simpler than answering, but a weaker or identical judge still bounds metric quality.
+- **Prices** (docs.mistral.ai/inference/pricing, 2026-10-10, USD per million tokens, input / output): Mistral Large 3 (`mistral-large-2512`) 0.50 / 1.50; Mistral Medium 3.5 1.50 / 7.50; Mistral Small 4 0.15 / 0.60; Ministral 14B 0.20 / 0.20. A third-party aggregator listed Large 3 at 2 / 5; the official page was used.
+- **Estimate per judge run on dev** (30 questions; ~150k input and ~20k output tokens, doubled for safety): Large 3 ~$0.21, Medium 3.5 ~$0.75, Small 4 ~$0.07; ~25 runs over the project: Large 3 ~$5.
+- **Decision**: **Mistral Large 3 as judge** (largest model, ~4x cheaper than Medium 3.5). Same provider family as the generator, so self-preference is reduced, not removed; judge agreement with human labels is measured in 8b-3. The judge stays swappable (a Claude judge is a later comparison).
+- **Switching to the paid plan**: adding credits was not enough (`403 tier_not_allowed: "This model is not available in your subscription tier"`); the subscription had to be upgraded in the console. After the upgrade: `mistral-large-2512` 15 requests/min, 400k tokens/min; `ministral-14b-2512` went from 30 to 120 requests/min and 1.5M tokens/min. **Every call is now billed** (generation and embeddings included), hence token usage and cost recorded in each run. A spending limit is set in the console.
+
+#### 8b-1 — Generation run and LLM-free metrics
+
+- **Date**: 2026-10-10
+- **What**:
+  - `src/rag/evaluation/generation_eval.py`: `evaluate_generation` runs the RAG pipeline on golden set questions; `QuestionGeneration` keeps the full `Answer` (text, citations, refusal flag, the retrieved chunks *with their text*, tokens, latency) or the error; `summarize` / `summarize_by_group`.
+  - `scripts/eval_generation.py --split dev|test|all`: writes a `generation` run file (provenance as in 8a, plus `generation_cost_usd`).
+  - `src/rag/costs.py` (`cost_usd`) and settings `llm_input_usd_per_mtok`, `llm_output_usd_per_mtok` (Ministral 14B list prices).
+  - `src/rag/evaluation/grouping.py`: grouping overall / per category / per split, shared with the retrieval evaluation.
+- **Metrics** (no LLM):
+  - **Refusal accuracy**: share of questions where the refuse/answer decision matches the golden set (refuse iff unanswerable). Split into **correct refusal rate** (unanswerable questions refused) and **false refusal rate** (answerable questions refused).
+  - **Citation structure**, on non-refused answers: share of answers without any citation, share with a citation pointing to no context block, mean number of distinct citations.
+  - Tokens, cost from measured usage, latency.
+- **Why** (and alternatives):
+  - **Generate once, judge later**: the run file stores the context texts given to the LLM, so the judge (8b-2) scores saved answers. Several judges or judge prompts can be compared on exactly the same answers, and generation is paid once. Alternative: generate and judge in one loop (simpler, but every judge change regenerates, and LLM sampling noise mixes with judge differences).
+  - **A failed call does not lose the run**: errors are recorded per question and excluded from the metrics (counted separately). Lesson from the step 7 rebuild failure.
+  - A partial refusal ("Je ne trouve pas cette information … pour votre situation spécifique. Cependant, …") is not a refusal: only the exact refusal sentence at the start counts, as in v0.
+- **Result: v0 generation, dev split** (30 questions; `ministral-14b-2512`, dense top-5; run `experiments/20261010T170359Z-generation-ministral-14b-2512-dense-fixed-2000-200-mistral-embed-dev.json`, commit `c265666`, clean tree; 123 s; 78,431 prompt + 5,671 completion tokens; **generation cost $0.0168**, embeddings not counted):
+
+  | Group | n | Refusal acc. | Correct refusals | False refusals | Uncited | Invalid citation | Citations / answer | Latency |
+  |---|---|---|---|---|---|---|---|---|
+  | All | 30 | **0.93** | **6/6** | **2/24 (0.08)** | 0.00 | 0.00 | 3.55 | 4.1 s |
+  | Lookup | 12 | 1.00 | – | 0/12 | 0.00 | 0.00 | 3.00 | 3.7 s |
+  | Multi-hop | 7 | 0.86 | – | 1/7 | 0.00 | 0.00 | 3.83 | 5.5 s |
+  | Ambiguous | 5 | 0.80 | – | 1/5 | 0.00 | 0.00 | 4.75 | 5.6 s |
+  | Unanswerable | 6 | 1.00 | 6/6 | – | – | – | – | 2.1 s |
+
+- **Analysis**:
+  - **Refusals are good on dev**: all 6 unanswerable questions refused, including the near-domain traps (Bordeaux sale prices, property-tax amounts) and the false premise. Structurally, citations are clean: every non-refused answer cites, no citation points to a missing block. Whether citations *support* the claims is the judge's job (8b-2); v0's known failure mode is exactly there (step 5c).
+  - **The two false refusals differ**: q043 (ambiguous) is refused when no expected fiche was retrieved (R@5 = 0): given its context, refusing is the right behavior, and the error belongs to retrieval. q022 (multi-hop) is refused although one of its two fiches was retrieved: a genuine generation error, against rule 5 of the prompt (answer the part the sources cover).
+  - **Answers without any expected fiche in context**: q008, q017, q024 and q049 are answered although retrieval recall@5 was 0. Either the model fills gaps (unfaithful), or the answer also exists in other fiches (q024's answer about the rent freeze for G-rated homes plausibly comes from neighbouring rent fiches). If the latter, `expected_docs` is incomplete (it lists the fiches the quotes were taken from, not every fiche containing the answer) and fiche-level recall underestimates retrieval. The judge's correctness and faithfulness scores will tell which.
+  - **Latency is inflated by our own rate limiters** (embedding 50/min, generation 25/min, kept from the free plan although the paid plan allows 120/min for the generator). Mean 4.1 s; 2.1 s for refusals (short output).
+  - The top-5 contexts are identical to those of the reference retrieval run for all questions checked (embedding drift did not change them this time).
+- **Tests**: `tests/evaluation/test_generation_eval.py` (5: answer and expectation kept, failed call recorded not raised, refusal and citation metrics, rates None without denominator, grouping), `tests/test_costs.py` (2). 105 tests pass, no network.
+- **Reproduce**: `uv run python scripts/eval_generation.py` (about $0.02 on dev)
+- **Files**: `src/rag/evaluation/generation_eval.py`, `src/rag/evaluation/grouping.py`, `src/rag/evaluation/retrieval_eval.py`, `src/rag/costs.py`, `src/rag/config.py`, `scripts/eval_generation.py`, `scripts/eval_retrieval.py`, `tests/evaluation/test_generation_eval.py`, `tests/evaluation/test_retrieval_eval.py`, `tests/test_costs.py`, `.env.example`
+- **Open points**: 8b-2 LLM judge (correctness, faithfulness, citation accuracy) on this saved run; raise rate limits to the paid plan's; check whether answers without expected fiches are supported by other fiches (incomplete `expected_docs`).

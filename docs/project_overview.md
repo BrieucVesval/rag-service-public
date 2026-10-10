@@ -8,8 +8,8 @@ Interview talking points, grouped by theme, are in [`interview_notes.md`](interv
 
 ## Status
 
-- **Current**: retrieval evaluation in place; v0 retrieval baseline measured on dev (Recall@5 0.67, evidence recall@5 0.50, MRR 0.65).
-- **Next**: generation metrics with an LLM judge (correctness, faithfulness, citation accuracy), then the full v0 baseline.
+- **Current**: retrieval and LLM-free generation metrics measured on dev for v0 (Recall@5 0.67, evidence recall@5 0.50; refusal accuracy 0.93, 6/6 correct refusals). Paid Mistral plan with Mistral Large 3 as judge.
+- **Next**: LLM judge (correctness, faithfulness, citation accuracy) on the saved generation run, then judge validation against human labels.
 
 ## Roadmap
 
@@ -18,8 +18,8 @@ Interview talking points, grouped by theme, are in [`interview_notes.md`](interv
 | 1 | Corpus and ingestion (incl. merged table cells fix) | ✅ Done |
 | 2 | Minimal end-to-end RAG (v0) | ✅ Done |
 | 3 | Golden set (50 questions) | ✅ Done |
-| 3b | Evaluation harness | 🟡 Retrieval done, generation next |
-| 4 | Baseline evaluation of v0 | 🟡 Retrieval measured |
+| 3b | Evaluation harness | 🟡 Retrieval and LLM-free generation done, judge next |
+| 4 | Baseline evaluation of v0 | 🟡 Retrieval and refusals measured |
 | 5 | Citation verification (LLM-as-judge) and confidence score | ⬜ |
 | 6 | Chunking comparison (fixed vs. headers vs. semantic) | ⬜ |
 | 7 | Hybrid retrieval (dense + BM25, RRF) and reranking | ⬜ |
@@ -42,6 +42,8 @@ Interview talking points, grouped by theme, are in [`interview_notes.md`](interv
 | 2026-10-09 | 6. Golden set | 50 questions (20 lookup, 12 multi-hop, 10 unanswerable, 8 ambiguous), 30 dev / 20 test | Every reference fact backed by a verbatim quote checked automatically; bias measured (title overlap 0.16, 20/28 sub-themes) |
 | 2026-10-10 | 7. Table cells fix | Merged cells (colspan/rowspan) laid out on a grid, two-row headers merged; 17 fiches, 242 chunks re-embedded | Repeat merged text in every covered cell so each row reads on its own |
 | 2026-10-10 | 8a. Retrieval evaluation | Recall@k, All@k, MRR, evidence recall; one JSON run file per run with commit, config, index and golden set hash. v0 dev: R@5 0.67, Evid@5 0.50, multi-hop All@5 0.14 | Fiche-level metrics (independent of chunking) plus evidence recall for the passage level |
+| 2026-10-10 | 8b-0. Judge choice | Free plan has no model stronger than the generator; prices compared; switched to the paid plan | Mistral Large 3 as judge (~$0.21 per dev run, ~4x cheaper than Medium 3.5) |
+| 2026-10-10 | 8b-1. Generation run | Answers + contexts saved for later judging; refusal accuracy 0.93, 6/6 correct refusals, 2/24 false refusals; cost $0.017 | Generate once, judge later: judges compared on identical answers |
 
 ## Key numbers so far
 
@@ -52,7 +54,8 @@ Interview talking points, grouped by theme, are in [`interview_notes.md`](interv
 - Merged table cells: 405 in 90 tables (17 fiches); the fix changed 5% of fiches but 8.5% of chunks.
 - v0 retrieval, dev (24 answerable questions): Recall@5 0.67 (lookup 0.83, multi-hop 0.50, ambiguous 0.50), evidence recall@5 0.50, MRR 0.65, multi-hop All@5 0.14; 2.77 distinct fiches per top-5.
 - Top similarity: answerable 0.846–0.917, unanswerable 0.788–0.840 (dev).
-- Tests: 98 unit tests, no network.
+- v0 generation, dev: refusal accuracy 0.93 (6/6 unanswerable refused, 2/24 false refusals), 3.55 citations per answer, no invalid citation; $0.017 for 30 answers (78k prompt tokens).
+- Tests: 105 unit tests, no network.
 
 ## Key lessons
 

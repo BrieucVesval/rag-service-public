@@ -2,6 +2,7 @@
 
 High-level view of how the project evolves: one line per step, key decisions, key numbers.
 Details, alternatives and reproduction commands are in [`project_log.md`](project_log.md).
+Interview talking points, grouped by theme, are in [`interview_notes.md`](interview_notes.md).
 
 **Goal**: a production-grade RAG over French public-service fiches (Service-Public.gouv.fr, *Logement*), where every choice is measured: faithfulness, citation accuracy, hybrid vs. dense retrieval, chunking strategies.
 

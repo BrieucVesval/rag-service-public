@@ -512,3 +512,83 @@ Newest entries at the bottom. Each entry: date, phase, what, why (alternatives c
   ```
 - **Files**: `src/rag/evaluation/judge_labels.py`, `scripts/export_judge_sample.py`, `scripts/export_adjudication.py`, `scripts/judge_agreement.py`, `scripts/adjudicate_panel.py`, `tests/evaluation/test_judge_labels.py`, `data/judge_labels/`
 - **Open points**: human labels on the 24 adjudication items (the only validity check still missing; ~20 min); a less lenient sentence judge before the verification step: one call per sentence, majority over repeated runs, or a judge from another family (Claude), each to be measured against this label set; repeated judging to put error bars on comparisons.
+
+## Step 9 — Header-based chunking
+
+- **Date**: 2026-10-12
+- **Phase**: retrieval improvements (roadmap 6, chunking comparison)
+- **Goal**: a second strategy behind the `Chunker` protocol that cuts along the Markdown heading tree, measured against the v0 baseline (fixed 2,000 / 200, dense top-5) with the same metrics, the same dev split and the same reference runs.
+- **What**:
+  - `src/rag/chunking/headers.py`: `HeaderChunker(max_size, overlap, prefix)`. A section (heading + everything below it) that fits in `max_size` characters is one chunk; otherwise its own text and its sub-sections are packed in order into chunks of at most `max_size`, never mixing branches, and an oversized sub-section is chunked recursively. Own text that alone is too long is split at blank lines; an oversized table is split by rows with caption and header row repeated; a row or paragraph still too long falls back to the fixed-size windows (with overlap). A short lead (a heading and its intro sentence) joins the start of the next sub-section when both fit, instead of becoming a chunk of its own.
+  - Heading path (`Fiche title > Chapter > Cas : …`) stored in the new `Chunk.heading_path` field; with `prefix="path"` it is prepended to the chunk text (embedded and shown to the LLM), with `"none"` it is not (ablation). `start_char` / `end_char` locate the passage in the document; `text` may add context around it (documented on `Chunk`).
+  - `src/rag/chunking/factory.py`: `make_chunker(settings)`, `index_collection_name(settings)`; the four scripts (build index, retrieval eval, generation eval, `ask`) now use the configured strategy. Chunkers expose a `label` (strategy + options that change the texts) used in the collection name: `fixed-2000-200-mistral-embed` (unchanged), `headers-path-…`, `headers-none-…`. Index metadata records `chunk_label`.
+  - Settings `chunk_strategy` (`fixed` | `headers`, default `fixed` so v0 stays reproducible) and `header_prefix` (`path` | `none`). `chunk_size` / `chunk_overlap` are reused: maximum passage size (heading path not counted) and the overlap of the fallback windows.
+  - `scripts/chunk_stats.py` (no API call): chunk counts and sizes, and the step 8a check that every golden set evidence quote fits inside a chunk of its fiche.
+  - `FixedSizeChunker.windows` and `trim_span` made public for reuse.
+- **Why** (and alternatives):
+  - **Same maximum size as the baseline (2,000)** so only the boundaries change, not the size. Side effect, measured: header chunks are smaller on average, so the top-5 carries less text.
+  - **Tree packing rather than one chunk per heading**: in this corpus the text between two headings has a median of 394 characters (24% under 200), while 37% of `##` sections exceed 2,000. One chunk per heading gives crumbs without context; whole `##` sections are often too big.
+  - **No minimum size**: a minimum would force merging unrelated cases ("À Paris" with "Cas général"), the worst error for administrative rules. Short leads are attached to what follows instead (no extra threshold).
+  - **Heading path in the text**: a passage under "Cas : En cas de violences" says nothing about "logement vide" or who gives notice. Cost: +7% text to embed, and every chunk of a fiche repeats its title (risk of one fiche filling the top-5). Measured with the `none` ablation.
+  - **Own implementation instead of LangChain** (CLAUDE.md planned LangChain splitters for this strategy): `MarkdownHeaderTextSplitter` splits by heading but neither packs along the tree, nor handles tables, nor returns exact offsets (needed for evidence recall and citations). ~250 lines, tested, no dependency.
+- **Chunk statistics** (`scripts/chunk_stats.py`, 333 documents):
+
+  | | Fixed (v0) | Headers + path | Headers, no path |
+  |---|---|---|---|
+  | Chunks | 2,832 | 3,664 | 3,664 |
+  | Chunk text, median (p10 / max) chars | 1,997 (1,754 / 2,000) | 1,536 (607 / 2,234) | 1,449 (502 / 2,000) |
+  | Chunks under 200 chars | 1 | 14 (0.4%) | 70 (1.9%) |
+  | Passages over 2,000 chars | 0 | 0 | 0 |
+  | Evidence quotes inside one chunk | 109/109 | **109/109** | **109/109** |
+  | Embedded tokens (measured) | 1.74M | 1.70M | 1.58M |
+
+  Heading path: median 104 characters, max 357. Less text in total than fixed despite the path, because there is no overlap between sections.
+- **Bugs found by the statistics before paying for embeddings** (each fixed and covered by a test):
+  1. Single table rows longer than 2,000 characters (F35323, F1169) produced passages of up to 3,604 characters: such a row is now split into windows, each with caption and header.
+  2. Heading-only chunks ("## Dom", "## Logement vide"): a heading whose first sub-section is too big stayed alone. 97 chunks under 200 characters → 14 after attaching short leads to the next sub-section.
+  3. Bold captions separated from their table, and bold sub-titles left at the end of an oversized section: a caption now forms one block with its table, and the tail of a split section can join the next sub-section.
+  - Known limits: a heading directly followed by a single paragraph longer than `max_size` stays alone (rare; documented by a test); when a table row is split, the table header appears only as repeated context, not in the offsets (one fiche, F35323). The remaining small chunks are genuine short sections ("La CDC intervient gratuitement.") or headings whose content was a dropped media ("infographie").
+- **Cost**: indexing 1,698,096 + 1,577,798 tokens (~$0.33 at mistral-embed's $0.10 / M, last known list price; not shown on the public pricing page on 2026-10-12), 147 s and 141 s; generation $0.014; judge $0.054. Total ~$0.40.
+- **Result: retrieval, dev split** (24 answerable questions; commit `084d300`, clean tree; the fixed baseline was re-run the same day to measure embedding drift):
+
+  | Configuration | R@1 | R@3 | R@5 | R@10 | All@5 | Evid@5 | MRR | Distinct fiches / top-5 | Top-5 context |
+  |---|---|---|---|---|---|---|---|---|---|
+  | Fixed (re-run, identical to the 8a reference) | 0.42 | 0.67 | 0.67 | 0.73 | 0.54 | 0.50 | 0.65 | 2.73 | 9,066 chars |
+  | **Headers + path** | 0.42 | 0.65 | **0.72** | 0.76 | 0.58 | **0.54** | **0.67** | 2.70 | 6,901 chars (−24%) |
+  | Headers, no path | 0.33 | 0.54 | 0.71 | 0.73 | 0.58 | 0.51 | 0.56 | 2.73 | 6,515 chars |
+
+  Runs: `experiments/20261012T214654Z-retrieval-dense-fixed-…-dev.json`, `20261012T214730Z-retrieval-dense-headers-path-…-dev.json`, `20261012T214807Z-retrieval-dense-headers-none-…-dev.json`.
+  - **No embedding drift this time**: the baseline re-run reproduces the reference exactly, so differences come from the chunking. With 24 questions, one question weighs ~0.04 in R@5.
+  - **Headers + path vs. fixed, per question**: 5 gains — q017 (fiche from rank 6 to 3), q049 (F1165, the large lease comparison table, retrieved for the first time: table split by rows with the header repeated), q024 (1 of 3 fiches found), q005 and q014 (answering passage now retrieved, Evid@5 0.33 → 1.0 and 0.5 → 1.0); 3 losses, all multi-hop — q022 (fiche from rank 1 to 9), q021 (Evid@5 0.83 → 0.50), q028 (1.0 → 0.50). 5 vs. 3 is a trend, not a significant result (sign test p ≈ 0.7). Total misses (no expected fiche in top-5): 5 → 3.
+  - **Ablation of the heading path**: fiche-level recall is the same with or without it (R@5 0.71 vs. 0.72), but ranking is worse without it: R@1 0.42 → 0.33, R@3 0.65 → 0.54, MRR 0.67 → 0.56. The path mostly helps put the right chunk first. Again 2–3 questions.
+  - Diversity unchanged (2.70 distinct fiches per top-5): the repeated fiche title did not make one fiche fill the top-5 more often in aggregate (single-fiche top-5: 2 → 3 questions).
+- **Result: generation and judge, dev split** (headers + path; generation run `experiments/20261012T215326Z-generation-ministral-14b-2512-dense-headers-path-2000-200-mistral-embed-dev.json`, judge run `experiments/20261012T215546Z-judge-mistral-large-2512-on-20261012T215326Z.json`, both commit `084d300`, clean tree):
+
+  | | Refusal acc. | False refusals | Prompt tokens | Faithfulness | Citation acc. | Citation prec. | Correctness |
+  |---|---|---|---|---|---|---|---|
+  | v0 fixed (8b) | 0.93 | 2/24 | 78k | 0.93 | 0.95 | 0.80 | 0.61 |
+  | Headers + path | 0.93 | 2/24 | 63k (−19%) | 0.99 | 0.97 | 0.86 | **0.61** |
+
+  Correctness by category: lookup 0.70 → 0.72, multi-hop 0.54 → 0.52, ambiguous 0.50 → 0.47.
+- **Analysis**:
+  - **Correctness is unchanged (0.61 = 0.61)**, under the ~3-point noise threshold of 8b-3, but the per-question picture is not "nothing happened": correctness changed on 12 of 24 questions, **6 up and 6 down**.
+  - **4 of the 6 gains follow the retrieval gains**: q005, q014, q017, q049 (passage or fiche now retrieved). q008 and q026 improve with unchanged retrieval metrics.
+  - **Only 1 of the 6 losses has a retrieval cause** (q028, passage lost); q001, q004, q032, q045, q046 drop with unchanged R@5 and Evid@5. q022 lost its fiche (rank 1 → 9) but was refused in both runs (correctness 0, the same 2 false refusals q022 and q043 as v0). Two causes, checked in the saved contexts:
+    - *Passage lost by smaller chunks* (multi-hop): q028 — the chunk saying who installs the smoke detector is no longer in the top-5 and the generator wrote "the tenant" (judged `contradicted`); a 2,000-character window used to cover several facts by chance.
+    - *Generator variability with the evidence in context*: q001 — the 750 € fine is in context block [1] but the answer omits it; q004 similar. Changing the surrounding chunks changes what a 14B model picks up, even when the answering passage is present. This is the generation-side noise any retrieval change carries.
+  - Correctness when an expected fiche is retrieved stays 0.67 (now 21 questions instead of 19); the 3 remaining misses score 0.17.
+  - **Faithfulness 0.93 → 0.99 and citation precision 0.80 → 0.86** are consistent with the heading path telling the generator which case applies, but sentence-level verdicts are not reliable (8b-3: the judge misses a third of unsupported sentences): a trend, not a claim.
+  - **Cheaper**: −19% prompt tokens per question for the same correctness.
+- **Conclusion**: header-based chunking with the heading path is **kept as the chunking for the next steps** — better fiche recall (0.67 → 0.72, misses 5 → 3), better ranking than without the path, 19% fewer prompt tokens, changes confined to their section for incremental indexing — **but it does not measurably improve answer correctness on dev**. The bottleneck moved slightly: fiche-level retrieval is better, multi-hop passage coverage is worse with smaller chunks. Hybrid search and reranking (next steps) act on exactly these two points; reranking in particular benefits from finer, labelled chunks.
+- **Tests**: `tests/chunking/test_headers.py` (11: single chunk with metadata, sibling packing at headings, nested path and lead joining the next case, prefix none, long paragraph windows, long table by rows with caption/header, long row, coverage + order + deterministic IDs on a mixed document, heading tree with skipped levels, invalid sizes), `tests/chunking/test_factory.py` (3: default and baseline collection name unchanged, headers label in collection name, unknown strategy rejected). 152 tests pass, no network.
+- **Reproduce**:
+  ```bash
+  RAG_CHUNK_STRATEGY=headers uv run python scripts/chunk_stats.py              # free
+  RAG_CHUNK_STRATEGY=headers RAG_HEADER_PREFIX=path uv run python scripts/build_index.py   # ~$0.17
+  RAG_CHUNK_STRATEGY=headers RAG_HEADER_PREFIX=none uv run python scripts/build_index.py   # ~$0.16
+  RAG_CHUNK_STRATEGY=headers RAG_HEADER_PREFIX=path uv run python scripts/eval_retrieval.py
+  RAG_CHUNK_STRATEGY=headers RAG_HEADER_PREFIX=path uv run python scripts/eval_generation.py   # ~$0.02
+  uv run python scripts/judge_generation.py experiments/<generation run>.json                  # ~$0.06
+  ```
+- **Files**: `src/rag/chunking/headers.py`, `src/rag/chunking/factory.py`, `src/rag/chunking/fixed.py`, `src/rag/chunking/base.py`, `src/rag/models.py`, `src/rag/config.py`, `.env.example`, `scripts/chunk_stats.py`, `scripts/build_index.py`, `scripts/eval_retrieval.py`, `scripts/eval_generation.py`, `scripts/ask.py`, `tests/chunking/`, `experiments/`
+- **Open points**: make `headers` the default strategy (kept `fixed` until this step is reviewed); with n = 24, repeated generation runs would separate generator variability from the chunking effect; content-hash chunk IDs for incremental indexing (positions still shift when a section is inserted); `mistral-embed` price to confirm in the console; a smaller `max_size` and the semantic strategy remain to compare.

@@ -9,8 +9,11 @@ from rag.evaluation.judge_eval import (
     SentenceJudgment,
 )
 from rag.evaluation.judge_labels import (
+    LabelItem,
+    adjudication_sample,
     agreement,
     binarize,
+    judge_verdicts,
     parse_labels,
     render_label_file,
     select_sample,
@@ -125,3 +128,23 @@ def test_binarize_keeps_the_metric_decision() -> None:
         ("supported", "not_supported"),
         ("not_supported", "not_supported"),
     ]
+
+
+def test_judge_verdicts_are_keyed_like_label_items() -> None:
+    verdicts = judge_verdicts([judgment("q001", [S, U], [FactVerdict.PARTIAL])])
+
+    assert verdicts == {"S-q001-1": "supported", "S-q001-2": "unsupported", "F-q001-1": "partial"}
+
+
+def test_adjudication_takes_all_disagreements_and_audits_some_agreements() -> None:
+    items = [LabelItem(kind="S", question_id="q001", item_id=i) for i in range(1, 7)]
+    llm = {item.key: "supported" for item in items}
+    judge = {**llm, "S-q001-2": "unsupported", "S-q001-5": "partial"}
+
+    selected = adjudication_sample(items, llm, judge, n_agreements=2, seed=0)
+
+    keys = [item.key for item in selected]
+    assert {"S-q001-2", "S-q001-5"} <= set(keys)
+    assert len(keys) == 4
+    assert keys == sorted(keys)  # question order kept: disagreements are not grouped first
+    assert adjudication_sample(items, llm, judge, 2, seed=0) == selected

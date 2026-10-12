@@ -22,22 +22,14 @@ from rag.evaluation.judge_labels import (
     Agreement,
     agreement,
     binarize,
+    judge_verdicts,
     parse_labels,
 )
 
 
-def judge_labels(path: Path) -> dict[str, str]:
-    judgments = [
-        QuestionJudgment.model_validate(r)
-        for r in json.loads(path.read_text(encoding="utf-8"))["results"]
-    ]
-    labels: dict[str, str] = {}
-    for j in judgments:
-        for s in j.sentences:
-            labels[f"{SENTENCE_PREFIX}-{j.question_id}-{s.id}"] = s.verdict.value
-        for f in j.key_facts:
-            labels[f"{FACT_PREFIX}-{j.question_id}-{f.id}"] = f.verdict.value
-    return labels
+def load_verdicts(path: Path) -> dict[str, str]:
+    data = json.loads(path.read_text(encoding="utf-8"))
+    return judge_verdicts(QuestionJudgment.model_validate(r) for r in data["results"])
 
 
 def print_agreement(title: str, result: Agreement) -> None:
@@ -60,7 +52,7 @@ def main() -> int:
         return 1
 
     for run in args.judge_runs:
-        judge = judge_labels(run)
+        judge = load_verdicts(run)
         print(f"\n{run.name}")
         for kind, positive, title in (
             (SENTENCE_PREFIX, SupportVerdict.SUPPORTED.value, "sentences"),

@@ -175,6 +175,33 @@ def parse_labels(text: str) -> tuple[dict[str, str], list[str]]:
     return labels, problems
 
 
+def judge_verdicts(judgments: Iterable[QuestionJudgment]) -> dict[str, str]:
+    """Every verdict of a judge run, keyed like label items ("S-q001-2", "F-q001-1")."""
+    verdicts: dict[str, str] = {}
+    for j in judgments:
+        for s in j.sentences:
+            verdicts[f"{SENTENCE_PREFIX}-{j.question_id}-{s.id}"] = s.verdict.value
+        for f in j.key_facts:
+            verdicts[f"{FACT_PREFIX}-{j.question_id}-{f.id}"] = f.verdict.value
+    return verdicts
+
+
+def adjudication_sample(
+    items: Sequence[LabelItem],
+    first: dict[str, str],
+    second: dict[str, str],
+    n_agreements: int,
+    seed: int,
+) -> list[LabelItem]:
+    """Items for a human to adjudicate: every disagreement between two raters, plus a
+    random audit of agreements (two LLMs can be wrong the same way). Order is kept."""
+    labelled = [item for item in items if item.key in first and item.key in second]
+    disagreements = {item.key for item in labelled if first[item.key] != second[item.key]}
+    agreements = [item.key for item in labelled if item.key not in disagreements]
+    audit = set(random.Random(seed).sample(agreements, min(n_agreements, len(agreements))))
+    return [item for item in labelled if item.key in disagreements | audit]
+
+
 class Agreement(BaseModel):
     n: int
     agreement: float

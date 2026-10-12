@@ -363,3 +363,152 @@ Newest entries at the bottom. Each entry: date, phase, what, why (alternatives c
   ```
 - **Files**: `src/rag/evaluation/retrieval_metrics.py`, `src/rag/evaluation/retrieval_eval.py`, `src/rag/evaluation/experiment.py`, `src/rag/provenance.py`, `src/rag/config.py`, `src/rag/indexing/chroma_store.py` (`metadata` property), `src/rag/evaluation/golden_set.py` (`quote_in_text` made public), `scripts/eval_retrieval.py`, `scripts/build_index.py`, `scripts/validate_golden_set.py`, `tests/evaluation/`, `tests/test_provenance.py`, `tests/test_config.py`, `.env.example`, `pyproject.toml`, `experiments/`
 - **Open points**: query-embedding cache for repeatable runs; 8b generation metrics (LLM judge, choice of judge model); latency measured without the rate limiter; out-of-corpus threshold to validate on test.
+
+### 8b — Generation metrics
+
+#### 8b-0 — Choice of the judge model (measured access and cost)
+
+- **Date**: 2026-10-10
+- **Free plan probe** (1-token calls, reading `x-ratelimit-*` headers): `mistral-large-latest` → 403; `mistral-medium` (3, 3.5, 2604, latest), `magistral-medium`, `magistral-small`, `mistral-small` (2603, latest), `mistral-vibe-cli` → 429 with a limit of 0 requests/minute; only the Ministral family (3B/8B/14B) and `codestral-2508` (a code model) are callable. No judge stronger than the generator was available for free.
+- **Why a stronger judge than the generator**: a model judging its own outputs tends to be lenient with its own errors (self-preference bias). The judge's task (does this short passage support this claim?) is simpler than answering, but a weaker or identical judge still bounds metric quality.
+- **Prices** (docs.mistral.ai/inference/pricing, 2026-10-10, USD per million tokens, input / output): Mistral Large 3 (`mistral-large-2512`) 0.50 / 1.50; Mistral Medium 3.5 1.50 / 7.50; Mistral Small 4 0.15 / 0.60; Ministral 14B 0.20 / 0.20. A third-party aggregator listed Large 3 at 2 / 5; the official page was used.
+- **Estimate per judge run on dev** (30 questions; ~150k input and ~20k output tokens, doubled for safety): Large 3 ~$0.21, Medium 3.5 ~$0.75, Small 4 ~$0.07; ~25 runs over the project: Large 3 ~$5.
+- **Decision**: **Mistral Large 3 as judge** (largest model, ~4x cheaper than Medium 3.5). Same provider family as the generator, so self-preference is reduced, not removed; judge agreement with human labels is measured in 8b-3. The judge stays swappable (a Claude judge is a later comparison).
+- **Switching to the paid plan**: adding credits was not enough (`403 tier_not_allowed: "This model is not available in your subscription tier"`); the subscription had to be upgraded in the console. After the upgrade: `mistral-large-2512` 15 requests/min, 400k tokens/min; `ministral-14b-2512` went from 30 to 120 requests/min and 1.5M tokens/min. **Every call is now billed** (generation and embeddings included), hence token usage and cost recorded in each run. A spending limit is set in the console.
+
+#### 8b-1 — Generation run and LLM-free metrics
+
+- **Date**: 2026-10-10
+- **What**:
+  - `src/rag/evaluation/generation_eval.py`: `evaluate_generation` runs the RAG pipeline on golden set questions; `QuestionGeneration` keeps the full `Answer` (text, citations, refusal flag, the retrieved chunks *with their text*, tokens, latency) or the error; `summarize` / `summarize_by_group`.
+  - `scripts/eval_generation.py --split dev|test|all`: writes a `generation` run file (provenance as in 8a, plus `generation_cost_usd`).
+  - `src/rag/costs.py` (`cost_usd`) and settings `llm_input_usd_per_mtok`, `llm_output_usd_per_mtok` (Ministral 14B list prices).
+  - `src/rag/evaluation/grouping.py`: grouping overall / per category / per split, shared with the retrieval evaluation.
+- **Metrics** (no LLM):
+  - **Refusal accuracy**: share of questions where the refuse/answer decision matches the golden set (refuse iff unanswerable). Split into **correct refusal rate** (unanswerable questions refused) and **false refusal rate** (answerable questions refused).
+  - **Citation structure**, on non-refused answers: share of answers without any citation, share with a citation pointing to no context block, mean number of distinct citations.
+  - Tokens, cost from measured usage, latency.
+- **Why** (and alternatives):
+  - **Generate once, judge later**: the run file stores the context texts given to the LLM, so the judge (8b-2) scores saved answers. Several judges or judge prompts can be compared on exactly the same answers, and generation is paid once. Alternative: generate and judge in one loop (simpler, but every judge change regenerates, and LLM sampling noise mixes with judge differences).
+  - **A failed call does not lose the run**: errors are recorded per question and excluded from the metrics (counted separately). Lesson from the step 7 rebuild failure.
+  - A partial refusal ("Je ne trouve pas cette information … pour votre situation spécifique. Cependant, …") is not a refusal: only the exact refusal sentence at the start counts, as in v0.
+- **Result: v0 generation, dev split** (30 questions; `ministral-14b-2512`, dense top-5; run `experiments/20261010T170359Z-generation-ministral-14b-2512-dense-fixed-2000-200-mistral-embed-dev.json`, commit `c265666`, clean tree; 123 s; 78,431 prompt + 5,671 completion tokens; **generation cost $0.0168**, embeddings not counted):
+
+  | Group | n | Refusal acc. | Correct refusals | False refusals | Uncited | Invalid citation | Citations / answer | Latency |
+  |---|---|---|---|---|---|---|---|---|
+  | All | 30 | **0.93** | **6/6** | **2/24 (0.08)** | 0.00 | 0.00 | 3.55 | 4.1 s |
+  | Lookup | 12 | 1.00 | – | 0/12 | 0.00 | 0.00 | 3.00 | 3.7 s |
+  | Multi-hop | 7 | 0.86 | – | 1/7 | 0.00 | 0.00 | 3.83 | 5.5 s |
+  | Ambiguous | 5 | 0.80 | – | 1/5 | 0.00 | 0.00 | 4.75 | 5.6 s |
+  | Unanswerable | 6 | 1.00 | 6/6 | – | – | – | – | 2.1 s |
+
+- **Analysis**:
+  - **Refusals are good on dev**: all 6 unanswerable questions refused, including the near-domain traps (Bordeaux sale prices, property-tax amounts) and the false premise. Structurally, citations are clean: every non-refused answer cites, no citation points to a missing block. Whether citations *support* the claims is the judge's job (8b-2); v0's known failure mode is exactly there (step 5c).
+  - **The two false refusals differ**: q043 (ambiguous) is refused when no expected fiche was retrieved (R@5 = 0): given its context, refusing is the right behavior, and the error belongs to retrieval. q022 (multi-hop) is refused although one of its two fiches was retrieved: a genuine generation error, against rule 5 of the prompt (answer the part the sources cover).
+  - **Answers without any expected fiche in context**: q008, q017, q024 and q049 are answered although retrieval recall@5 was 0. Either the model fills gaps (unfaithful), or the answer also exists in other fiches (q024's answer about the rent freeze for G-rated homes plausibly comes from neighbouring rent fiches). If the latter, `expected_docs` is incomplete (it lists the fiches the quotes were taken from, not every fiche containing the answer) and fiche-level recall underestimates retrieval. The judge's correctness and faithfulness scores will tell which.
+  - **Latency is inflated by our own rate limiters** (embedding 50/min, generation 25/min, kept from the free plan although the paid plan allows 120/min for the generator). Mean 4.1 s; 2.1 s for refusals (short output).
+  - The top-5 contexts are identical to those of the reference retrieval run for all questions checked (embedding drift did not change them this time).
+- **Tests**: `tests/evaluation/test_generation_eval.py` (5: answer and expectation kept, failed call recorded not raised, refusal and citation metrics, rates None without denominator, grouping), `tests/test_costs.py` (2). 105 tests pass, no network.
+- **Reproduce**: `uv run python scripts/eval_generation.py` (about $0.02 on dev)
+- **Files**: `src/rag/evaluation/generation_eval.py`, `src/rag/evaluation/grouping.py`, `src/rag/evaluation/retrieval_eval.py`, `src/rag/costs.py`, `src/rag/config.py`, `scripts/eval_generation.py`, `scripts/eval_retrieval.py`, `tests/evaluation/test_generation_eval.py`, `tests/evaluation/test_retrieval_eval.py`, `tests/test_costs.py`, `.env.example`
+- **Open points**: 8b-2 LLM judge (correctness, faithfulness, citation accuracy) on this saved run; raise rate limits to the paid plan's; check whether answers without expected fiches are supported by other fiches (incomplete `expected_docs`).
+
+#### 8b-2 — LLM judge: faithfulness, citation accuracy, correctness
+
+- **Date**: 2026-10-10
+- **What**:
+  - `src/rag/evaluation/sentences.py`: `split_sentences` — deterministic split of an answer into sentences (lines, list items, sentence-ending punctuation before a capital), each with its cited numbers; marker-only lines join the previous sentence, wordless lines ("---") are dropped.
+  - `src/rag/evaluation/judge.py`: `Judge` with two judgments — `judge_sentences` (each sentence vs. the context blocks: `supported` / `partial` / `unsupported` / `contradicted` / `no_claim`, plus the supporting block numbers) and `judge_key_facts` (each golden key fact vs. the answer: `present` / `partial` / `absent` / `contradicted`, without the context). Reason written before verdict. Replies validated (ids complete and in order, existing blocks); one retry with the validation error, then `JudgeError`, which carries the failed calls' token usage.
+  - `src/rag/evaluation/judge_eval.py`: metrics, `judge_question`, `judge_run`, summaries. `scripts/judge_generation.py <generation run>` writes a `judge` run referencing the generation run (ID, path, SHA-256) and refuses to run if the golden set changed since generation.
+  - `src/rag/generation/llm.py`: `LLM.generate(system, user, schema=None)`; with a pydantic schema the call uses **strict JSON-schema structured output**. `MistralLLM.judge_from_settings`; settings `judge_model` (`mistral-large-2512`), `judge_requests_per_minute` (12), `judge_temperature`, `judge_max_tokens`, judge prices. `strip_citations` in `generation/citations.py`.
+- **Metrics** (per question, then averaged over questions):
+  - **Faithfulness** = supported claim sentences / claim sentences (`partial` counts as not supported: a half-invented sentence is still a problem).
+  - **Citation accuracy** = cited claim sentences where at least one cited block is among the supporting blocks.
+  - **Citation precision** = (claim sentence, cited block) pairs where the block supports the sentence.
+  - **Correctness** = key facts present / key facts (`partial` = 0.5). Refused answerable question: 0, no judge call. Refused unanswerable question: not judged.
+- **Why** (and alternatives):
+  - Sentences split in code rather than atomic claims extracted by an LLM: deterministic, free, testable, and the unit the generation prompt cites at. Cost: a sentence with one true and one invented fact gets a single (`partial`) verdict.
+  - One judge call per answer (all sentences) rather than per sentence: ~22 calls instead of ~200, ~4x cheaper. Risk: verdicts influencing each other; to compare if human agreement is poor.
+  - **Citation markers hidden from the judge**: it reports which blocks support each sentence on its own; the code compares with what was cited. Otherwise the judge tends to confirm existing citations.
+  - Correctness judged without the context: it compares the answer with the reference only, so it measures the user-facing outcome whatever the retrieval did.
+  - Faithfulness × correctness separate failure causes: faithful but incorrect → retrieval did not bring the information; correct but unfaithful → answer from the model's own knowledge (dangerous for rules that change).
+- **Incident: JSON mode is not enough.** First judge run (`json_object` mode, `experiments/20261010T171518Z-judge-…json`, commit `ce89b70`): q001's faithfulness reply was truncated, invalid JSON (`Expecting ',' delimiter`), **identical on retry** since temperature is 0 — a retry with the same input cannot fix a deterministic error. Fix: strict structured output (`response_format` `json_schema`, `strict: true`, schema from the pydantic reply model), which constrains decoding to the schema; the same q001 call then returned valid, complete JSON. Commit `c6e2602`.
+- **Result: v0 judged, dev split** (reference run `experiments/20261010T172137Z-judge-mistral-large-2512-on-20261010T170359Z.json`, commit `c6e2602`, clean tree; judge `mistral-large-2512`; 44 calls, 260 s, 76,733 prompt + 15,146 completion tokens, **judge cost $0.061**; 0 errors):
+
+  | Group | n | Faithfulness | Citation accuracy | Citation precision | Correctness |
+  |---|---|---|---|---|---|
+  | All | 30 (24 answerable) | **0.93** | **0.95** | **0.80** | **0.61** |
+  | Lookup | 12 | 0.95 | 0.95 | 0.85 | 0.70 |
+  | Multi-hop | 7 | 0.92 | 0.92 | 0.67 | 0.54 |
+  | Ambiguous | 5 | 0.89 | 0.98 | 0.85 | 0.50 |
+
+  Sentence verdicts: 136 supported, 5 partial, 4 unsupported, 3 contradicted, 48 no claim (196 sentences). Key-fact verdicts: 39 present, 9 partial, 18 absent, 5 contradicted (71 facts).
+- **Judge stability (same answers, same prompts, temperature 0, only the output format changed)**: sentence verdicts agree on **181/193 (94%)**, key-fact verdicts on **56/63 (89%)**; when both runs say `supported`, the supporting blocks are identical in 104/125. Changes concentrate on borderline cases (`partial` ↔ `supported`) and on "information not found" sentences (`contradicted` ↔ `supported`). Aggregates move accordingly: faithfulness 0.89 → 0.93 overall, multi-hop 0.79 → 0.92. **Most importantly, q021 sentence 11 ("aucune autorisation supplémentaire de la mairie n'est requise", the bureau → logement à Paris case, v0's known failure from step 5c) flips from `unsupported` to `supported`.** Consequences:
+  - On 30 questions, differences of a few points of faithfulness, and category-level differences, are within judge noise. Comparisons between pipeline versions must exceed this noise, or use repeated judging.
+  - The judge can be wrong on exactly the cases that matter: human validation (8b-3) is required before trusting these numbers.
+  - A self-contradicting verdict was also found: q026 sentence 2 is `contradicted` while its reason says the sources state the same thing.
+- **Analysis** (reference run, to be confirmed by 8b-3):
+  - **Correctness is the weak point (0.61), and it tracks retrieval**: 0.67 when an expected fiche is in the top-5 (19 questions) vs. 0.40 when none is (5 questions). Fully correct answers (q001, q004, q011, q019, q028, q048) all had their fiche retrieved.
+  - **High faithfulness, moderate correctness**: answers mostly stick to their context (0.93), but the context often lacks the answer. This points at retrieval and chunking first, not at the generator.
+  - **Citation precision 0.80 < accuracy 0.95**: the generator often cites every block (`[1][2][3][4][5]`) — at least one cited block supports the sentence, but many cited blocks do not. Multi-hop is lowest (0.67).
+  - **Unfaithful content found**: an unsupported "6 semaines" deadline (q008; **overturned in 8b-3**: block [2] states the 6-week delay, the judge was wrong); the winter truce (q030, true in reality but absent from the context: correct but unfaithful, from the model's own knowledge); an invented example amount (q011, partial). Some unsupported sentences carry no citation at all, although the answer-level "uncited" rate of 8b-1 was 0: the sentence level is finer.
+  - **Partial refusals are risky**: three "Je ne trouve pas cette information …" sentences were judged `contradicted` in one run (the sources did contain it), i.e. the generator under-reads its context.
+- **Tests**: `tests/evaluation/test_sentences.py` (4), `tests/evaluation/test_judge.py` (7: parsing, markers hidden from the judge, schema passed, retry with the error, 4 inconsistent replies fail after one retry, key facts judged without context), `tests/evaluation/test_judge_eval.py` (8: metric definitions, answered question gets both judgments, refused answerable scores 0 without a call, refused unanswerable not judged, judge failure recorded with its tokens), `tests/generation/test_llm.py` (+1: strict JSON schema on request), `tests/generation/test_citations.py` (+1). 125 tests pass. A test caught a cost-accounting bug: tokens of failed judge calls were not counted.
+- **Reproduce**:
+  ```bash
+  uv run python scripts/eval_generation.py                     # ~$0.02, dev
+  uv run python scripts/judge_generation.py experiments/<generation run>.json   # ~$0.06
+  ```
+- **Files**: `src/rag/evaluation/sentences.py`, `src/rag/evaluation/judge.py`, `src/rag/evaluation/judge_eval.py`, `src/rag/generation/llm.py`, `src/rag/generation/citations.py`, `src/rag/config.py`, `scripts/judge_generation.py`, `tests/evaluation/`, `tests/generation/`, `tests/test_pipeline.py`, `.env.example`
+- **Open points**: 8b-3 human labels and judge agreement (including q021 s11 and q026 s2); clearer rubric for "information not found" sentences and for sentences restating the question; judge noise with repeated runs; store the raw judge reply on failure for debugging.
+
+#### 8b-3 — Judge validation by adjudication (LLM panel)
+
+- **Date**: 2026-10-12
+- **Why**: an LLM judge is a measuring instrument. Step 8b-2 showed it is not stable on borderline cases (94% self-agreement), so its metrics are only trusted once its verdicts are checked against independent labels.
+- **Sample** (`scripts/export_judge_sample.py`, seed 0, no API call): `data/judge_labels/20261010T172137Z-judge-mistral-large-2512-on-20261010T170359Z.md`, 61 items from 19 questions: 30 sentences (every non-`supported` verdict, every verdict that changed between the two judge runs, 10 random `supported` from already sampled questions) and 31 key facts (every non-`present` verdict, 5 random `present`). Stratified because a uniform sample would be almost all `supported` and make agreement look high without testing hard cases. **Blind**: judge verdicts are not in the file. The rubric shown is the judge's own prompt, so annotators and judge apply the same definitions.
+- **Labelling 61 items by hand (~1.5 h) was replaced by adjudication**:
+  1. A fresh Claude subagent (Claude Opus 5.5, no access to this conversation nor to `experiments/`, so blind to the judge) labelled all 61 items: `….claude.md`.
+  2. Agreement Claude ↔ Mistral Large 3 judge (`scripts/judge_agreement.py`):
+
+     | Run | Sentences, all labels | Sentences, supported vs. not | Facts, all labels | Facts, present vs. not |
+     |---|---|---|---|---|
+     | Reference judge run (`…172137Z`) | 0.70 (κ 0.52) | 0.73 (κ 0.46) | 0.77 (κ 0.69) | 0.94 (κ 0.76) |
+     | First judge run (`…171518Z`) | 0.63 (κ 0.47) | 0.77 (κ 0.54) | 0.68 (κ 0.55) | 0.90 (κ 0.71) |
+
+  3. Adjudication set (`scripts/export_adjudication.py`): every disagreement with the reference judge run plus a random audit of 8 agreements (two LLMs can share a bias), mixed in question order with nothing marking which is which: `….human.md`, **24 items** (16 disagreements, 8 audited agreements) from 12 questions.
+  4. **Human labelling was stopped after 1 item** (time). Instead, **a panel of 3 fresh Claude subagents** (same model, launched in parallel, each reading only a copy of `….human.md` with all labels removed, forbidden to read the first annotator's file, the judge runs and this log) labelled the 24 items: `….panel-1.md`, `….panel-2.md`, `….panel-3.md`. The final label of an adjudicated item is the panel majority. `….human.md` keeps the single human label (S-q005-12: `supported`); it is reported but not used in the statistics (n = 1).
+- **Alternatives considered**: finish the human labels (~20 min with a condensed presentation; the only way to measure validity, recommended but declined for time); report only Claude ↔ judge agreement (honest, but leaves 16 disagreements unresolved); a panel of another model family (GPT, Gemini: less correlated errors than a Claude panel, but a new paid dependency). Panel size 3: odd, so a majority usually exists; more raters of the same model add stability, not validity. Their agreement decides: a high Fleiss κ means more raters would change little.
+- **Result** (`scripts/adjudicate_panel.py`, no API call):
+  - **Panel consistency**: Fleiss κ 0.83 (sentences 0.79, facts 0.83); unanimous on 19/24 items; a majority on every item.
+  - **Disagreements (16)**: the panel sides with the first Claude annotator 13 times, with the judge 2 times (F-q007-2, F-q024-2), with neither once (S-q008-2: `partial`, between `supported` and `unsupported`). **Audit (8 agreements)**: none overturned.
+  - **Judge vs. the final label set** (61 items: panel majority where adjudicated, shared label elsewhere):
+
+    | | n | All labels | Binary decision |
+    |---|---|---|---|
+    | Sentences | 30 | 0.70 (κ 0.52) | 0.73 (κ 0.46), supported vs. not |
+    | Key facts | 31 | 0.84 (κ 0.77) | 0.94 (κ 0.76), present vs. not |
+
+  - **Direction of the judge's sentence errors** (9 of 30): too lenient on 5 (`supported` where the panel says `partial` / `unsupported` / `contradicted`: q008 s2, q021 s11, q024 s6, q026 s4, q032 s8), too strict on 3 (q008 s3 "6 semaines", q030 s5, q048 s24), plus one `unsupported` that is `contradicted` (q015 s1: "mai (après le 1er septembre)"). Of the 14 claim sentences that are not supported in the final set, the judge flags 9 (recall 0.64); of its 12 flags, 9 are right (precision 0.75). **q021 s11, v0's known failure from step 5c, is `unsupported` (panel 2–1 with one `contradicted`): the reference judge run had it wrong.**
+  - **Metrics recomputed with the final labels** (all 30 questions; verdicts outside the sample unchanged; labels have no supporting blocks, so a sentence that becomes supported counts its cited blocks as supporting in the upper bound and none in the lower bound):
+
+    | | Faithfulness | Citation accuracy | Citation precision | Correctness |
+    |---|---|---|---|---|
+    | Judge (8b-2) | 0.93 | 0.95 | 0.80 | 0.61 |
+    | Final labels | **0.90** | **0.92–0.93** | **0.77–0.78** | **0.59** |
+
+  - The single human label (S-q005-12 `supported`) matches 1 of 3 panel members; the panel majority and both LLMs said `partial` (the 68 € amount appears only in the block on businesses).
+- **Conclusion: can the 8b-2 metrics be trusted?**
+  - **Aggregates, yes, to about 3 points**: the judge is slightly lenient, every metric drops by 2–3 points, and the diagnosis is unchanged (high faithfulness, correctness around 0.6, retrieval is the bottleneck).
+  - **Key facts (correctness), yes**: κ 0.77, 0.94 on present vs. not. Correctness is the main target of the retrieval work, so the judge is fit to compare retrieval versions, as long as differences exceed ~3 points (judge noise from 8b-2 and the bias measured here).
+  - **Sentence verdicts, not as a hallucination detector**: the judge misses about a third of the unsupported claims in the hard-case sample, including three `contradicted` sentences judged `supported` and the q021 case. Faithfulness is usable as a trend, not as a guarantee on a single answer; the verification step (roadmap 5) needs a better judge.
+  - **Limits of this validation**: all annotators are Claude, so the panel siding 13/16 with the first Claude annotator is partly a shared model bias, not independent confirmation; validity against a human is measured on 1 item only. The sample is stratified on hard cases, so 0.70 is the agreement on hard cases, not the judge's accuracy on all 196 sentences.
+- **Tests**: `tests/evaluation/test_judge_labels.py` (+3: majority needs more than half, Fleiss κ against a hand computation and undefined cases, relabelling recomputes metrics and bounds citation metrics). 137 tests pass, no network.
+- **Reproduce** (no API call):
+  ```bash
+  P=data/judge_labels/20261010T172137Z-judge-mistral-large-2512-on-20261010T170359Z
+  uv run python scripts/judge_agreement.py $P.claude.md experiments/20261010T172137Z-judge-mistral-large-2512-on-20261010T170359Z.json
+  uv run python scripts/adjudicate_panel.py $P.claude.md experiments/20261010T172137Z-judge-mistral-large-2512-on-20261010T170359Z.json $P.panel-{1,2,3}.md
+  ```
+- **Files**: `src/rag/evaluation/judge_labels.py`, `scripts/export_judge_sample.py`, `scripts/export_adjudication.py`, `scripts/judge_agreement.py`, `scripts/adjudicate_panel.py`, `tests/evaluation/test_judge_labels.py`, `data/judge_labels/`
+- **Open points**: human labels on the 24 adjudication items (the only validity check still missing; ~20 min); a less lenient sentence judge before the verification step: one call per sentence, majority over repeated runs, or a judge from another family (Claude), each to be measured against this label set; repeated judging to put error bars on comparisons.

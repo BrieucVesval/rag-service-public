@@ -3,8 +3,8 @@ from collections.abc import Iterator
 import pytest
 
 from rag.evaluation.golden_set import GoldenItem
+from rag.evaluation.grouping import OVERALL
 from rag.evaluation.retrieval_eval import (
-    OVERALL,
     evaluate_question,
     evaluate_retrieval,
     summarize,

@@ -11,6 +11,8 @@ from rag.models import Citation, RetrievedChunk
 
 # Matches [1], [12] and grouped forms like [1, 2] or [1,2,3].
 _MARKER = re.compile(r"\[(\d+(?:\s*,\s*\d+)*)\]")
+_SPACES = re.compile(r"[ \t]{2,}")
+_SPACE_BEFORE_PUNCTUATION = re.compile(r"[ \t]+([.,])")  # French keeps the space before : ;
 
 
 def cited_numbers(text: str) -> list[int]:
@@ -22,6 +24,12 @@ def cited_numbers(text: str) -> list[int]:
             if number not in numbers:
                 numbers.append(number)
     return numbers
+
+
+def strip_citations(text: str) -> str:
+    """Text without its citation markers, whitespace left by them collapsed."""
+    without = _SPACES.sub(" ", _MARKER.sub("", text))
+    return _SPACE_BEFORE_PUNCTUATION.sub(r"\1", without).strip()
 
 
 def resolve_citations(

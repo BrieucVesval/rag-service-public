@@ -2,6 +2,7 @@ from types import SimpleNamespace
 from typing import Any
 
 import pytest
+from pydantic import BaseModel
 
 from rag.generation.llm import MistralLLM
 from rag.indexing.embedder import RateLimiter
@@ -59,3 +60,21 @@ def test_generate_joins_chunked_content() -> None:
 def test_generate_without_choice_raises() -> None:
     with pytest.raises(RuntimeError, match="no message"):
         make_llm(FakeChatAPI("x", choices=False)).generate("s", "u")
+
+
+def test_text_by_default_strict_json_schema_on_request() -> None:
+    class Reply(BaseModel):
+        answer: str
+
+    chat = FakeChatAPI('{"answer": "oui"}')
+    llm = make_llm(chat)
+
+    llm.generate("s", "u")
+    assert chat.kwargs["response_format"] is None
+
+    llm.generate("s", "u", Reply)
+    response_format = chat.kwargs["response_format"]
+    assert response_format.type == "json_schema"
+    assert response_format.json_schema.name == "Reply"
+    assert response_format.json_schema.strict is True
+    assert response_format.json_schema.schema_definition["required"] == ["answer"]

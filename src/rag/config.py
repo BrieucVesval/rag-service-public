@@ -45,6 +45,19 @@ class Settings(BaseSettings):
     llm_temperature: float = Field(default=0.0, ge=0)
     llm_max_tokens: int = Field(default=1024, gt=0)
     llm_random_seed: int = 0
+    # List prices in USD per million tokens (docs.mistral.ai/inference/pricing, 2026-10-10),
+    # used to report the cost of each run from its measured token usage.
+    llm_input_usd_per_mtok: float = Field(default=0.20, ge=0)
+    llm_output_usd_per_mtok: float = Field(default=0.20, ge=0)
+
+    # LLM judge for evaluation: a model stronger than the generator, to limit
+    # self-preference bias (Mistral Large 3; paid plan limit: 15 requests/minute).
+    judge_model: str = "mistral-large-2512"
+    judge_requests_per_minute: int = Field(default=12, gt=0)
+    judge_temperature: float = Field(default=0.0, ge=0)
+    judge_max_tokens: int = Field(default=4096, gt=0)
+    judge_input_usd_per_mtok: float = Field(default=0.50, ge=0)
+    judge_output_usd_per_mtok: float = Field(default=1.50, ge=0)
 
     # Evaluation. Retrieval metrics are reported at several cut-offs from a single query
     # per question (the deepest k is retrieved once); retrieval_top_k is always included.

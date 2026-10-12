@@ -13,6 +13,7 @@ from statistics import mean
 from pydantic import BaseModel
 
 from rag.evaluation.golden_set import Category, GoldenItem
+from rag.evaluation.grouping import group_results
 from rag.evaluation.retrieval_metrics import (
     all_found_at_k,
     evidence_recall_at_k,
@@ -24,7 +25,6 @@ from rag.evaluation.retrieval_metrics import (
 from rag.retrieval.base import Retriever
 
 MS_PER_SECOND = 1000
-OVERALL = "all"
 
 
 class RetrievedHit(BaseModel):
@@ -146,8 +146,4 @@ def summarize(results: Sequence[QuestionRetrieval]) -> RetrievalSummary:
 
 def summarize_by_group(results: Sequence[QuestionRetrieval]) -> dict[str, RetrievalSummary]:
     """Summaries overall, per category and per split, keyed "all", "category:…", "split:…"."""
-    groups: dict[str, list[QuestionRetrieval]] = {OVERALL: list(results)}
-    for result in results:
-        groups.setdefault(f"category:{result.category.value}", []).append(result)
-        groups.setdefault(f"split:{result.split}", []).append(result)
-    return {name: summarize(group) for name, group in groups.items()}
+    return {name: summarize(group) for name, group in group_results(results).items()}

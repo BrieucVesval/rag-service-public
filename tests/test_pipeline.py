@@ -28,7 +28,7 @@ class FakeLLM:
         self.text = text
         self.prompts: list[tuple[str, str]] = []
 
-    def generate(self, system: str, user: str) -> LLMResponse:
+    def generate(self, system: str, user: str, schema: object = None) -> LLMResponse:
         self.prompts.append((system, user))
         return LLMResponse(
             text=self.text, model="fake-llm-v1", prompt_tokens=50, completion_tokens=8

@@ -8,8 +8,8 @@ Interview talking points, grouped by theme, are in [`interview_notes.md`](interv
 
 ## Status
 
-- **Current**: v0 fully measured on dev, pending judge validation: Recall@5 0.67, refusal accuracy 0.93, faithfulness 0.93, citation accuracy 0.95, citation precision 0.80, correctness 0.61 (judge: Mistral Large 3). The judge is not stable on borderline cases (94% verdict agreement between two runs).
-- **Next**: human labels to measure judge agreement (8b-3), then merge the evaluation harness.
+- **Current**: v0 fully measured on dev, judge checked by adjudication: Recall@5 0.67, refusal accuracy 0.93; judge metrics faithfulness 0.93, citation accuracy 0.95, precision 0.80, correctness 0.61, i.e. 0.90 / 0.92–0.93 / 0.77–0.78 / 0.59 after correcting the judge's errors on the hard-case sample. Aggregates and correctness are usable (±3 points); sentence verdicts miss a third of unsupported claims.
+- **Next**: merge the evaluation harness, then improve retrieval (header-based chunking, hybrid dense + BM25, reranking), each change measured.
 
 ## Roadmap
 
@@ -18,8 +18,8 @@ Interview talking points, grouped by theme, are in [`interview_notes.md`](interv
 | 1 | Corpus and ingestion (incl. merged table cells fix) | ✅ Done |
 | 2 | Minimal end-to-end RAG (v0) | ✅ Done |
 | 3 | Golden set (50 questions) | ✅ Done |
-| 3b | Evaluation harness | 🟡 Judge done, human validation next |
-| 4 | Baseline evaluation of v0 | 🟡 Measured on dev, judge to validate |
+| 3b | Evaluation harness | ✅ Done (judge validated by an LLM panel; human labels still open) |
+| 4 | Baseline evaluation of v0 | ✅ Done on dev |
 | 5 | Citation verification (LLM-as-judge) and confidence score | ⬜ |
 | 6 | Chunking comparison (fixed vs. headers vs. semantic) | ⬜ |
 | 7 | Hybrid retrieval (dense + BM25, RRF) and reranking | ⬜ |
@@ -45,6 +45,7 @@ Interview talking points, grouped by theme, are in [`interview_notes.md`](interv
 | 2026-10-10 | 8b-0. Judge choice | Free plan has no model stronger than the generator; prices compared; switched to the paid plan | Mistral Large 3 as judge (~$0.21 per dev run, ~4x cheaper than Medium 3.5) |
 | 2026-10-10 | 8b-1. Generation run | Answers + contexts saved for later judging; refusal accuracy 0.93, 6/6 correct refusals, 2/24 false refusals; cost $0.017 | Generate once, judge later: judges compared on identical answers |
 | 2026-10-10 | 8b-2. LLM judge | Sentence-level support and key-fact correctness; v0 dev: faithfulness 0.93, citation accuracy 0.95, precision 0.80, correctness 0.61; $0.06 per run | Strict JSON-schema output (JSON mode returned invalid JSON); judge stability measured: 94% |
+| 2026-10-12 | 8b-3. Judge validation | 61-item blind sample labelled by Claude; 24 items (16 disagreements + 8 audited agreements) adjudicated by a panel of 3 Claude subagents (Fleiss κ 0.83). Judge vs. final labels: sentences 0.70 (κ 0.52), facts 0.84 (κ 0.77); corrected faithfulness 0.90, correctness 0.59 | Human labelling stopped after 1 item (time): LLM panel instead, limit stated (same model family, validity vs. a human not measured) |
 
 ## Key numbers so far
 
@@ -58,7 +59,8 @@ Interview talking points, grouped by theme, are in [`interview_notes.md`](interv
 - v0 generation, dev: refusal accuracy 0.93 (6/6 unanswerable refused, 2/24 false refusals), 3.55 citations per answer, no invalid citation; $0.017 for 30 answers (78k prompt tokens).
 - v0 judged, dev: faithfulness 0.93, citation accuracy 0.95, citation precision 0.80, correctness 0.61 (0.67 when the fiche is retrieved, 0.40 when not); judge $0.061 per dev run.
 - Judge stability: 94% sentence and 89% key-fact verdict agreement between two runs on identical answers.
-- Tests: 125 unit tests, no network.
+- Judge validation (61 hard-case items, final labels from a 3-Claude panel): sentences 0.70 (κ 0.52), key facts 0.84 (κ 0.77, 0.94 present vs. not); judge recall on unsupported claims 9/14; slightly lenient: faithfulness 0.93 → 0.90, citation accuracy 0.95 → 0.92–0.93, correctness 0.61 → 0.59.
+- Tests: 137 unit tests, no network.
 
 ## Key lessons
 
@@ -75,3 +77,5 @@ Interview talking points, grouped by theme, are in [`interview_notes.md`](interv
 11. **An LLM judge is a measuring instrument with its own noise and errors**: two runs on identical answers agreed on 94% of verdicts, flipped on the most important case (q021), and one verdict contradicted its own reason. Human agreement must be measured before trusting it.
 12. **"JSON mode" is not a guarantee**: it returned truncated JSON, identically on retry at temperature 0. Strict schema-constrained output fixed it; a retry cannot fix a deterministic error.
 13. **Most v0 errors come from retrieval, not generation**: faithfulness 0.93 but correctness 0.61, and correctness drops from 0.67 to 0.40 when no expected fiche is retrieved.
+14. **Validate the judge, then trust it for what it measures well**: the Mistral Large 3 judge agrees well on key facts (κ 0.77) but misses a third of unsupported sentences, including contradicted ones and the known q021 failure. Aggregates move by only 2–3 points, so the diagnosis holds; per-answer hallucination detection needs a better judge.
+15. **An LLM panel measures consistency, not truth**: 3 Claude annotators agreed with each other (κ 0.83) and sided 13/16 with the first Claude annotator, which is partly a shared model bias. Only human labels (or another model family) measure validity.

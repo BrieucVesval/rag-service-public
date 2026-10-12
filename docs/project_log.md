@@ -451,7 +451,7 @@ Newest entries at the bottom. Each entry: date, phase, what, why (alternatives c
   - **Correctness is the weak point (0.61), and it tracks retrieval**: 0.67 when an expected fiche is in the top-5 (19 questions) vs. 0.40 when none is (5 questions). Fully correct answers (q001, q004, q011, q019, q028, q048) all had their fiche retrieved.
   - **High faithfulness, moderate correctness**: answers mostly stick to their context (0.93), but the context often lacks the answer. This points at retrieval and chunking first, not at the generator.
   - **Citation precision 0.80 < accuracy 0.95**: the generator often cites every block (`[1][2][3][4][5]`) — at least one cited block supports the sentence, but many cited blocks do not. Multi-hop is lowest (0.67).
-  - **Unfaithful content found**: an unsupported "6 semaines" deadline (q008); the winter truce (q030, true in reality but absent from the context: correct but unfaithful, from the model's own knowledge); an invented example amount (q011, partial). Some unsupported sentences carry no citation at all, although the answer-level "uncited" rate of 8b-1 was 0: the sentence level is finer.
+  - **Unfaithful content found**: an unsupported "6 semaines" deadline (q008; **overturned in 8b-3**: block [2] states the 6-week delay, the judge was wrong); the winter truce (q030, true in reality but absent from the context: correct but unfaithful, from the model's own knowledge); an invented example amount (q011, partial). Some unsupported sentences carry no citation at all, although the answer-level "uncited" rate of 8b-1 was 0: the sentence level is finer.
   - **Partial refusals are risky**: three "Je ne trouve pas cette information …" sentences were judged `contradicted` in one run (the sources did contain it), i.e. the generator under-reads its context.
 - **Tests**: `tests/evaluation/test_sentences.py` (4), `tests/evaluation/test_judge.py` (7: parsing, markers hidden from the judge, schema passed, retry with the error, 4 inconsistent replies fail after one retry, key facts judged without context), `tests/evaluation/test_judge_eval.py` (8: metric definitions, answered question gets both judgments, refused answerable scores 0 without a call, refused unanswerable not judged, judge failure recorded with its tokens), `tests/generation/test_llm.py` (+1: strict JSON schema on request), `tests/generation/test_citations.py` (+1). 125 tests pass. A test caught a cost-accounting bug: tokens of failed judge calls were not counted.
 - **Reproduce**:
@@ -461,3 +461,54 @@ Newest entries at the bottom. Each entry: date, phase, what, why (alternatives c
   ```
 - **Files**: `src/rag/evaluation/sentences.py`, `src/rag/evaluation/judge.py`, `src/rag/evaluation/judge_eval.py`, `src/rag/generation/llm.py`, `src/rag/generation/citations.py`, `src/rag/config.py`, `scripts/judge_generation.py`, `tests/evaluation/`, `tests/generation/`, `tests/test_pipeline.py`, `.env.example`
 - **Open points**: 8b-3 human labels and judge agreement (including q021 s11 and q026 s2); clearer rubric for "information not found" sentences and for sentences restating the question; judge noise with repeated runs; store the raw judge reply on failure for debugging.
+
+#### 8b-3 — Judge validation by adjudication (LLM panel)
+
+- **Date**: 2026-10-12
+- **Why**: an LLM judge is a measuring instrument. Step 8b-2 showed it is not stable on borderline cases (94% self-agreement), so its metrics are only trusted once its verdicts are checked against independent labels.
+- **Sample** (`scripts/export_judge_sample.py`, seed 0, no API call): `data/judge_labels/20261010T172137Z-judge-mistral-large-2512-on-20261010T170359Z.md`, 61 items from 19 questions: 30 sentences (every non-`supported` verdict, every verdict that changed between the two judge runs, 10 random `supported` from already sampled questions) and 31 key facts (every non-`present` verdict, 5 random `present`). Stratified because a uniform sample would be almost all `supported` and make agreement look high without testing hard cases. **Blind**: judge verdicts are not in the file. The rubric shown is the judge's own prompt, so annotators and judge apply the same definitions.
+- **Labelling 61 items by hand (~1.5 h) was replaced by adjudication**:
+  1. A fresh Claude subagent (Claude Opus 5.5, no access to this conversation nor to `experiments/`, so blind to the judge) labelled all 61 items: `….claude.md`.
+  2. Agreement Claude ↔ Mistral Large 3 judge (`scripts/judge_agreement.py`):
+
+     | Run | Sentences, all labels | Sentences, supported vs. not | Facts, all labels | Facts, present vs. not |
+     |---|---|---|---|---|
+     | Reference judge run (`…172137Z`) | 0.70 (κ 0.52) | 0.73 (κ 0.46) | 0.77 (κ 0.69) | 0.94 (κ 0.76) |
+     | First judge run (`…171518Z`) | 0.63 (κ 0.47) | 0.77 (κ 0.54) | 0.68 (κ 0.55) | 0.90 (κ 0.71) |
+
+  3. Adjudication set (`scripts/export_adjudication.py`): every disagreement with the reference judge run plus a random audit of 8 agreements (two LLMs can share a bias), mixed in question order with nothing marking which is which: `….human.md`, **24 items** (16 disagreements, 8 audited agreements) from 12 questions.
+  4. **Human labelling was stopped after 1 item** (time). Instead, **a panel of 3 fresh Claude subagents** (same model, launched in parallel, each reading only a copy of `….human.md` with all labels removed, forbidden to read the first annotator's file, the judge runs and this log) labelled the 24 items: `….panel-1.md`, `….panel-2.md`, `….panel-3.md`. The final label of an adjudicated item is the panel majority. `….human.md` keeps the single human label (S-q005-12: `supported`); it is reported but not used in the statistics (n = 1).
+- **Alternatives considered**: finish the human labels (~20 min with a condensed presentation; the only way to measure validity, recommended but declined for time); report only Claude ↔ judge agreement (honest, but leaves 16 disagreements unresolved); a panel of another model family (GPT, Gemini: less correlated errors than a Claude panel, but a new paid dependency). Panel size 3: odd, so a majority usually exists; more raters of the same model add stability, not validity. Their agreement decides: a high Fleiss κ means more raters would change little.
+- **Result** (`scripts/adjudicate_panel.py`, no API call):
+  - **Panel consistency**: Fleiss κ 0.83 (sentences 0.79, facts 0.83); unanimous on 19/24 items; a majority on every item.
+  - **Disagreements (16)**: the panel sides with the first Claude annotator 13 times, with the judge 2 times (F-q007-2, F-q024-2), with neither once (S-q008-2: `partial`, between `supported` and `unsupported`). **Audit (8 agreements)**: none overturned.
+  - **Judge vs. the final label set** (61 items: panel majority where adjudicated, shared label elsewhere):
+
+    | | n | All labels | Binary decision |
+    |---|---|---|---|
+    | Sentences | 30 | 0.70 (κ 0.52) | 0.73 (κ 0.46), supported vs. not |
+    | Key facts | 31 | 0.84 (κ 0.77) | 0.94 (κ 0.76), present vs. not |
+
+  - **Direction of the judge's sentence errors** (9 of 30): too lenient on 5 (`supported` where the panel says `partial` / `unsupported` / `contradicted`: q008 s2, q021 s11, q024 s6, q026 s4, q032 s8), too strict on 3 (q008 s3 "6 semaines", q030 s5, q048 s24), plus one `unsupported` that is `contradicted` (q015 s1: "mai (après le 1er septembre)"). Of the 14 claim sentences that are not supported in the final set, the judge flags 9 (recall 0.64); of its 12 flags, 9 are right (precision 0.75). **q021 s11, v0's known failure from step 5c, is `unsupported` (panel 2–1 with one `contradicted`): the reference judge run had it wrong.**
+  - **Metrics recomputed with the final labels** (all 30 questions; verdicts outside the sample unchanged; labels have no supporting blocks, so a sentence that becomes supported counts its cited blocks as supporting in the upper bound and none in the lower bound):
+
+    | | Faithfulness | Citation accuracy | Citation precision | Correctness |
+    |---|---|---|---|---|
+    | Judge (8b-2) | 0.93 | 0.95 | 0.80 | 0.61 |
+    | Final labels | **0.90** | **0.92–0.93** | **0.77–0.78** | **0.59** |
+
+  - The single human label (S-q005-12 `supported`) matches 1 of 3 panel members; the panel majority and both LLMs said `partial` (the 68 € amount appears only in the block on businesses).
+- **Conclusion: can the 8b-2 metrics be trusted?**
+  - **Aggregates, yes, to about 3 points**: the judge is slightly lenient, every metric drops by 2–3 points, and the diagnosis is unchanged (high faithfulness, correctness around 0.6, retrieval is the bottleneck).
+  - **Key facts (correctness), yes**: κ 0.77, 0.94 on present vs. not. Correctness is the main target of the retrieval work, so the judge is fit to compare retrieval versions, as long as differences exceed ~3 points (judge noise from 8b-2 and the bias measured here).
+  - **Sentence verdicts, not as a hallucination detector**: the judge misses about a third of the unsupported claims in the hard-case sample, including three `contradicted` sentences judged `supported` and the q021 case. Faithfulness is usable as a trend, not as a guarantee on a single answer; the verification step (roadmap 5) needs a better judge.
+  - **Limits of this validation**: all annotators are Claude, so the panel siding 13/16 with the first Claude annotator is partly a shared model bias, not independent confirmation; validity against a human is measured on 1 item only. The sample is stratified on hard cases, so 0.70 is the agreement on hard cases, not the judge's accuracy on all 196 sentences.
+- **Tests**: `tests/evaluation/test_judge_labels.py` (+3: majority needs more than half, Fleiss κ against a hand computation and undefined cases, relabelling recomputes metrics and bounds citation metrics). 137 tests pass, no network.
+- **Reproduce** (no API call):
+  ```bash
+  P=data/judge_labels/20261010T172137Z-judge-mistral-large-2512-on-20261010T170359Z
+  uv run python scripts/judge_agreement.py $P.claude.md experiments/20261010T172137Z-judge-mistral-large-2512-on-20261010T170359Z.json
+  uv run python scripts/adjudicate_panel.py $P.claude.md experiments/20261010T172137Z-judge-mistral-large-2512-on-20261010T170359Z.json $P.panel-{1,2,3}.md
+  ```
+- **Files**: `src/rag/evaluation/judge_labels.py`, `scripts/export_judge_sample.py`, `scripts/export_adjudication.py`, `scripts/judge_agreement.py`, `scripts/adjudicate_panel.py`, `tests/evaluation/test_judge_labels.py`, `data/judge_labels/`
+- **Open points**: human labels on the 24 adjudication items (the only validity check still missing; ~20 min); a less lenient sentence judge before the verification step: one call per sentence, majority over repeated runs, or a judge from another family (Claude), each to be measured against this label set; repeated judging to put error bars on comparisons.

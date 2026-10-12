@@ -12,6 +12,7 @@ from rag.models import Chunk, Document
 
 class FixedSizeChunker:
     name = "fixed"
+    label = "fixed"
 
     def __init__(self, chunk_size: int, chunk_overlap: int) -> None:
         if chunk_size <= 0:
@@ -23,7 +24,7 @@ class FixedSizeChunker:
 
     def chunk(self, document: Document) -> list[Chunk]:
         chunks: list[Chunk] = []
-        for start, end in self._windows(document.text):
+        for start, end in self.windows(document.text):
             chunks.append(
                 Chunk(
                     chunk_id=make_chunk_id(document.doc_id, self.name, len(chunks)),
@@ -39,13 +40,13 @@ class FixedSizeChunker:
             )
         return chunks
 
-    def _windows(self, text: str) -> list[tuple[int, int]]:
+    def windows(self, text: str) -> list[tuple[int, int]]:
         """Character spans of the chunks, trimmed of surrounding whitespace."""
         spans: list[tuple[int, int]] = []
         start = 0
         while start < len(text):
             end = self._snap_end(text, start)
-            span = _trim(text, start, end)
+            span = trim_span(text, start, end)
             if span[0] < span[1]:
                 spans.append(span)
             if end >= len(text):
@@ -84,7 +85,8 @@ def _first_space(text: str, lo: int, hi: int) -> int:
     return -1
 
 
-def _trim(text: str, start: int, end: int) -> tuple[int, int]:
+def trim_span(text: str, start: int, end: int) -> tuple[int, int]:
+    """Shrink a span so it neither starts nor ends with whitespace."""
     while start < end and text[start].isspace():
         start += 1
     while end > start and text[end - 1].isspace():

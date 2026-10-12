@@ -1,0 +1,2906 @@
+{
+  "run": {
+    "run_id": "20261012T214730Z-retrieval-dense-headers-path-2000-200-mistral-embed-dev",
+    "kind": "retrieval",
+    "started_at": "2026-10-12T21:47:30.526915Z",
+    "duration_s": 35.88532808300806,
+    "git_commit": "084d300",
+    "git_dirty": false,
+    "settings": {
+      "processed_dir": "data/processed/service_public",
+      "chroma_dir": "data/indexes/chroma",
+      "chunk_strategy": "headers",
+      "chunk_size": 2000,
+      "chunk_overlap": 200,
+      "header_prefix": "path",
+      "embedding_model": "mistral-embed",
+      "embedding_batch_size": 32,
+      "mistral_requests_per_minute": 50,
+      "mistral_timeout_s": 60.0,
+      "mistral_max_retry_s": 120.0,
+      "retrieval_top_k": 5,
+      "llm_model": "ministral-14b-2512",
+      "llm_requests_per_minute": 25,
+      "llm_temperature": 0.0,
+      "llm_max_tokens": 1024,
+      "llm_random_seed": 0,
+      "llm_input_usd_per_mtok": 0.2,
+      "llm_output_usd_per_mtok": 0.2,
+      "judge_model": "mistral-large-2512",
+      "judge_requests_per_minute": 12,
+      "judge_temperature": 0.0,
+      "judge_max_tokens": 4096,
+      "judge_input_usd_per_mtok": 0.5,
+      "judge_output_usd_per_mtok": 1.5,
+      "golden_set_path": "data/golden_set/golden_set.yaml",
+      "experiments_dir": "experiments",
+      "eval_k_values": [
+        1,
+        3,
+        5,
+        10
+      ]
+    },
+    "index": {
+      "collection": "headers-path-2000-200-mistral-embed",
+      "chunks": 3664,
+      "embedding_model": "mistral-embed",
+      "chunk_overlap": 200,
+      "chunk_size": 2000,
+      "raw_downloaded_at": "2026-10-07T16:35:15+00:00",
+      "git_dirty": "false",
+      "built_at": "2026-10-12T21:41:17+00:00",
+      "processed_at": "2026-10-10T16:00:39+00:00",
+      "git_commit": "084d300",
+      "chunk_label": "headers-path",
+      "chunk_strategy": "headers"
+    },
+    "golden_set": {
+      "path": "data/golden_set/golden_set.yaml",
+      "sha256": "5c74e2b856e91d6409eca7012d7244c0deaf5ff455cc930619e96f7c1418b10a",
+      "corpus_snapshot": "2026-10-07T16:35:15+00:00",
+      "split": "dev",
+      "n_questions": 30
+    }
+  },
+  "retriever": "dense",
+  "summary": {
+    "all": {
+      "n_questions": 30,
+      "n_answerable": 24,
+      "recall_at": {
+        "1": 0.4166666666666667,
+        "3": 0.6458333333333334,
+        "5": 0.7222222222222222,
+        "10": 0.7638888888888888
+      },
+      "all_found_at": {
+        "1": 0.2916666666666667,
+        "3": 0.5,
+        "5": 0.5833333333333334,
+        "10": 0.625
+      },
+      "evidence_recall_at": {
+        "1": 0.14583333333333334,
+        "3": 0.5138888888888888,
+        "5": 0.5416666666666666,
+        "10": 0.6388888888888888
+      },
+      "mrr": 0.6671296296296296,
+      "mean_top_score": 0.87078963915507,
+      "mean_latency_ms": 1195.1511568991311
+    },
+    "category:lookup": {
+      "n_questions": 12,
+      "n_answerable": 12,
+      "recall_at": {
+        "1": 0.5,
+        "3": 0.9166666666666666,
+        "5": 0.9166666666666666,
+        "10": 0.9166666666666666
+      },
+      "all_found_at": {
+        "1": 0.5,
+        "3": 0.9166666666666666,
+        "5": 0.9166666666666666,
+        "10": 0.9166666666666666
+      },
+      "evidence_recall_at": {
+        "1": 0.20833333333333334,
+        "3": 0.7777777777777778,
+        "5": 0.8333333333333334,
+        "10": 0.9166666666666666
+      },
+      "mrr": 0.6805555555555556,
+      "mean_top_score": 0.8826672236124674,
+      "mean_latency_ms": 1114.0838540838256
+    },
+    "split:dev": {
+      "n_questions": 30,
+      "n_answerable": 24,
+      "recall_at": {
+        "1": 0.4166666666666667,
+        "3": 0.6458333333333334,
+        "5": 0.7222222222222222,
+        "10": 0.7638888888888888
+      },
+      "all_found_at": {
+        "1": 0.2916666666666667,
+        "3": 0.5,
+        "5": 0.5833333333333334,
+        "10": 0.625
+      },
+      "evidence_recall_at": {
+        "1": 0.14583333333333334,
+        "3": 0.5138888888888888,
+        "5": 0.5416666666666666,
+        "10": 0.6388888888888888
+      },
+      "mrr": 0.6671296296296296,
+      "mean_top_score": 0.87078963915507,
+      "mean_latency_ms": 1195.1511568991311
+    },
+    "category:multi_hop": {
+      "n_questions": 7,
+      "n_answerable": 7,
+      "recall_at": {
+        "1": 0.35714285714285715,
+        "3": 0.35714285714285715,
+        "5": 0.47619047619047616,
+        "10": 0.6190476190476191
+      },
+      "all_found_at": {
+        "1": 0.0,
+        "3": 0.0,
+        "5": 0.14285714285714285,
+        "10": 0.2857142857142857
+      },
+      "evidence_recall_at": {
+        "1": 0.14285714285714285,
+        "3": 0.42857142857142855,
+        "5": 0.42857142857142855,
+        "10": 0.5238095238095238
+      },
+      "mrr": 0.7587301587301587,
+      "mean_top_score": 0.8962801098823547,
+      "mean_latency_ms": 1328.2682499973037
+    },
+    "category:unanswerable": {
+      "n_questions": 6,
+      "n_answerable": 0,
+      "recall_at": {},
+      "all_found_at": {},
+      "evidence_recall_at": {},
+      "mrr": null,
+      "mean_top_score": 0.8173525830109915,
+      "mean_latency_ms": 1197.5502153315272
+    },
+    "category:ambiguous": {
+      "n_questions": 5,
+      "n_answerable": 5,
+      "recall_at": {
+        "1": 0.3,
+        "3": 0.4,
+        "5": 0.6,
+        "10": 0.6
+      },
+      "all_found_at": {
+        "1": 0.2,
+        "3": 0.2,
+        "5": 0.4,
+        "10": 0.4
+      },
+      "evidence_recall_at": {
+        "1": 0.0,
+        "3": 0.0,
+        "5": 0.0,
+        "10": 0.13333333333333333
+      },
+      "mrr": 0.5066666666666667,
+      "mean_top_score": 0.8707212448120117,
+      "mean_latency_ms": 1200.4698831995483
+    }
+  },
+  "results": [
+    {
+      "question_id": "q001",
+      "question": "Mon voisin fait brûler ses feuilles mortes et ses branches dans son jardin tous les week-ends. Il a le droit ?",
+      "category": "lookup",
+      "split": "dev",
+      "expected_docs": [
+        "F31858"
+      ],
+      "hits": [
+        {
+          "rank": 1,
+          "chunk_id": "F31858:headers:0001",
+          "doc_id": "F31858",
+          "score": 0.8803514242172241
+        },
+        {
+          "rank": 2,
+          "chunk_id": "F31858:headers:0000",
+          "doc_id": "F31858",
+          "score": 0.8720017075538635
+        },
+        {
+          "rank": 3,
+          "chunk_id": "F1176:headers:0000",
+          "doc_id": "F1176",
+          "score": 0.8393821120262146
+        },
+        {
+          "rank": 4,
+          "chunk_id": "F614:headers:0003",
+          "doc_id": "F614",
+          "score": 0.8352862596511841
+        },
+        {
+          "rank": 5,
+          "chunk_id": "F33298:headers:0000",
+          "doc_id": "F33298",
+          "score": 0.834064781665802
+        },
+        {
+          "rank": 6,
+          "chunk_id": "F1176:headers:0001",
+          "doc_id": "F1176",
+          "score": 0.8337740898132324
+        },
+        {
+          "rank": 7,
+          "chunk_id": "F1525:headers:0003",
+          "doc_id": "F1525",
+          "score": 0.8329337239265442
+        },
+        {
+          "rank": 8,
+          "chunk_id": "F33298:headers:0001",
+          "doc_id": "F33298",
+          "score": 0.8328545093536377
+        },
+        {
+          "rank": 9,
+          "chunk_id": "F32437:headers:0000",
+          "doc_id": "F32437",
+          "score": 0.8324019908905029
+        },
+        {
+          "rank": 10,
+          "chunk_id": "F33298:headers:0005",
+          "doc_id": "F33298",
+          "score": 0.8319089412689209
+        }
+      ],
+      "recall_at": {
+        "1": 1.0,
+        "3": 1.0,
+        "5": 1.0,
+        "10": 1.0
+      },
+      "all_found_at": {
+        "1": true,
+        "3": true,
+        "5": true,
+        "10": true
+      },
+      "evidence_recall_at": {
+        "1": 0.5,
+        "3": 1.0,
+        "5": 1.0,
+        "10": 1.0
+      },
+      "first_relevant_rank": 1,
+      "reciprocal_rank": 1.0,
+      "top_score": 0.8803514242172241,
+      "latency_ms": 1188.9801660145167
+    },
+    {
+      "question_id": "q002",
+      "question": "Il a neigé cette nuit : c'est à moi de dégager le trottoir devant ma maison ou c'est à la mairie ?",
+      "category": "lookup",
+      "split": "dev",
+      "expected_docs": [
+        "F15133"
+      ],
+      "hits": [
+        {
+          "rank": 1,
+          "chunk_id": "F15133:headers:0002",
+          "doc_id": "F15133",
+          "score": 0.9070075750350952
+        },
+        {
+          "rank": 2,
+          "chunk_id": "F15133:headers:0000",
+          "doc_id": "F15133",
+          "score": 0.906859815120697
+        },
+        {
+          "rank": 3,
+          "chunk_id": "F15133:headers:0001",
+          "doc_id": "F15133",
+          "score": 0.8914422988891602
+        },
+        {
+          "rank": 4,
+          "chunk_id": "F33298:headers:0001",
+          "doc_id": "F33298",
+          "score": 0.8308871388435364
+        },
+        {
+          "rank": 5,
+          "chunk_id": "F1525:headers:0004",
+          "doc_id": "F1525",
+          "score": 0.8277091383934021
+        },
+        {
+          "rank": 6,
+          "chunk_id": "F1525:headers:0001",
+          "doc_id": "F1525",
+          "score": 0.8272556662559509
+        },
+        {
+          "rank": 7,
+          "chunk_id": "F31117:headers:0013",
+          "doc_id": "F31117",
+          "score": 0.826183557510376
+        },
+        {
+          "rank": 8,
+          "chunk_id": "F31117:headers:0015",
+          "doc_id": "F31117",
+          "score": 0.8246856927871704
+        },
+        {
+          "rank": 9,
+          "chunk_id": "F612:headers:0003",
+          "doc_id": "F612",
+          "score": 0.8237302303314209
+        },
+        {
+          "rank": 10,
+          "chunk_id": "F31522:headers:0002",
+          "doc_id": "F31522",
+          "score": 0.8236679434776306
+        }
+      ],
+      "recall_at": {
+        "1": 1.0,
+        "3": 1.0,
+        "5": 1.0,
+        "10": 1.0
+      },
+      "all_found_at": {
+        "1": true,
+        "3": true,
+        "5": true,
+        "10": true
+      },
+      "evidence_recall_at": {
+        "1": 0.0,
+        "3": 1.0,
+        "5": 1.0,
+        "10": 1.0
+      },
+      "first_relevant_rank": 1,
+      "reciprocal_rank": 1.0,
+      "top_score": 0.9070075750350952,
+      "latency_ms": 204.5388330006972
+    },
+    {
+      "question_id": "q004",
+      "question": "J'ai quitté mon appart il y a deux ans et mon ancien proprio me réclame des loyers impayés. Il peut encore le faire ?",
+      "category": "lookup",
+      "split": "dev",
+      "expected_docs": [
+        "F479"
+      ],
+      "hits": [
+        {
+          "rank": 1,
+          "chunk_id": "F2044:headers:0001",
+          "doc_id": "F2044",
+          "score": 0.880866527557373
+        },
+        {
+          "rank": 2,
+          "chunk_id": "F479:headers:0000",
+          "doc_id": "F479",
+          "score": 0.8721640110015869
+        },
+        {
+          "rank": 3,
+          "chunk_id": "F947:headers:0012",
+          "doc_id": "F947",
+          "score": 0.8665751814842224
+        },
+        {
+          "rank": 4,
+          "chunk_id": "F947:headers:0005",
+          "doc_id": "F947",
+          "score": 0.864717960357666
+        },
+        {
+          "rank": 5,
+          "chunk_id": "F34396:headers:0010",
+          "doc_id": "F34396",
+          "score": 0.8590810894966125
+        },
+        {
+          "rank": 6,
+          "chunk_id": "F31267:headers:0007",
+          "doc_id": "F31267",
+          "score": 0.8578755855560303
+        },
+        {
+          "rank": 7,
+          "chunk_id": "F31267:headers:0027",
+          "doc_id": "F31267",
+          "score": 0.8570529818534851
+        },
+        {
+          "rank": 8,
+          "chunk_id": "F1317:headers:0014",
+          "doc_id": "F1317",
+          "score": 0.8569256067276001
+        },
+        {
+          "rank": 9,
+          "chunk_id": "F1214:headers:0010",
+          "doc_id": "F1214",
+          "score": 0.8549660444259644
+        },
+        {
+          "rank": 10,
+          "chunk_id": "F31272:headers:0005",
+          "doc_id": "F31272",
+          "score": 0.854649543762207
+        }
+      ],
+      "recall_at": {
+        "1": 0.0,
+        "3": 1.0,
+        "5": 1.0,
+        "10": 1.0
+      },
+      "all_found_at": {
+        "1": false,
+        "3": true,
+        "5": true,
+        "10": true
+      },
+      "evidence_recall_at": {
+        "1": 0.0,
+        "3": 1.0,
+        "5": 1.0,
+        "10": 1.0
+      },
+      "first_relevant_rank": 2,
+      "reciprocal_rank": 0.5,
+      "top_score": 0.880866527557373,
+      "latency_ms": 1900.4512499959674
+    },
+    {
+      "question_id": "q005",
+      "question": "Mes voisins du dessus font la fête jusqu'à 3 h du matin presque tous les samedis. Qu'est-ce qu'ils risquent ?",
+      "category": "lookup",
+      "split": "dev",
+      "expected_docs": [
+        "F612"
+      ],
+      "hits": [
+        {
+          "rank": 1,
+          "chunk_id": "F31117:headers:0001",
+          "doc_id": "F31117",
+          "score": 0.8464416265487671
+        },
+        {
+          "rank": 2,
+          "chunk_id": "F31117:headers:0009",
+          "doc_id": "F31117",
+          "score": 0.8436849117279053
+        },
+        {
+          "rank": 3,
+          "chunk_id": "F612:headers:0001",
+          "doc_id": "F612",
+          "score": 0.843675434589386
+        },
+        {
+          "rank": 4,
+          "chunk_id": "F612:headers:0005",
+          "doc_id": "F612",
+          "score": 0.8433869481086731
+        },
+        {
+          "rank": 5,
+          "chunk_id": "F31117:headers:0007",
+          "doc_id": "F31117",
+          "score": 0.8418043255805969
+        },
+        {
+          "rank": 6,
+          "chunk_id": "F31117:headers:0002",
+          "doc_id": "F31117",
+          "score": 0.8391702175140381
+        },
+        {
+          "rank": 7,
+          "chunk_id": "F31522:headers:0002",
+          "doc_id": "F31522",
+          "score": 0.8379159569740295
+        },
+        {
+          "rank": 8,
+          "chunk_id": "F31117:headers:0005",
+          "doc_id": "F31117",
+          "score": 0.8371329307556152
+        },
+        {
+          "rank": 9,
+          "chunk_id": "F31117:headers:0015",
+          "doc_id": "F31117",
+          "score": 0.8341169357299805
+        },
+        {
+          "rank": 10,
+          "chunk_id": "F31117:headers:0006",
+          "doc_id": "F31117",
+          "score": 0.8325653672218323
+        }
+      ],
+      "recall_at": {
+        "1": 0.0,
+        "3": 1.0,
+        "5": 1.0,
+        "10": 1.0
+      },
+      "all_found_at": {
+        "1": false,
+        "3": true,
+        "5": true,
+        "10": true
+      },
+      "evidence_recall_at": {
+        "1": 0.0,
+        "3": 0.3333333333333333,
+        "5": 1.0,
+        "10": 1.0
+      },
+      "first_relevant_rank": 3,
+      "reciprocal_rank": 0.3333333333333333,
+      "top_score": 0.8464416265487671,
+      "latency_ms": 571.6094169765711
+    },
+    {
+      "question_id": "q007",
+      "question": "Je suis locataire avec une chaudière au gaz. Tous les combien dois-je la faire contrôler, et quel papier dois-je garder ?",
+      "category": "lookup",
+      "split": "dev",
+      "expected_docs": [
+        "F20760"
+      ],
+      "hits": [
+        {
+          "rank": 1,
+          "chunk_id": "F20760:headers:0000",
+          "doc_id": "F20760",
+          "score": 0.8977537155151367
+        },
+        {
+          "rank": 2,
+          "chunk_id": "F20760:headers:0001",
+          "doc_id": "F20760",
+          "score": 0.8912433981895447
+        },
+        {
+          "rank": 3,
+          "chunk_id": "F20760:headers:0002",
+          "doc_id": "F20760",
+          "score": 0.8874424695968628
+        },
+        {
+          "rank": 4,
+          "chunk_id": "F20760:headers:0003",
+          "doc_id": "F20760",
+          "score": 0.8803844451904297
+        },
+        {
+          "rank": 5,
+          "chunk_id": "F32563:headers:0001",
+          "doc_id": "F32563",
+          "score": 0.8620696663856506
+        },
+        {
+          "rank": 6,
+          "chunk_id": "F17337:headers:0002",
+          "doc_id": "F17337",
+          "score": 0.8609157800674438
+        },
+        {
+          "rank": 7,
+          "chunk_id": "F17337:headers:0001",
+          "doc_id": "F17337",
+          "score": 0.8596965670585632
+        },
+        {
+          "rank": 8,
+          "chunk_id": "F31697:headers:0003",
+          "doc_id": "F31697",
+          "score": 0.8536030054092407
+        },
+        {
+          "rank": 9,
+          "chunk_id": "F32563:headers:0004",
+          "doc_id": "F32563",
+          "score": 0.8510665893554688
+        },
+        {
+          "rank": 10,
+          "chunk_id": "F31697:headers:0004",
+          "doc_id": "F31697",
+          "score": 0.8510238528251648
+        }
+      ],
+      "recall_at": {
+        "1": 1.0,
+        "3": 1.0,
+        "5": 1.0,
+        "10": 1.0
+      },
+      "all_found_at": {
+        "1": true,
+        "3": true,
+        "5": true,
+        "10": true
+      },
+      "evidence_recall_at": {
+        "1": 0.0,
+        "3": 1.0,
+        "5": 1.0,
+        "10": 1.0
+      },
+      "first_relevant_rank": 1,
+      "reciprocal_rank": 1.0,
+      "top_score": 0.8977537155151367,
+      "latency_ms": 1199.4110830128193
+    },
+    {
+      "question_id": "q008",
+      "question": "Mon propriétaire menace de me mettre dehors en décembre parce que j'ai des retards de loyer. Il peut ?",
+      "category": "lookup",
+      "split": "dev",
+      "expected_docs": [
+        "F34736"
+      ],
+      "hits": [
+        {
+          "rank": 1,
+          "chunk_id": "F31044:headers:0001",
+          "doc_id": "F31044",
+          "score": 0.8638613820075989
+        },
+        {
+          "rank": 2,
+          "chunk_id": "F31272:headers:0005",
+          "doc_id": "F31272",
+          "score": 0.8634282946586609
+        },
+        {
+          "rank": 3,
+          "chunk_id": "F34396:headers:0010",
+          "doc_id": "F34396",
+          "score": 0.8568001985549927
+        },
+        {
+          "rank": 4,
+          "chunk_id": "F31272:headers:0025",
+          "doc_id": "F31272",
+          "score": 0.8561107516288757
+        },
+        {
+          "rank": 5,
+          "chunk_id": "F31272:headers:0012",
+          "doc_id": "F31272",
+          "score": 0.8545718193054199
+        },
+        {
+          "rank": 6,
+          "chunk_id": "F31272:headers:0026",
+          "doc_id": "F31272",
+          "score": 0.8543033003807068
+        },
+        {
+          "rank": 7,
+          "chunk_id": "F2559:headers:0008",
+          "doc_id": "F2559",
+          "score": 0.8542566299438477
+        },
+        {
+          "rank": 8,
+          "chunk_id": "F1214:headers:0016",
+          "doc_id": "F1214",
+          "score": 0.8534688353538513
+        },
+        {
+          "rank": 9,
+          "chunk_id": "F31272:headers:0010",
+          "doc_id": "F31272",
+          "score": 0.8533053398132324
+        },
+        {
+          "rank": 10,
+          "chunk_id": "F2889:headers:0000",
+          "doc_id": "F2889",
+          "score": 0.8517350554466248
+        }
+      ],
+      "recall_at": {
+        "1": 0.0,
+        "3": 0.0,
+        "5": 0.0,
+        "10": 0.0
+      },
+      "all_found_at": {
+        "1": false,
+        "3": false,
+        "5": false,
+        "10": false
+      },
+      "evidence_recall_at": {
+        "1": 0.0,
+        "3": 0.0,
+        "5": 0.0,
+        "10": 0.0
+      },
+      "first_relevant_rank": null,
+      "reciprocal_rank": 0.0,
+      "top_score": 0.8638613820075989,
+      "latency_ms": 1405.6355000066105
+    },
+    {
+      "question_id": "q011",
+      "question": "J'ai obtenu MaPrimeRénov' pour changer ma chaudière. Est-ce que je peux en plus prendre un éco-prêt à taux zéro pour payer ce qui reste ?",
+      "category": "lookup",
+      "split": "dev",
+      "expected_docs": [
+        "F36448"
+      ],
+      "hits": [
+        {
+          "rank": 1,
+          "chunk_id": "F36448:headers:0001",
+          "doc_id": "F36448",
+          "score": 0.8958415389060974
+        },
+        {
+          "rank": 2,
+          "chunk_id": "F36448:headers:0000",
+          "doc_id": "F36448",
+          "score": 0.8912200927734375
+        },
+        {
+          "rank": 3,
+          "chunk_id": "F36448:headers:0002",
+          "doc_id": "F36448",
+          "score": 0.8872941732406616
+        },
+        {
+          "rank": 4,
+          "chunk_id": "F35083:headers:0018",
+          "doc_id": "F35083",
+          "score": 0.8766482472419739
+        },
+        {
+          "rank": 5,
+          "chunk_id": "F19905:headers:0000",
+          "doc_id": "F19905",
+          "score": 0.8751561641693115
+        },
+        {
+          "rank": 6,
+          "chunk_id": "F35083:headers:0037",
+          "doc_id": "F35083",
+          "score": 0.8703073263168335
+        },
+        {
+          "rank": 7,
+          "chunk_id": "F19905:headers:0009",
+          "doc_id": "F19905",
+          "score": 0.8694320321083069
+        },
+        {
+          "rank": 8,
+          "chunk_id": "F35083:headers:0010",
+          "doc_id": "F35083",
+          "score": 0.8692846894264221
+        },
+        {
+          "rank": 9,
+          "chunk_id": "F19905:headers:0013",
+          "doc_id": "F19905",
+          "score": 0.8684924244880676
+        },
+        {
+          "rank": 10,
+          "chunk_id": "F38425:headers:0000",
+          "doc_id": "F38425",
+          "score": 0.8669646978378296
+        }
+      ],
+      "recall_at": {
+        "1": 1.0,
+        "3": 1.0,
+        "5": 1.0,
+        "10": 1.0
+      },
+      "all_found_at": {
+        "1": true,
+        "3": true,
+        "5": true,
+        "10": true
+      },
+      "evidence_recall_at": {
+        "1": 0.0,
+        "3": 1.0,
+        "5": 1.0,
+        "10": 1.0
+      },
+      "first_relevant_rank": 1,
+      "reciprocal_rank": 1.0,
+      "top_score": 0.8958415389060974,
+      "latency_ms": 1186.4094999909867
+    },
+    {
+      "question_id": "q012",
+      "question": "Cinq ans après la construction de notre maison, de grosses fissures apparaissent dans les murs porteurs. Le constructeur doit-il encore réparer ?",
+      "category": "lookup",
+      "split": "dev",
+      "expected_docs": [
+        "F2034"
+      ],
+      "hits": [
+        {
+          "rank": 1,
+          "chunk_id": "F2958:headers:0001",
+          "doc_id": "F2958",
+          "score": 0.8707578778266907
+        },
+        {
+          "rank": 2,
+          "chunk_id": "F2034:headers:0001",
+          "doc_id": "F2034",
+          "score": 0.8692253828048706
+        },
+        {
+          "rank": 3,
+          "chunk_id": "F2958:headers:0004",
+          "doc_id": "F2958",
+          "score": 0.86370849609375
+        },
+        {
+          "rank": 4,
+          "chunk_id": "F2958:headers:0003",
+          "doc_id": "F2958",
+          "score": 0.8523046970367432
+        },
+        {
+          "rank": 5,
+          "chunk_id": "F2958:headers:0000",
+          "doc_id": "F2958",
+          "score": 0.8522423505783081
+        },
+        {
+          "rank": 6,
+          "chunk_id": "F2415:headers:0001",
+          "doc_id": "F2415",
+          "score": 0.8520383834838867
+        },
+        {
+          "rank": 7,
+          "chunk_id": "F2958:headers:0002",
+          "doc_id": "F2958",
+          "score": 0.8513058423995972
+        },
+        {
+          "rank": 8,
+          "chunk_id": "F2034:headers:0002",
+          "doc_id": "F2034",
+          "score": 0.8495385646820068
+        },
+        {
+          "rank": 9,
+          "chunk_id": "F2034:headers:0000",
+          "doc_id": "F2034",
+          "score": 0.8478080034255981
+        },
+        {
+          "rank": 10,
+          "chunk_id": "F36909:headers:0004",
+          "doc_id": "F36909",
+          "score": 0.8449658751487732
+        }
+      ],
+      "recall_at": {
+        "1": 0.0,
+        "3": 1.0,
+        "5": 1.0,
+        "10": 1.0
+      },
+      "all_found_at": {
+        "1": false,
+        "3": true,
+        "5": true,
+        "10": true
+      },
+      "evidence_recall_at": {
+        "1": 0.0,
+        "3": 0.0,
+        "5": 0.0,
+        "10": 1.0
+      },
+      "first_relevant_rank": 2,
+      "reciprocal_rank": 0.5,
+      "top_score": 0.8707578778266907,
+      "latency_ms": 979.0686249907594
+    },
+    {
+      "question_id": "q014",
+      "question": "J'ai déposé mon permis de construire pour une maison. La mairie a combien de temps pour me répondre, et que se passe-t-il si elle ne répond pas ?",
+      "category": "lookup",
+      "split": "dev",
+      "expected_docs": [
+        "F1986"
+      ],
+      "hits": [
+        {
+          "rank": 1,
+          "chunk_id": "F17665:headers:0009",
+          "doc_id": "F17665",
+          "score": 0.8885493874549866
+        },
+        {
+          "rank": 2,
+          "chunk_id": "F1986:headers:0009",
+          "doc_id": "F1986",
+          "score": 0.8873251676559448
+        },
+        {
+          "rank": 3,
+          "chunk_id": "F1986:headers:0010",
+          "doc_id": "F1986",
+          "score": 0.8863180875778198
+        },
+        {
+          "rank": 4,
+          "chunk_id": "F17665:headers:0008",
+          "doc_id": "F17665",
+          "score": 0.8844890594482422
+        },
+        {
+          "rank": 5,
+          "chunk_id": "F36909:headers:0003",
+          "doc_id": "F36909",
+          "score": 0.8813777565956116
+        },
+        {
+          "rank": 6,
+          "chunk_id": "F17665:headers:0012",
+          "doc_id": "F17665",
+          "score": 0.8801547288894653
+        },
+        {
+          "rank": 7,
+          "chunk_id": "F36909:headers:0002",
+          "doc_id": "F36909",
+          "score": 0.8792923092842102
+        },
+        {
+          "rank": 8,
+          "chunk_id": "F1997:headers:0006",
+          "doc_id": "F1997",
+          "score": 0.8783044219017029
+        },
+        {
+          "rank": 9,
+          "chunk_id": "F36961:headers:0008",
+          "doc_id": "F36961",
+          "score": 0.8779271841049194
+        },
+        {
+          "rank": 10,
+          "chunk_id": "F1986:headers:0000",
+          "doc_id": "F1986",
+          "score": 0.8759095072746277
+        }
+      ],
+      "recall_at": {
+        "1": 0.0,
+        "3": 1.0,
+        "5": 1.0,
+        "10": 1.0
+      },
+      "all_found_at": {
+        "1": false,
+        "3": true,
+        "5": true,
+        "10": true
+      },
+      "evidence_recall_at": {
+        "1": 0.0,
+        "3": 1.0,
+        "5": 1.0,
+        "10": 1.0
+      },
+      "first_relevant_rank": 2,
+      "reciprocal_rank": 0.5,
+      "top_score": 0.8885493874549866,
+      "latency_ms": 1206.368665996706
+    },
+    {
+      "question_id": "q015",
+      "question": "J'ai reçu mon chèque énergie en mai. Jusqu'à quand je peux l'utiliser ?",
+      "category": "lookup",
+      "split": "dev",
+      "expected_docs": [
+        "F33667"
+      ],
+      "hits": [
+        {
+          "rank": 1,
+          "chunk_id": "F33667:headers:0016",
+          "doc_id": "F33667",
+          "score": 0.8937644362449646
+        },
+        {
+          "rank": 2,
+          "chunk_id": "F33667:headers:0006",
+          "doc_id": "F33667",
+          "score": 0.8799388408660889
+        },
+        {
+          "rank": 3,
+          "chunk_id": "F33667:headers:0007",
+          "doc_id": "F33667",
+          "score": 0.8766342997550964
+        },
+        {
+          "rank": 4,
+          "chunk_id": "F33667:headers:0011",
+          "doc_id": "F33667",
+          "score": 0.8679812550544739
+        },
+        {
+          "rank": 5,
+          "chunk_id": "F33667:headers:0013",
+          "doc_id": "F33667",
+          "score": 0.8671167492866516
+        },
+        {
+          "rank": 6,
+          "chunk_id": "F33667:headers:0012",
+          "doc_id": "F33667",
+          "score": 0.8660417795181274
+        },
+        {
+          "rank": 7,
+          "chunk_id": "F33667:headers:0014",
+          "doc_id": "F33667",
+          "score": 0.865928053855896
+        },
+        {
+          "rank": 8,
+          "chunk_id": "F33667:headers:0000",
+          "doc_id": "F33667",
+          "score": 0.8640245795249939
+        },
+        {
+          "rank": 9,
+          "chunk_id": "F33667:headers:0004",
+          "doc_id": "F33667",
+          "score": 0.8628090620040894
+        },
+        {
+          "rank": 10,
+          "chunk_id": "F33667:headers:0010",
+          "doc_id": "F33667",
+          "score": 0.8613149523735046
+        }
+      ],
+      "recall_at": {
+        "1": 1.0,
+        "3": 1.0,
+        "5": 1.0,
+        "10": 1.0
+      },
+      "all_found_at": {
+        "1": true,
+        "3": true,
+        "5": true,
+        "10": true
+      },
+      "evidence_recall_at": {
+        "1": 1.0,
+        "3": 1.0,
+        "5": 1.0,
+        "10": 1.0
+      },
+      "first_relevant_rank": 1,
+      "reciprocal_rank": 1.0,
+      "top_score": 0.8937644362449646,
+      "latency_ms": 1165.9167500038166
+    },
+    {
+      "question_id": "q017",
+      "question": "On veut virer notre syndic à la prochaine AG. Il faut quelle majorité pour voter ça ?",
+      "category": "lookup",
+      "split": "dev",
+      "expected_docs": [
+        "F2137"
+      ],
+      "hits": [
+        {
+          "rank": 1,
+          "chunk_id": "F1548:headers:0002",
+          "doc_id": "F1548",
+          "score": 0.8666089773178101
+        },
+        {
+          "rank": 2,
+          "chunk_id": "F2619:headers:0005",
+          "doc_id": "F2619",
+          "score": 0.8622720837593079
+        },
+        {
+          "rank": 3,
+          "chunk_id": "F2137:headers:0000",
+          "doc_id": "F2137",
+          "score": 0.862051248550415
+        },
+        {
+          "rank": 4,
+          "chunk_id": "F1548:headers:0001",
+          "doc_id": "F1548",
+          "score": 0.8606643676757812
+        },
+        {
+          "rank": 5,
+          "chunk_id": "F31671:headers:0001",
+          "doc_id": "F31671",
+          "score": 0.8584779500961304
+        },
+        {
+          "rank": 6,
+          "chunk_id": "F2619:headers:0006",
+          "doc_id": "F2619",
+          "score": 0.8576673865318298
+        },
+        {
+          "rank": 7,
+          "chunk_id": "F2137:headers:0003",
+          "doc_id": "F2137",
+          "score": 0.8559076189994812
+        },
+        {
+          "rank": 8,
+          "chunk_id": "F2137:headers:0004",
+          "doc_id": "F2137",
+          "score": 0.8530394434928894
+        },
+        {
+          "rank": 9,
+          "chunk_id": "F2619:headers:0003",
+          "doc_id": "F2619",
+          "score": 0.8524096012115479
+        },
+        {
+          "rank": 10,
+          "chunk_id": "F2137:headers:0010",
+          "doc_id": "F2137",
+          "score": 0.850000262260437
+        }
+      ],
+      "recall_at": {
+        "1": 0.0,
+        "3": 1.0,
+        "5": 1.0,
+        "10": 1.0
+      },
+      "all_found_at": {
+        "1": false,
+        "3": true,
+        "5": true,
+        "10": true
+      },
+      "evidence_recall_at": {
+        "1": 0.0,
+        "3": 1.0,
+        "5": 1.0,
+        "10": 1.0
+      },
+      "first_relevant_rank": 3,
+      "reciprocal_rank": 0.3333333333333333,
+      "top_score": 0.8666089773178101,
+      "latency_ms": 1299.9056249973364
+    },
+    {
+      "question_id": "q019",
+      "question": "Notre syndic a été désigné il y a bientôt 3 ans. Son contrat s'arrête quand, et qu'est-ce qu'on peut faire à la fin ?",
+      "category": "lookup",
+      "split": "dev",
+      "expected_docs": [
+        "F1548"
+      ],
+      "hits": [
+        {
+          "rank": 1,
+          "chunk_id": "F1548:headers:0000",
+          "doc_id": "F1548",
+          "score": 0.900202214717865
+        },
+        {
+          "rank": 2,
+          "chunk_id": "F2608:headers:0010",
+          "doc_id": "F2608",
+          "score": 0.8971640467643738
+        },
+        {
+          "rank": 3,
+          "chunk_id": "F31671:headers:0003",
+          "doc_id": "F31671",
+          "score": 0.8961345553398132
+        },
+        {
+          "rank": 4,
+          "chunk_id": "F31671:headers:0001",
+          "doc_id": "F31671",
+          "score": 0.8940248489379883
+        },
+        {
+          "rank": 5,
+          "chunk_id": "F1548:headers:0001",
+          "doc_id": "F1548",
+          "score": 0.8933459520339966
+        },
+        {
+          "rank": 6,
+          "chunk_id": "F31671:headers:0000",
+          "doc_id": "F31671",
+          "score": 0.8913000822067261
+        },
+        {
+          "rank": 7,
+          "chunk_id": "F1548:headers:0002",
+          "doc_id": "F1548",
+          "score": 0.8892505764961243
+        },
+        {
+          "rank": 8,
+          "chunk_id": "F2608:headers:0022",
+          "doc_id": "F2608",
+          "score": 0.8860440254211426
+        },
+        {
+          "rank": 9,
+          "chunk_id": "F31671:headers:0002",
+          "doc_id": "F31671",
+          "score": 0.8858382701873779
+        },
+        {
+          "rank": 10,
+          "chunk_id": "F2610:headers:0008",
+          "doc_id": "F2610",
+          "score": 0.879105269908905
+        }
+      ],
+      "recall_at": {
+        "1": 1.0,
+        "3": 1.0,
+        "5": 1.0,
+        "10": 1.0
+      },
+      "all_found_at": {
+        "1": true,
+        "3": true,
+        "5": true,
+        "10": true
+      },
+      "evidence_recall_at": {
+        "1": 1.0,
+        "3": 1.0,
+        "5": 1.0,
+        "10": 1.0
+      },
+      "first_relevant_rank": 1,
+      "reciprocal_rank": 1.0,
+      "top_score": 0.900202214717865,
+      "latency_ms": 1060.710834019119
+    },
+    {
+      "question_id": "q021",
+      "question": "Je loue un bureau dans un immeuble en copropriété à Paris et j'aimerais le transformer en logement pour y habiter. Quelles démarches dois-je faire ?",
+      "category": "multi_hop",
+      "split": "dev",
+      "expected_docs": [
+        "F2416",
+        "F35336"
+      ],
+      "hits": [
+        {
+          "rank": 1,
+          "chunk_id": "F2416:headers:0000",
+          "doc_id": "F2416",
+          "score": 0.8977386355400085
+        },
+        {
+          "rank": 2,
+          "chunk_id": "F2416:headers:0003",
+          "doc_id": "F2416",
+          "score": 0.8915175199508667
+        },
+        {
+          "rank": 3,
+          "chunk_id": "F2416:headers:0004",
+          "doc_id": "F2416",
+          "score": 0.8846326470375061
+        },
+        {
+          "rank": 4,
+          "chunk_id": "F3107:headers:0001",
+          "doc_id": "F3107",
+          "score": 0.8780673146247864
+        },
+        {
+          "rank": 5,
+          "chunk_id": "F24611:headers:0015",
+          "doc_id": "F24611",
+          "score": 0.8748797178268433
+        },
+        {
+          "rank": 6,
+          "chunk_id": "F37976:headers:0000",
+          "doc_id": "F37976",
+          "score": 0.8733989000320435
+        },
+        {
+          "rank": 7,
+          "chunk_id": "F35336:headers:0006",
+          "doc_id": "F35336",
+          "score": 0.8732725977897644
+        },
+        {
+          "rank": 8,
+          "chunk_id": "F24611:headers:0005",
+          "doc_id": "F24611",
+          "score": 0.8729454278945923
+        },
+        {
+          "rank": 9,
+          "chunk_id": "F37976:headers:0005",
+          "doc_id": "F37976",
+          "score": 0.8714413642883301
+        },
+        {
+          "rank": 10,
+          "chunk_id": "F31531:headers:0002",
+          "doc_id": "F31531",
+          "score": 0.8696771860122681
+        }
+      ],
+      "recall_at": {
+        "1": 0.5,
+        "3": 0.5,
+        "5": 0.5,
+        "10": 1.0
+      },
+      "all_found_at": {
+        "1": false,
+        "3": false,
+        "5": false,
+        "10": true
+      },
+      "evidence_recall_at": {
+        "1": 0.0,
+        "3": 0.5,
+        "5": 0.5,
+        "10": 0.6666666666666666
+      },
+      "first_relevant_rank": 1,
+      "reciprocal_rank": 1.0,
+      "top_score": 0.8977386355400085,
+      "latency_ms": 1277.2677920002025
+    },
+    {
+      "question_id": "q022",
+      "question": "J'ai percé des trous de cheville pour accrocher des étagères. Mon propriétaire peut-il garder une partie de ma caution pour ça quand je pars ?",
+      "category": "multi_hop",
+      "split": "dev",
+      "expected_docs": [
+        "F31697",
+        "F31269"
+      ],
+      "hits": [
+        {
+          "rank": 1,
+          "chunk_id": "F31267:headers:0021",
+          "doc_id": "F31267",
+          "score": 0.8450703024864197
+        },
+        {
+          "rank": 2,
+          "chunk_id": "F31267:headers:0011",
+          "doc_id": "F31267",
+          "score": 0.8448963165283203
+        },
+        {
+          "rank": 3,
+          "chunk_id": "F1169:headers:0006",
+          "doc_id": "F1169",
+          "score": 0.8425317406654358
+        },
+        {
+          "rank": 4,
+          "chunk_id": "F31267:headers:0002",
+          "doc_id": "F31267",
+          "score": 0.8409046530723572
+        },
+        {
+          "rank": 5,
+          "chunk_id": "F31699:headers:0002",
+          "doc_id": "F31699",
+          "score": 0.839645266532898
+        },
+        {
+          "rank": 6,
+          "chunk_id": "F31267:headers:0007",
+          "doc_id": "F31267",
+          "score": 0.8365514874458313
+        },
+        {
+          "rank": 7,
+          "chunk_id": "F1874:headers:0005",
+          "doc_id": "F1874",
+          "score": 0.8343766927719116
+        },
+        {
+          "rank": 8,
+          "chunk_id": "F31699:headers:0004",
+          "doc_id": "F31699",
+          "score": 0.8339095115661621
+        },
+        {
+          "rank": 9,
+          "chunk_id": "F31269:headers:0023",
+          "doc_id": "F31269",
+          "score": 0.8332725763320923
+        },
+        {
+          "rank": 10,
+          "chunk_id": "F31267:headers:0017",
+          "doc_id": "F31267",
+          "score": 0.8330143094062805
+        }
+      ],
+      "recall_at": {
+        "1": 0.0,
+        "3": 0.0,
+        "5": 0.0,
+        "10": 0.5
+      },
+      "all_found_at": {
+        "1": false,
+        "3": false,
+        "5": false,
+        "10": false
+      },
+      "evidence_recall_at": {
+        "1": 0.0,
+        "3": 0.0,
+        "5": 0.0,
+        "10": 0.0
+      },
+      "first_relevant_rank": 9,
+      "reciprocal_rank": 0.1111111111111111,
+      "top_score": 0.8450703024864197,
+      "latency_ms": 1629.559208988212
+    },
+    {
+      "question_id": "q024",
+      "question": "Mon appartement est classé G au diagnostic énergie et mon locataire a signé son bail en 2023. Je peux augmenter le loyer avec l'indice chaque année, et renouveler son bail à l'échéance ?",
+      "category": "multi_hop",
+      "split": "dev",
+      "expected_docs": [
+        "F1311",
+        "F479",
+        "F16096"
+      ],
+      "hits": [
+        {
+          "rank": 1,
+          "chunk_id": "F1312:headers:0001",
+          "doc_id": "F1312",
+          "score": 0.9016708731651306
+        },
+        {
+          "rank": 2,
+          "chunk_id": "F1312:headers:0009",
+          "doc_id": "F1312",
+          "score": 0.892778754234314
+        },
+        {
+          "rank": 3,
+          "chunk_id": "F1310:headers:0007",
+          "doc_id": "F1310",
+          "score": 0.8917484879493713
+        },
+        {
+          "rank": 4,
+          "chunk_id": "F1310:headers:0009",
+          "doc_id": "F1310",
+          "score": 0.8888790011405945
+        },
+        {
+          "rank": 5,
+          "chunk_id": "F1311:headers:0000",
+          "doc_id": "F1311",
+          "score": 0.8853276371955872
+        },
+        {
+          "rank": 6,
+          "chunk_id": "F1310:headers:0005",
+          "doc_id": "F1310",
+          "score": 0.8847150206565857
+        },
+        {
+          "rank": 7,
+          "chunk_id": "F1310:headers:0003",
+          "doc_id": "F1310",
+          "score": 0.8838161826133728
+        },
+        {
+          "rank": 8,
+          "chunk_id": "F1310:headers:0002",
+          "doc_id": "F1310",
+          "score": 0.882993757724762
+        },
+        {
+          "rank": 9,
+          "chunk_id": "F1310:headers:0001",
+          "doc_id": "F1310",
+          "score": 0.8814540505409241
+        },
+        {
+          "rank": 10,
+          "chunk_id": "F1310:headers:0006",
+          "doc_id": "F1310",
+          "score": 0.88077312707901
+        }
+      ],
+      "recall_at": {
+        "1": 0.0,
+        "3": 0.0,
+        "5": 0.3333333333333333,
+        "10": 0.3333333333333333
+      },
+      "all_found_at": {
+        "1": false,
+        "3": false,
+        "5": false,
+        "10": false
+      },
+      "evidence_recall_at": {
+        "1": 0.0,
+        "3": 0.0,
+        "5": 0.0,
+        "10": 0.0
+      },
+      "first_relevant_rank": 5,
+      "reciprocal_rank": 0.2,
+      "top_score": 0.9016708731651306,
+      "latency_ms": 933.9488749974407
+    },
+    {
+      "question_id": "q026",
+      "question": "On veut une piscine enterrée de 50 m² sans abri. Quelle autorisation faut-il, et va-t-on payer une taxe dessus ?",
+      "category": "multi_hop",
+      "split": "dev",
+      "expected_docs": [
+        "F31404",
+        "F23263"
+      ],
+      "hits": [
+        {
+          "rank": 1,
+          "chunk_id": "F31404:headers:0003",
+          "doc_id": "F31404",
+          "score": 0.9182748794555664
+        },
+        {
+          "rank": 2,
+          "chunk_id": "F31404:headers:0001",
+          "doc_id": "F31404",
+          "score": 0.9172963500022888
+        },
+        {
+          "rank": 3,
+          "chunk_id": "F31404:headers:0000",
+          "doc_id": "F31404",
+          "score": 0.9158000349998474
+        },
+        {
+          "rank": 4,
+          "chunk_id": "F31404:headers:0002",
+          "doc_id": "F31404",
+          "score": 0.9129085540771484
+        },
+        {
+          "rank": 5,
+          "chunk_id": "F31404:headers:0004",
+          "doc_id": "F31404",
+          "score": 0.9104375839233398
+        },
+        {
+          "rank": 6,
+          "chunk_id": "F31404:headers:0005",
+          "doc_id": "F31404",
+          "score": 0.9102737307548523
+        },
+        {
+          "rank": 7,
+          "chunk_id": "F31404:headers:0006",
+          "doc_id": "F31404",
+          "score": 0.9053248167037964
+        },
+        {
+          "rank": 8,
+          "chunk_id": "F31404:headers:0007",
+          "doc_id": "F31404",
+          "score": 0.9002999663352966
+        },
+        {
+          "rank": 9,
+          "chunk_id": "F31404:headers:0009",
+          "doc_id": "F31404",
+          "score": 0.8864496350288391
+        },
+        {
+          "rank": 10,
+          "chunk_id": "F31404:headers:0010",
+          "doc_id": "F31404",
+          "score": 0.8862993121147156
+        }
+      ],
+      "recall_at": {
+        "1": 0.5,
+        "3": 0.5,
+        "5": 0.5,
+        "10": 0.5
+      },
+      "all_found_at": {
+        "1": false,
+        "3": false,
+        "5": false,
+        "10": false
+      },
+      "evidence_recall_at": {
+        "1": 0.25,
+        "3": 0.5,
+        "5": 0.5,
+        "10": 0.5
+      },
+      "first_relevant_rank": 1,
+      "reciprocal_rank": 1.0,
+      "top_score": 0.9182748794555664,
+      "latency_ms": 1166.3182910124306
+    },
+    {
+      "question_id": "q028",
+      "question": "Je mets mon appartement en location vide pour la première fois. Quels diagnostics je dois donner au locataire, et qu'est-ce que je dois faire pour le détecteur de fumée ?",
+      "category": "multi_hop",
+      "split": "dev",
+      "expected_docs": [
+        "F33463",
+        "F19950"
+      ],
+      "hits": [
+        {
+          "rank": 1,
+          "chunk_id": "F33463:headers:0001",
+          "doc_id": "F33463",
+          "score": 0.8890493512153625
+        },
+        {
+          "rank": 2,
+          "chunk_id": "F33463:headers:0002",
+          "doc_id": "F33463",
+          "score": 0.8872347474098206
+        },
+        {
+          "rank": 3,
+          "chunk_id": "F33463:headers:0000",
+          "doc_id": "F33463",
+          "score": 0.878287136554718
+        },
+        {
+          "rank": 4,
+          "chunk_id": "F19950:headers:0000",
+          "doc_id": "F19950",
+          "score": 0.8770461082458496
+        },
+        {
+          "rank": 5,
+          "chunk_id": "F19950:headers:0002",
+          "doc_id": "F19950",
+          "score": 0.8764431476593018
+        },
+        {
+          "rank": 6,
+          "chunk_id": "F17337:headers:0001",
+          "doc_id": "F17337",
+          "score": 0.8747472763061523
+        },
+        {
+          "rank": 7,
+          "chunk_id": "F19950:headers:0001",
+          "doc_id": "F19950",
+          "score": 0.872674286365509
+        },
+        {
+          "rank": 8,
+          "chunk_id": "F10798:headers:0003",
+          "doc_id": "F10798",
+          "score": 0.872127115726471
+        },
+        {
+          "rank": 9,
+          "chunk_id": "F10798:headers:0000",
+          "doc_id": "F10798",
+          "score": 0.8665388822555542
+        },
+        {
+          "rank": 10,
+          "chunk_id": "F10798:headers:0001",
+          "doc_id": "F10798",
+          "score": 0.8657743334770203
+        }
+      ],
+      "recall_at": {
+        "1": 0.5,
+        "3": 0.5,
+        "5": 1.0,
+        "10": 1.0
+      },
+      "all_found_at": {
+        "1": false,
+        "3": false,
+        "5": true,
+        "10": true
+      },
+      "evidence_recall_at": {
+        "1": 0.5,
+        "3": 0.5,
+        "5": 0.5,
+        "10": 1.0
+      },
+      "first_relevant_rank": 1,
+      "reciprocal_rank": 1.0,
+      "top_score": 0.8890493512153625,
+      "latency_ms": 1022.0963750034571
+    },
+    {
+      "question_id": "q030",
+      "question": "Mon locataire touche l'APL, qui m'est versée directement, mais il ne paie plus sa part depuis trois mois. Je dois prévenir la Caf ? Et je peux le faire expulser cet hiver ?",
+      "category": "multi_hop",
+      "split": "dev",
+      "expected_docs": [
+        "F32037",
+        "F34736"
+      ],
+      "hits": [
+        {
+          "rank": 1,
+          "chunk_id": "F32037:headers:0003",
+          "doc_id": "F32037",
+          "score": 0.8953918218612671
+        },
+        {
+          "rank": 2,
+          "chunk_id": "F32037:headers:0000",
+          "doc_id": "F32037",
+          "score": 0.8888728618621826
+        },
+        {
+          "rank": 3,
+          "chunk_id": "F31272:headers:0019",
+          "doc_id": "F31272",
+          "score": 0.8872620463371277
+        },
+        {
+          "rank": 4,
+          "chunk_id": "F12006:headers:0008",
+          "doc_id": "F12006",
+          "score": 0.8864237070083618
+        },
+        {
+          "rank": 5,
+          "chunk_id": "F32037:headers:0002",
+          "doc_id": "F32037",
+          "score": 0.8753297924995422
+        },
+        {
+          "rank": 6,
+          "chunk_id": "F32037:headers:0005",
+          "doc_id": "F32037",
+          "score": 0.8751845955848694
+        },
+        {
+          "rank": 7,
+          "chunk_id": "F32037:headers:0004",
+          "doc_id": "F32037",
+          "score": 0.8718616962432861
+        },
+        {
+          "rank": 8,
+          "chunk_id": "F12006:headers:0002",
+          "doc_id": "F12006",
+          "score": 0.8712912797927856
+        },
+        {
+          "rank": 9,
+          "chunk_id": "F12006:headers:0001",
+          "doc_id": "F12006",
+          "score": 0.8708757162094116
+        },
+        {
+          "rank": 10,
+          "chunk_id": "F12006:headers:0000",
+          "doc_id": "F12006",
+          "score": 0.8692283034324646
+        }
+      ],
+      "recall_at": {
+        "1": 0.5,
+        "3": 0.5,
+        "5": 0.5,
+        "10": 0.5
+      },
+      "all_found_at": {
+        "1": false,
+        "3": false,
+        "5": false,
+        "10": false
+      },
+      "evidence_recall_at": {
+        "1": 0.25,
+        "3": 0.75,
+        "5": 0.75,
+        "10": 0.75
+      },
+      "first_relevant_rank": 1,
+      "reciprocal_rank": 1.0,
+      "top_score": 0.8953918218612671,
+      "latency_ms": 3038.695374998497
+    },
+    {
+      "question_id": "q032",
+      "question": "Je vends mon appartement en copropriété en cours d'année, et des travaux ont été votés à la dernière AG. Qui paie les charges et les travaux, moi ou l'acheteur ?",
+      "category": "multi_hop",
+      "split": "dev",
+      "expected_docs": [
+        "F32920",
+        "F37294"
+      ],
+      "hits": [
+        {
+          "rank": 1,
+          "chunk_id": "F32920:headers:0001",
+          "doc_id": "F32920",
+          "score": 0.9267649054527283
+        },
+        {
+          "rank": 2,
+          "chunk_id": "F32920:headers:0000",
+          "doc_id": "F32920",
+          "score": 0.9147387742996216
+        },
+        {
+          "rank": 3,
+          "chunk_id": "F2590:headers:0005",
+          "doc_id": "F2590",
+          "score": 0.8774996399879456
+        },
+        {
+          "rank": 4,
+          "chunk_id": "F2604:headers:0021",
+          "doc_id": "F2604",
+          "score": 0.8768209218978882
+        },
+        {
+          "rank": 5,
+          "chunk_id": "F2604:headers:0022",
+          "doc_id": "F2604",
+          "score": 0.8748815655708313
+        },
+        {
+          "rank": 6,
+          "chunk_id": "F34026:headers:0005",
+          "doc_id": "F34026",
+          "score": 0.8745250701904297
+        },
+        {
+          "rank": 7,
+          "chunk_id": "F37190:headers:0027",
+          "doc_id": "F37190",
+          "score": 0.874277651309967
+        },
+        {
+          "rank": 8,
+          "chunk_id": "F2604:headers:0012",
+          "doc_id": "F2604",
+          "score": 0.8735487461090088
+        },
+        {
+          "rank": 9,
+          "chunk_id": "F37190:headers:0028",
+          "doc_id": "F37190",
+          "score": 0.8710719347000122
+        },
+        {
+          "rank": 10,
+          "chunk_id": "F2762:headers:0003",
+          "doc_id": "F2762",
+          "score": 0.8709275722503662
+        }
+      ],
+      "recall_at": {
+        "1": 0.5,
+        "3": 0.5,
+        "5": 0.5,
+        "10": 0.5
+      },
+      "all_found_at": {
+        "1": false,
+        "3": false,
+        "5": false,
+        "10": false
+      },
+      "evidence_recall_at": {
+        "1": 0.0,
+        "3": 0.75,
+        "5": 0.75,
+        "10": 0.75
+      },
+      "first_relevant_rank": 1,
+      "reciprocal_rank": 1.0,
+      "top_score": 0.9267649054527283,
+      "latency_ms": 229.9918329808861
+    },
+    {
+      "question_id": "q033",
+      "question": "Combien coûte un passeport ?",
+      "category": "unanswerable",
+      "split": "dev",
+      "expected_docs": [],
+      "hits": [
+        {
+          "rank": 1,
+          "chunk_id": "F17759:headers:0003",
+          "doc_id": "F17759",
+          "score": 0.8105538487434387
+        },
+        {
+          "rank": 2,
+          "chunk_id": "F32973:headers:0042",
+          "doc_id": "F32973",
+          "score": 0.7987009286880493
+        },
+        {
+          "rank": 3,
+          "chunk_id": "F32973:headers:0053",
+          "doc_id": "F32973",
+          "score": 0.7976081371307373
+        },
+        {
+          "rank": 4,
+          "chunk_id": "F32973:headers:0009",
+          "doc_id": "F32973",
+          "score": 0.7954233288764954
+        },
+        {
+          "rank": 5,
+          "chunk_id": "F32973:headers:0043",
+          "doc_id": "F32973",
+          "score": 0.7951642274856567
+        },
+        {
+          "rank": 6,
+          "chunk_id": "F32973:headers:0045",
+          "doc_id": "F32973",
+          "score": 0.7946475148200989
+        },
+        {
+          "rank": 7,
+          "chunk_id": "F32973:headers:0020",
+          "doc_id": "F32973",
+          "score": 0.7941921353340149
+        },
+        {
+          "rank": 8,
+          "chunk_id": "F32973:headers:0047",
+          "doc_id": "F32973",
+          "score": 0.7934877872467041
+        },
+        {
+          "rank": 9,
+          "chunk_id": "F32973:headers:0048",
+          "doc_id": "F32973",
+          "score": 0.7926939725875854
+        },
+        {
+          "rank": 10,
+          "chunk_id": "F32973:headers:0054",
+          "doc_id": "F32973",
+          "score": 0.7926566004753113
+        }
+      ],
+      "recall_at": null,
+      "all_found_at": null,
+      "evidence_recall_at": null,
+      "first_relevant_rank": null,
+      "reciprocal_rank": null,
+      "top_score": 0.8105538487434387,
+      "latency_ms": 1511.0687499982305
+    },
+    {
+      "question_id": "q035",
+      "question": "Quels sont les horaires de la déchetterie de Rennes ?",
+      "category": "unanswerable",
+      "split": "dev",
+      "expected_docs": [],
+      "hits": [
+        {
+          "rank": 1,
+          "chunk_id": "F16217:headers:0004",
+          "doc_id": "F16217",
+          "score": 0.8103067874908447
+        },
+        {
+          "rank": 2,
+          "chunk_id": "F16217:headers:0005",
+          "doc_id": "F16217",
+          "score": 0.800606369972229
+        },
+        {
+          "rank": 3,
+          "chunk_id": "F16217:headers:0002",
+          "doc_id": "F16217",
+          "score": 0.7997336387634277
+        },
+        {
+          "rank": 4,
+          "chunk_id": "F16217:headers:0000",
+          "doc_id": "F16217",
+          "score": 0.7964902520179749
+        },
+        {
+          "rank": 5,
+          "chunk_id": "F31954:headers:0001",
+          "doc_id": "F31954",
+          "score": 0.7903115749359131
+        },
+        {
+          "rank": 6,
+          "chunk_id": "F16217:headers:0003",
+          "doc_id": "F16217",
+          "score": 0.7895054221153259
+        },
+        {
+          "rank": 7,
+          "chunk_id": "F31835:headers:0002",
+          "doc_id": "F31835",
+          "score": 0.788427472114563
+        },
+        {
+          "rank": 8,
+          "chunk_id": "F31955:headers:0004",
+          "doc_id": "F31955",
+          "score": 0.7879363894462585
+        },
+        {
+          "rank": 9,
+          "chunk_id": "F31955:headers:0002",
+          "doc_id": "F31955",
+          "score": 0.7820070385932922
+        },
+        {
+          "rank": 10,
+          "chunk_id": "F31955:headers:0000",
+          "doc_id": "F31955",
+          "score": 0.7808806896209717
+        }
+      ],
+      "recall_at": null,
+      "all_found_at": null,
+      "evidence_recall_at": null,
+      "first_relevant_rank": null,
+      "reciprocal_rank": null,
+      "top_score": 0.8103067874908447,
+      "latency_ms": 1177.4542090133764
+    },
+    {
+      "question_id": "q036",
+      "question": "Quel est le taux d'intérêt moyen d'un prêt immobilier en ce moment ?",
+      "category": "unanswerable",
+      "split": "dev",
+      "expected_docs": [],
+      "hits": [
+        {
+          "rank": 1,
+          "chunk_id": "F16832:headers:0000",
+          "doc_id": "F16832",
+          "score": 0.8251038193702698
+        },
+        {
+          "rank": 2,
+          "chunk_id": "F38425:headers:0012",
+          "doc_id": "F38425",
+          "score": 0.8213712573051453
+        },
+        {
+          "rank": 3,
+          "chunk_id": "F38425:headers:0003",
+          "doc_id": "F38425",
+          "score": 0.8202875852584839
+        },
+        {
+          "rank": 4,
+          "chunk_id": "F38425:headers:0020",
+          "doc_id": "F38425",
+          "score": 0.8171220421791077
+        },
+        {
+          "rank": 5,
+          "chunk_id": "F1311:headers:0003",
+          "doc_id": "F1311",
+          "score": 0.8168801665306091
+        },
+        {
+          "rank": 6,
+          "chunk_id": "F188:headers:0001",
+          "doc_id": "F188",
+          "score": 0.8144682049751282
+        },
+        {
+          "rank": 7,
+          "chunk_id": "F38425:headers:0004",
+          "doc_id": "F38425",
+          "score": 0.8133026361465454
+        },
+        {
+          "rank": 8,
+          "chunk_id": "F36219:headers:0010",
+          "doc_id": "F36219",
+          "score": 0.8127251863479614
+        },
+        {
+          "rank": 9,
+          "chunk_id": "F17759:headers:0003",
+          "doc_id": "F17759",
+          "score": 0.8127111792564392
+        },
+        {
+          "rank": 10,
+          "chunk_id": "F36219:headers:0007",
+          "doc_id": "F36219",
+          "score": 0.8120500445365906
+        }
+      ],
+      "recall_at": null,
+      "all_found_at": null,
+      "evidence_recall_at": null,
+      "first_relevant_rank": null,
+      "reciprocal_rank": null,
+      "top_score": 0.8251038193702698,
+      "latency_ms": 912.3326249828096
+    },
+    {
+      "question_id": "q038",
+      "question": "Quel est le prix moyen du mètre carré pour acheter un appartement à Bordeaux ?",
+      "category": "unanswerable",
+      "split": "dev",
+      "expected_docs": [],
+      "hits": [
+        {
+          "rank": 1,
+          "chunk_id": "F36487:headers:0000",
+          "doc_id": "F36487",
+          "score": 0.8440569043159485
+        },
+        {
+          "rank": 2,
+          "chunk_id": "F16832:headers:0000",
+          "doc_id": "F16832",
+          "score": 0.8369935154914856
+        },
+        {
+          "rank": 3,
+          "chunk_id": "F1314:headers:0067",
+          "doc_id": "F1314",
+          "score": 0.8343695402145386
+        },
+        {
+          "rank": 4,
+          "chunk_id": "F36487:headers:0001",
+          "doc_id": "F36487",
+          "score": 0.8317393660545349
+        },
+        {
+          "rank": 5,
+          "chunk_id": "F36487:headers:0013",
+          "doc_id": "F36487",
+          "score": 0.8300140500068665
+        },
+        {
+          "rank": 6,
+          "chunk_id": "F36487:headers:0003",
+          "doc_id": "F36487",
+          "score": 0.830003559589386
+        },
+        {
+          "rank": 7,
+          "chunk_id": "F36487:headers:0012",
+          "doc_id": "F36487",
+          "score": 0.8299224972724915
+        },
+        {
+          "rank": 8,
+          "chunk_id": "F34401:headers:0006",
+          "doc_id": "F34401",
+          "score": 0.8291705846786499
+        },
+        {
+          "rank": 9,
+          "chunk_id": "F36487:headers:0002",
+          "doc_id": "F36487",
+          "score": 0.8286141157150269
+        },
+        {
+          "rank": 10,
+          "chunk_id": "F36487:headers:0011",
+          "doc_id": "F36487",
+          "score": 0.8278024792671204
+        }
+      ],
+      "recall_at": null,
+      "all_found_at": null,
+      "evidence_recall_at": null,
+      "first_relevant_rank": null,
+      "reciprocal_rank": null,
+      "top_score": 0.8440569043159485,
+      "latency_ms": 1695.4175000137184
+    },
+    {
+      "question_id": "q040",
+      "question": "Quel est le numéro de téléphone de l'ADIL de Nantes ?",
+      "category": "unanswerable",
+      "split": "dev",
+      "expected_docs": [],
+      "hits": [
+        {
+          "rank": 1,
+          "chunk_id": "F1280:headers:0020",
+          "doc_id": "F1280",
+          "score": 0.795950174331665
+        },
+        {
+          "rank": 2,
+          "chunk_id": "F1280:headers:0009",
+          "doc_id": "F1280",
+          "score": 0.7957585453987122
+        },
+        {
+          "rank": 3,
+          "chunk_id": "F18005:headers:0013",
+          "doc_id": "F18005",
+          "score": 0.7910841107368469
+        },
+        {
+          "rank": 4,
+          "chunk_id": "F12006:headers:0011",
+          "doc_id": "F12006",
+          "score": 0.7883003354072571
+        },
+        {
+          "rank": 5,
+          "chunk_id": "F1702:headers:0003",
+          "doc_id": "F1702",
+          "score": 0.7846469283103943
+        },
+        {
+          "rank": 6,
+          "chunk_id": "F18005:headers:0012",
+          "doc_id": "F18005",
+          "score": 0.7821158170700073
+        },
+        {
+          "rank": 7,
+          "chunk_id": "F32880:headers:0071",
+          "doc_id": "F32880",
+          "score": 0.781025230884552
+        },
+        {
+          "rank": 8,
+          "chunk_id": "F10007:headers:0036",
+          "doc_id": "F10007",
+          "score": 0.7808664441108704
+        },
+        {
+          "rank": 9,
+          "chunk_id": "F32880:headers:0070",
+          "doc_id": "F32880",
+          "score": 0.780714750289917
+        },
+        {
+          "rank": 10,
+          "chunk_id": "F10007:headers:0038",
+          "doc_id": "F10007",
+          "score": 0.7796578407287598
+        }
+      ],
+      "recall_at": null,
+      "all_found_at": null,
+      "evidence_recall_at": null,
+      "first_relevant_rank": null,
+      "reciprocal_rank": null,
+      "top_score": 0.795950174331665,
+      "latency_ms": 689.9846660089679
+    },
+    {
+      "question_id": "q041",
+      "question": "Combien ça coûte de récupérer sa voiture à la fourrière ?",
+      "category": "unanswerable",
+      "split": "dev",
+      "expected_docs": [],
+      "hits": [
+        {
+          "rank": 1,
+          "chunk_id": "F32973:headers:0063",
+          "doc_id": "F32973",
+          "score": 0.8181439638137817
+        },
+        {
+          "rank": 2,
+          "chunk_id": "F32973:headers:0041",
+          "doc_id": "F32973",
+          "score": 0.8177033066749573
+        },
+        {
+          "rank": 3,
+          "chunk_id": "F32973:headers:0030",
+          "doc_id": "F32973",
+          "score": 0.8142299652099609
+        },
+        {
+          "rank": 4,
+          "chunk_id": "F32973:headers:0019",
+          "doc_id": "F32973",
+          "score": 0.8141610622406006
+        },
+        {
+          "rank": 5,
+          "chunk_id": "F32973:headers:0052",
+          "doc_id": "F32973",
+          "score": 0.8132088780403137
+        },
+        {
+          "rank": 6,
+          "chunk_id": "F32973:headers:0007",
+          "doc_id": "F32973",
+          "score": 0.8088911771774292
+        },
+        {
+          "rank": 7,
+          "chunk_id": "F32973:headers:0061",
+          "doc_id": "F32973",
+          "score": 0.8082345724105835
+        },
+        {
+          "rank": 8,
+          "chunk_id": "F32973:headers:0039",
+          "doc_id": "F32973",
+          "score": 0.8059086799621582
+        },
+        {
+          "rank": 9,
+          "chunk_id": "F32973:headers:0008",
+          "doc_id": "F32973",
+          "score": 0.8055709600448608
+        },
+        {
+          "rank": 10,
+          "chunk_id": "F32973:headers:0057",
+          "doc_id": "F32973",
+          "score": 0.8054092526435852
+        }
+      ],
+      "recall_at": null,
+      "all_found_at": null,
+      "evidence_recall_at": null,
+      "first_relevant_rank": null,
+      "reciprocal_rank": null,
+      "top_score": 0.8181439638137817,
+      "latency_ms": 1199.0435419720598
+    },
+    {
+      "question_id": "q043",
+      "question": "Combien mon propriétaire peut-il me demander comme caution ?",
+      "category": "ambiguous",
+      "split": "dev",
+      "expected_docs": [
+        "F1165",
+        "F31269"
+      ],
+      "hits": [
+        {
+          "rank": 1,
+          "chunk_id": "F31267:headers:0021",
+          "doc_id": "F31267",
+          "score": 0.8634985685348511
+        },
+        {
+          "rank": 2,
+          "chunk_id": "F31267:headers:0002",
+          "doc_id": "F31267",
+          "score": 0.8631241321563721
+        },
+        {
+          "rank": 3,
+          "chunk_id": "F31267:headers:0011",
+          "doc_id": "F31267",
+          "score": 0.8622570037841797
+        },
+        {
+          "rank": 4,
+          "chunk_id": "F1169:headers:0006",
+          "doc_id": "F1169",
+          "score": 0.8617634773254395
+        },
+        {
+          "rank": 5,
+          "chunk_id": "F31267:headers:0023",
+          "doc_id": "F31267",
+          "score": 0.8578349351882935
+        },
+        {
+          "rank": 6,
+          "chunk_id": "F31267:headers:0004",
+          "doc_id": "F31267",
+          "score": 0.8567231893539429
+        },
+        {
+          "rank": 7,
+          "chunk_id": "F31267:headers:0013",
+          "doc_id": "F31267",
+          "score": 0.8565969467163086
+        },
+        {
+          "rank": 8,
+          "chunk_id": "F1169:headers:0005",
+          "doc_id": "F1169",
+          "score": 0.8565587401390076
+        },
+        {
+          "rank": 9,
+          "chunk_id": "F31267:headers:0003",
+          "doc_id": "F31267",
+          "score": 0.8499615788459778
+        },
+        {
+          "rank": 10,
+          "chunk_id": "F31267:headers:0022",
+          "doc_id": "F31267",
+          "score": 0.8489938378334045
+        }
+      ],
+      "recall_at": {
+        "1": 0.0,
+        "3": 0.0,
+        "5": 0.0,
+        "10": 0.0
+      },
+      "all_found_at": {
+        "1": false,
+        "3": false,
+        "5": false,
+        "10": false
+      },
+      "evidence_recall_at": {
+        "1": 0.0,
+        "3": 0.0,
+        "5": 0.0,
+        "10": 0.0
+      },
+      "first_relevant_rank": null,
+      "reciprocal_rank": 0.0,
+      "top_score": 0.8634985685348511,
+      "latency_ms": 1484.072916005971
+    },
+    {
+      "question_id": "q045",
+      "question": "Je veux partir de mon logement, combien de temps à l'avance je dois prévenir ?",
+      "category": "ambiguous",
+      "split": "dev",
+      "expected_docs": [
+        "F1168",
+        "F1165"
+      ],
+      "hits": [
+        {
+          "rank": 1,
+          "chunk_id": "F1168:headers:0000",
+          "doc_id": "F1168",
+          "score": 0.8845491409301758
+        },
+        {
+          "rank": 2,
+          "chunk_id": "F32360:headers:0008",
+          "doc_id": "F32360",
+          "score": 0.8833038806915283
+        },
+        {
+          "rank": 3,
+          "chunk_id": "F1168:headers:0020",
+          "doc_id": "F1168",
+          "score": 0.874371349811554
+        },
+        {
+          "rank": 4,
+          "chunk_id": "F929:headers:0051",
+          "doc_id": "F929",
+          "score": 0.8742019534111023
+        },
+        {
+          "rank": 5,
+          "chunk_id": "F1168:headers:0015",
+          "doc_id": "F1168",
+          "score": 0.8740805983543396
+        },
+        {
+          "rank": 6,
+          "chunk_id": "F32360:headers:0000",
+          "doc_id": "F32360",
+          "score": 0.8736200332641602
+        },
+        {
+          "rank": 7,
+          "chunk_id": "F1168:headers:0010",
+          "doc_id": "F1168",
+          "score": 0.8731528520584106
+        },
+        {
+          "rank": 8,
+          "chunk_id": "F929:headers:0063",
+          "doc_id": "F929",
+          "score": 0.8723031878471375
+        },
+        {
+          "rank": 9,
+          "chunk_id": "F1168:headers:0021",
+          "doc_id": "F1168",
+          "score": 0.8720563054084778
+        },
+        {
+          "rank": 10,
+          "chunk_id": "F1168:headers:0014",
+          "doc_id": "F1168",
+          "score": 0.871885359287262
+        }
+      ],
+      "recall_at": {
+        "1": 0.5,
+        "3": 0.5,
+        "5": 0.5,
+        "10": 0.5
+      },
+      "all_found_at": {
+        "1": false,
+        "3": false,
+        "5": false,
+        "10": false
+      },
+      "evidence_recall_at": {
+        "1": 0.0,
+        "3": 0.0,
+        "5": 0.0,
+        "10": 0.3333333333333333
+      },
+      "first_relevant_rank": 1,
+      "reciprocal_rank": 1.0,
+      "top_score": 0.8845491409301758,
+      "latency_ms": 882.7123749942984
+    },
+    {
+      "question_id": "q046",
+      "question": "On aimerait poser une petite cabane en bois au fond du jardin pour ranger les outils. On doit demander quelque chose à la mairie ?",
+      "category": "ambiguous",
+      "split": "dev",
+      "expected_docs": [
+        "F31471"
+      ],
+      "hits": [
+        {
+          "rank": 1,
+          "chunk_id": "F31471:headers:0000",
+          "doc_id": "F31471",
+          "score": 0.875906765460968
+        },
+        {
+          "rank": 2,
+          "chunk_id": "F662:headers:0000",
+          "doc_id": "F662",
+          "score": 0.875545084476471
+        },
+        {
+          "rank": 3,
+          "chunk_id": "F662:headers:0005",
+          "doc_id": "F662",
+          "score": 0.8724560737609863
+        },
+        {
+          "rank": 4,
+          "chunk_id": "F31473:headers:0014",
+          "doc_id": "F31473",
+          "score": 0.8710716366767883
+        },
+        {
+          "rank": 5,
+          "chunk_id": "F31473:headers:0019",
+          "doc_id": "F31473",
+          "score": 0.8666611909866333
+        },
+        {
+          "rank": 6,
+          "chunk_id": "F31473:headers:0021",
+          "doc_id": "F31473",
+          "score": 0.8637999892234802
+        },
+        {
+          "rank": 7,
+          "chunk_id": "F662:headers:0002",
+          "doc_id": "F662",
+          "score": 0.8637401461601257
+        },
+        {
+          "rank": 8,
+          "chunk_id": "F31473:headers:0025",
+          "doc_id": "F31473",
+          "score": 0.8632466793060303
+        },
+        {
+          "rank": 9,
+          "chunk_id": "F662:headers:0013",
+          "doc_id": "F662",
+          "score": 0.8631040453910828
+        },
+        {
+          "rank": 10,
+          "chunk_id": "F31471:headers:0008",
+          "doc_id": "F31471",
+          "score": 0.8622329235076904
+        }
+      ],
+      "recall_at": {
+        "1": 1.0,
+        "3": 1.0,
+        "5": 1.0,
+        "10": 1.0
+      },
+      "all_found_at": {
+        "1": true,
+        "3": true,
+        "5": true,
+        "10": true
+      },
+      "evidence_recall_at": {
+        "1": 0.0,
+        "3": 0.0,
+        "5": 0.0,
+        "10": 0.0
+      },
+      "first_relevant_rank": 1,
+      "reciprocal_rank": 1.0,
+      "top_score": 0.875906765460968,
+      "latency_ms": 1283.9225420029834
+    },
+    {
+      "question_id": "q048",
+      "question": "Dans un logement loué, qui doit payer les réparations ?",
+      "category": "ambiguous",
+      "split": "dev",
+      "expected_docs": [
+        "F31697",
+        "F31699"
+      ],
+      "hits": [
+        {
+          "rank": 1,
+          "chunk_id": "F21105:headers:0001",
+          "doc_id": "F21105",
+          "score": 0.8785120844841003
+        },
+        {
+          "rank": 2,
+          "chunk_id": "F21105:headers:0000",
+          "doc_id": "F21105",
+          "score": 0.8693536520004272
+        },
+        {
+          "rank": 3,
+          "chunk_id": "F31697:headers:0002",
+          "doc_id": "F31697",
+          "score": 0.8578082323074341
+        },
+        {
+          "rank": 4,
+          "chunk_id": "F31699:headers:0002",
+          "doc_id": "F31699",
+          "score": 0.8556361794471741
+        },
+        {
+          "rank": 5,
+          "chunk_id": "F31697:headers:0003",
+          "doc_id": "F31697",
+          "score": 0.8536722660064697
+        },
+        {
+          "rank": 6,
+          "chunk_id": "F31697:headers:0000",
+          "doc_id": "F31697",
+          "score": 0.8493291735649109
+        },
+        {
+          "rank": 7,
+          "chunk_id": "F31301:headers:0010",
+          "doc_id": "F31301",
+          "score": 0.8490310311317444
+        },
+        {
+          "rank": 8,
+          "chunk_id": "F31301:headers:0014",
+          "doc_id": "F31301",
+          "score": 0.8478609323501587
+        },
+        {
+          "rank": 9,
+          "chunk_id": "F31697:headers:0004",
+          "doc_id": "F31697",
+          "score": 0.8477716445922852
+        },
+        {
+          "rank": 10,
+          "chunk_id": "F31301:headers:0069",
+          "doc_id": "F31301",
+          "score": 0.8472418189048767
+        }
+      ],
+      "recall_at": {
+        "1": 0.0,
+        "3": 0.5,
+        "5": 1.0,
+        "10": 1.0
+      },
+      "all_found_at": {
+        "1": false,
+        "3": false,
+        "5": true,
+        "10": true
+      },
+      "evidence_recall_at": {
+        "1": 0.0,
+        "3": 0.0,
+        "5": 0.0,
+        "10": 0.3333333333333333
+      },
+      "first_relevant_rank": 3,
+      "reciprocal_rank": 0.3333333333333333,
+      "top_score": 0.8785120844841003,
+      "latency_ms": 1137.1104999852832
+    },
+    {
+      "question_id": "q049",
+      "question": "Mon proprio a le droit d'augmenter mon loyer ?",
+      "category": "ambiguous",
+      "split": "dev",
+      "expected_docs": [
+        "F1311",
+        "F1165"
+      ],
+      "hits": [
+        {
+          "rank": 1,
+          "chunk_id": "F1310:headers:0009",
+          "doc_id": "F1310",
+          "score": 0.8511396646499634
+        },
+        {
+          "rank": 2,
+          "chunk_id": "F1310:headers:0005",
+          "doc_id": "F1310",
+          "score": 0.8485181927680969
+        },
+        {
+          "rank": 3,
+          "chunk_id": "F1310:headers:0003",
+          "doc_id": "F1310",
+          "score": 0.8475334644317627
+        },
+        {
+          "rank": 4,
+          "chunk_id": "F1219:headers:0001",
+          "doc_id": "F1219",
+          "score": 0.8461253046989441
+        },
+        {
+          "rank": 5,
+          "chunk_id": "F1311:headers:0000",
+          "doc_id": "F1311",
+          "score": 0.8449368476867676
+        },
+        {
+          "rank": 6,
+          "chunk_id": "F1310:headers:0001",
+          "doc_id": "F1310",
+          "score": 0.8447312116622925
+        },
+        {
+          "rank": 7,
+          "chunk_id": "F1310:headers:0002",
+          "doc_id": "F1310",
+          "score": 0.844677209854126
+        },
+        {
+          "rank": 8,
+          "chunk_id": "F1310:headers:0007",
+          "doc_id": "F1310",
+          "score": 0.8436891436576843
+        },
+        {
+          "rank": 9,
+          "chunk_id": "F17709:headers:0003",
+          "doc_id": "F17709",
+          "score": 0.8425059914588928
+        },
+        {
+          "rank": 10,
+          "chunk_id": "F1219:headers:0003",
+          "doc_id": "F1219",
+          "score": 0.8412209749221802
+        }
+      ],
+      "recall_at": {
+        "1": 0.0,
+        "3": 0.0,
+        "5": 0.5,
+        "10": 0.5
+      },
+      "all_found_at": {
+        "1": false,
+        "3": false,
+        "5": false,
+        "10": false
+      },
+      "evidence_recall_at": {
+        "1": 0.0,
+        "3": 0.0,
+        "5": 0.0,
+        "10": 0.0
+      },
+      "first_relevant_rank": 5,
+      "reciprocal_rank": 0.2,
+      "top_score": 0.8511396646499634,
+      "latency_ms": 1214.5310830092058
+    }
+  ]
+}

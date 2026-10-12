@@ -23,7 +23,12 @@ class Document(BaseModel):
 
 
 class Chunk(BaseModel):
-    """A passage of a Document: the unit that is embedded, indexed and cited."""
+    """A passage of a Document: the unit that is embedded, indexed and cited.
+
+    `text` is what is embedded and shown to the LLM. `start_char`/`end_char` locate
+    the passage in the document; `text` may add context around it (heading path,
+    repeated table header), so it is not always `document.text[start_char:end_char]`.
+    """
 
     model_config = ConfigDict(frozen=True)
 
@@ -36,6 +41,8 @@ class Chunk(BaseModel):
     end_char: int
     doc_title: str
     url: str | None = None
+    # Headings above the passage, outermost first, joined by " > " (header-based chunking).
+    heading_path: str | None = None
 
 
 class RetrievedChunk(BaseModel):

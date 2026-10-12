@@ -9,7 +9,8 @@ Interview talking points, grouped by theme, are in [`interview_notes.md`](interv
 ## Status
 
 - **Current**: v0 fully measured on dev, judge checked by adjudication: Recall@5 0.67, refusal accuracy 0.93; judge metrics faithfulness 0.93, citation accuracy 0.95, precision 0.80, correctness 0.61, i.e. 0.90 / 0.92–0.93 / 0.77–0.78 / 0.59 after correcting the judge's errors on the hard-case sample. Aggregates and correctness are usable (±3 points); sentence verdicts miss a third of unsupported claims.
-- **Next**: merge the evaluation harness, then improve retrieval (header-based chunking, hybrid dense + BM25, reranking), each change measured.
+- **Step 9 (header-based chunking) measured on dev**: Recall@5 0.67 → 0.72, evidence recall 0.50 → 0.54, MRR 0.65 → 0.67, 19% fewer prompt tokens, but correctness unchanged (0.61 = 0.61; 6 questions up, 6 down). Kept for the next steps.
+- **Next**: hybrid dense + BM25 (RRF), then reranking, each measured the same way.
 
 ## Roadmap
 
@@ -21,7 +22,7 @@ Interview talking points, grouped by theme, are in [`interview_notes.md`](interv
 | 3b | Evaluation harness | ✅ Done (judge validated by an LLM panel; human labels still open) |
 | 4 | Baseline evaluation of v0 | ✅ Done on dev |
 | 5 | Citation verification (LLM-as-judge) and confidence score | ⬜ |
-| 6 | Chunking comparison (fixed vs. headers vs. semantic) | ⬜ |
+| 6 | Chunking comparison (fixed vs. headers vs. semantic) | 🟡 Headers done (step 9); semantic open |
 | 7 | Hybrid retrieval (dense + BM25, RRF) and reranking | ⬜ |
 | 8 | Provider comparisons (Mistral Small, Claude, GPT-4o, self-hosted) | ⬜ |
 | 9 | API (FastAPI), dashboard (Streamlit), Docker | ⬜ |
@@ -46,6 +47,7 @@ Interview talking points, grouped by theme, are in [`interview_notes.md`](interv
 | 2026-10-10 | 8b-1. Generation run | Answers + contexts saved for later judging; refusal accuracy 0.93, 6/6 correct refusals, 2/24 false refusals; cost $0.017 | Generate once, judge later: judges compared on identical answers |
 | 2026-10-10 | 8b-2. LLM judge | Sentence-level support and key-fact correctness; v0 dev: faithfulness 0.93, citation accuracy 0.95, precision 0.80, correctness 0.61; $0.06 per run | Strict JSON-schema output (JSON mode returned invalid JSON); judge stability measured: 94% |
 | 2026-10-12 | 8b-3. Judge validation | 61-item blind sample labelled by Claude; 24 items (16 disagreements + 8 audited agreements) adjudicated by a panel of 3 Claude subagents (Fleiss κ 0.83). Judge vs. final labels: sentences 0.70 (κ 0.52), facts 0.84 (κ 0.77); corrected faithfulness 0.90, correctness 0.59 | Human labelling stopped after 1 item (time): LLM panel instead, limit stated (same model family, validity vs. a human not measured) |
+| 2026-10-12 | 9. Header-based chunking | Chunks along the heading tree (2,000 max, heading path prefixed, tables split by rows with header repeated): 3,664 chunks, 109/109 quotes fit. Dev: R@5 0.67 → 0.72, Evid@5 0.50 → 0.54, correctness 0.61 → 0.61; ablation without path: same R@5, MRR 0.67 → 0.56; ~$0.40 | Kept: better recall and ranking, cheaper prompts, same correctness; smaller chunks lose multi-hop passages |
 
 ## Key numbers so far
 
@@ -60,7 +62,9 @@ Interview talking points, grouped by theme, are in [`interview_notes.md`](interv
 - v0 judged, dev: faithfulness 0.93, citation accuracy 0.95, citation precision 0.80, correctness 0.61 (0.67 when the fiche is retrieved, 0.40 when not); judge $0.061 per dev run.
 - Judge stability: 94% sentence and 89% key-fact verdict agreement between two runs on identical answers.
 - Judge validation (61 hard-case items, final labels from a 3-Claude panel): sentences 0.70 (κ 0.52), key facts 0.84 (κ 0.77, 0.94 present vs. not); judge recall on unsupported claims 9/14; slightly lenient: faithfulness 0.93 → 0.90, citation accuracy 0.95 → 0.92–0.93, correctness 0.61 → 0.59.
-- Tests: 137 unit tests, no network.
+- Header-based chunks: 3,664 (vs. 2,832 fixed), median 1,536 characters with a 104-character heading path; 1.70M tokens to embed (~$0.17).
+- Headers + path, dev: R@5 0.72, All@5 0.58, Evid@5 0.54, MRR 0.67, 3 total misses (v0: 5); top-5 context 6.9k characters (v0: 9.1k); correctness 0.61, faithfulness 0.99, citation precision 0.86; 63k prompt tokens (v0: 78k). Without the path: R@5 0.71, MRR 0.56.
+- Tests: 152 unit tests, no network.
 
 ## Key lessons
 
@@ -79,3 +83,5 @@ Interview talking points, grouped by theme, are in [`interview_notes.md`](interv
 13. **Most v0 errors come from retrieval, not generation**: faithfulness 0.93 but correctness 0.61, and correctness drops from 0.67 to 0.40 when no expected fiche is retrieved.
 14. **Validate the judge, then trust it for what it measures well**: the Mistral Large 3 judge agrees well on key facts (κ 0.77) but misses a third of unsupported sentences, including contradicted ones and the known q021 failure. Aggregates move by only 2–3 points, so the diagnosis holds; per-answer hallucination detection needs a better judge.
 15. **An LLM panel measures consistency, not truth**: 3 Claude annotators agreed with each other (κ 0.83) and sided 13/16 with the first Claude annotator, which is partly a shared model bias. Only human labels (or another model family) measure validity.
+16. **Better retrieval does not automatically mean better answers**: header chunks raised fiche recall (0.67 → 0.72) but correctness stayed at 0.61, with 6 questions up and 6 down. Gains followed retrieval; most losses came from generator variability with the evidence still in context, one from a multi-hop passage lost by smaller chunks. Per-question analysis, not the aggregate, shows what a change does.
+17. **Run cheap checks before paid ones**: chunk statistics found three chunker bugs (3,600-character table rows, heading-only chunks, orphan captions) before paying for embeddings.

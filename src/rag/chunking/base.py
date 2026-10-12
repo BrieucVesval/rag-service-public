@@ -6,7 +6,10 @@ from rag.models import Chunk, Document
 
 
 class Chunker(Protocol):
+    # Strategy recorded on every chunk ("fixed", "headers").
     name: str
+    # Strategy plus the options that change the chunk texts, used to name the index.
+    label: str
 
     def chunk(self, document: Document) -> list[Chunk]: ...
 

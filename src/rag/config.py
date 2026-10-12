@@ -6,6 +6,7 @@ API keys use their provider's usual variable name.
 """
 
 from pathlib import Path
+from typing import Literal
 
 from pydantic import Field, SecretStr, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -21,9 +22,15 @@ class Settings(BaseSettings):
     processed_dir: Path = Path("data/processed/service_public")
     chroma_dir: Path = Path("data/indexes/chroma")
 
-    # Fixed-size chunking, in characters (~3-4 characters per token in French Markdown).
+    # Chunking: "fixed" (baseline windows) or "headers" (Markdown heading tree).
+    chunk_strategy: Literal["fixed", "headers"] = "fixed"
+    # Sizes in characters (~3 characters per token in French Markdown, measured).
+    # Fixed: window size and overlap. Headers: maximum passage size (heading path not
+    # counted) and the overlap used only when a single paragraph exceeds it.
     chunk_size: int = Field(default=2000, gt=0)
     chunk_overlap: int = Field(default=200, ge=0)
+    # Headers: "path" prepends the heading path to the chunk text, "none" does not.
+    header_prefix: Literal["path", "none"] = "path"
 
     # Embeddings. A batch of 32 chunks of 2,000 characters is ~21k tokens; 128 chunks
     # exceeded Mistral's per-request token limit when measured on 2026-10-08.

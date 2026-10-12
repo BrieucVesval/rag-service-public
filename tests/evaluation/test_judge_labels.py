@@ -13,8 +13,11 @@ from rag.evaluation.judge_labels import (
     adjudication_sample,
     agreement,
     binarize,
+    fleiss_kappa,
     judge_verdicts,
+    majority_label,
     parse_labels,
+    relabel,
     render_label_file,
     select_sample,
 )
@@ -148,3 +151,45 @@ def test_adjudication_takes_all_disagreements_and_audits_some_agreements() -> No
     assert len(keys) == 4
     assert keys == sorted(keys)  # question order kept: disagreements are not grouped first
     assert adjudication_sample(items, llm, judge, 2, seed=0) == selected
+
+
+def test_majority_needs_more_than_half() -> None:
+    assert majority_label(["supported", "partial", "supported"]) == "supported"
+    assert majority_label(["supported", "partial", "unsupported"]) is None
+    assert majority_label(["supported", "partial"]) is None
+    assert majority_label([]) is None
+
+
+def test_fleiss_kappa() -> None:
+    assert fleiss_kappa([["a", "a", "a"], ["b", "b", "b"]]) == pytest.approx(1.0)
+    # Textbook-style check: 2 raters, Fleiss reduces to Scott's pi.
+    ratings = [["a", "a"], ["a", "b"], ["b", "b"], ["a", "a"]]
+    observed = 3 / 4
+    expected = (5 / 8) ** 2 + (3 / 8) ** 2
+    assert fleiss_kappa(ratings) == pytest.approx((observed - expected) / (1 - expected))
+    assert fleiss_kappa([["a", "a"], ["a", "a"]]) is None  # one label only
+    assert fleiss_kappa([["a", "a"], ["a"]]) is None  # unequal raters
+
+
+def test_relabel_recomputes_metrics_and_bounds_citations() -> None:
+    j = judgment("q001", [S, U], [FactVerdict.ABSENT, FactVerdict.PRESENT])
+    j = j.model_copy(
+        update={
+            "sentences": [
+                j.sentences[0].model_copy(update={"supporting_blocks": [1]}),
+                j.sentences[1],
+            ]
+        }
+    )
+    labels = {"S-q001-1": "unsupported", "S-q001-2": "supported", "F-q001-1": "partial"}
+
+    upper = relabel([j], labels, newly_supported_cite_correctly=True)[0]
+    lower = relabel([j], labels, newly_supported_cite_correctly=False)[0]
+
+    assert upper.faithfulness == 0.5
+    assert upper.correctness == 0.75
+    assert upper.sentences[0].supporting_blocks == []
+    assert upper.sentences[1].supporting_blocks == [1]
+    assert upper.citation_accuracy == 0.5
+    assert lower.citation_accuracy == 0.0
+    assert j.sentences[1].verdict == U  # input untouched

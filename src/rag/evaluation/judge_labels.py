@@ -19,6 +19,7 @@ import random
 import re
 from collections import Counter
 from collections.abc import Iterable, Sequence
+from statistics import mean
 
 from pydantic import BaseModel
 
@@ -28,7 +29,14 @@ from rag.evaluation.judge import (
     FactVerdict,
     SupportVerdict,
 )
-from rag.evaluation.judge_eval import REFUSAL_REASON, QuestionJudgment
+from rag.evaluation.judge_eval import (
+    REFUSAL_REASON,
+    QuestionJudgment,
+    citation_accuracy,
+    citation_precision,
+    correctness,
+    faithfulness,
+)
 from rag.generation.citations import strip_citations
 from rag.generation.prompts import format_context
 from rag.models import Answer
@@ -228,6 +236,79 @@ def binarize(pairs: Iterable[tuple[str, str]], positive: str) -> list[tuple[str,
     """Collapse labels to the decision a metric uses, e.g. supported vs. not."""
     other = f"not_{positive}"
     return [(h if h == positive else other, j if j == positive else other) for h, j in pairs]
+
+
+def majority_label(labels: Sequence[str]) -> str | None:
+    """The label given by more than half of the raters, or None (no majority)."""
+    if not labels:
+        return None
+    label, count = Counter(labels).most_common(1)[0]
+    return label if count * 2 > len(labels) else None
+
+
+def fleiss_kappa(ratings: Sequence[Sequence[str]]) -> float | None:
+    """Fleiss' kappa: agreement of several raters (same number per item), corrected for
+    chance. One inner sequence per item, one label per rater. None when undefined."""
+    if not ratings or len(ratings[0]) < 2 or any(len(r) != len(ratings[0]) for r in ratings):
+        return None
+    n_raters = len(ratings[0])
+    counts = [Counter(item) for item in ratings]
+    observed = mean(
+        (sum(c * c for c in item.values()) - n_raters) / (n_raters * (n_raters - 1))
+        for item in counts
+    )
+    totals = Counter(label for item in ratings for label in item)
+    n_labels = len(ratings) * n_raters
+    expected = sum((total / n_labels) ** 2 for total in totals.values())
+    return (observed - expected) / (1 - expected) if expected < 1 else None
+
+
+_NO_SUPPORT = {SupportVerdict.UNSUPPORTED, SupportVerdict.CONTRADICTED, SupportVerdict.NO_CLAIM}
+
+
+def relabel(
+    judgments: Iterable[QuestionJudgment],
+    labels: dict[str, str],
+    newly_supported_cite_correctly: bool,
+) -> list[QuestionJudgment]:
+    """Judge run with some verdicts replaced by adjudicated labels, metrics recomputed.
+
+    Labels carry no supporting blocks. A sentence relabelled to a non-support verdict
+    loses its blocks (as in the judge's rubric). A sentence that becomes supported or
+    partial without judge blocks gets its cited blocks if `newly_supported_cite_correctly`,
+    none otherwise: the two settings bound the citation metrics."""
+    result = []
+    for j in judgments:
+        sentences = []
+        for s in j.sentences:
+            label = labels.get(f"{SENTENCE_PREFIX}-{j.question_id}-{s.id}")
+            if label is None or label == s.verdict.value:
+                sentences.append(s)
+                continue
+            verdict = SupportVerdict(label)
+            blocks = s.supporting_blocks
+            if verdict in _NO_SUPPORT:
+                blocks = []
+            elif not blocks and newly_supported_cite_correctly:
+                blocks = s.cited
+            sentences.append(s.model_copy(update={"verdict": verdict, "supporting_blocks": blocks}))
+        facts = [
+            f.model_copy(update={"verdict": FactVerdict(label)})
+            if (label := labels.get(f"{FACT_PREFIX}-{j.question_id}-{f.id}")) is not None
+            else f
+            for f in j.key_facts
+        ]
+        update: dict[str, object] = {"sentences": sentences, "key_facts": facts}
+        if j.sentences:
+            update |= {
+                "faithfulness": faithfulness(sentences),
+                "citation_accuracy": citation_accuracy(sentences),
+                "citation_precision": citation_precision(sentences),
+            }
+        if j.key_facts:
+            update["correctness"] = correctness(facts)
+        result.append(j.model_copy(update=update))
+    return result
 
 
 def _sentence_verdict(judgment: QuestionJudgment, sentence_id: int) -> SupportVerdict | None:

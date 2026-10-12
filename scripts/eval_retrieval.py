@@ -18,7 +18,7 @@ import sys
 import time
 from datetime import UTC, datetime
 
-from rag.chunking.fixed import FixedSizeChunker
+from rag.chunking.factory import index_collection_name
 from rag.config import get_settings
 from rag.evaluation.experiment import make_run_info, write_run
 from rag.evaluation.golden_set import Split, load_golden_set
@@ -28,7 +28,7 @@ from rag.evaluation.retrieval_eval import (
     evaluate_retrieval,
     summarize_by_group,
 )
-from rag.indexing.chroma_store import ChromaStore, collection_name
+from rag.indexing.chroma_store import ChromaStore
 from rag.indexing.embedder import MistralEmbedder
 from rag.retrieval.dense import DenseRetriever
 
@@ -72,9 +72,7 @@ def main() -> int:
     golden = load_golden_set(settings.golden_set_path)
     items = golden.questions if args.split == ALL_SPLITS else golden.by_split(Split(args.split))
 
-    name = collection_name(
-        FixedSizeChunker.name, settings.chunk_size, settings.chunk_overlap, settings.embedding_model
-    )
+    name = index_collection_name(settings)
     store = ChromaStore(settings.chroma_dir, name)
     if store.count() == 0:
         print(f"Collection {name} is empty; run scripts/build_index.py", file=sys.stderr)

@@ -10,10 +10,10 @@ import argparse
 import logging
 import sys
 
-from rag.chunking.fixed import FixedSizeChunker
+from rag.chunking.factory import index_collection_name
 from rag.config import get_settings
 from rag.generation.llm import MistralLLM
-from rag.indexing.chroma_store import ChromaStore, collection_name
+from rag.indexing.chroma_store import ChromaStore
 from rag.indexing.embedder import MistralEmbedder
 from rag.models import Answer
 from rag.pipeline import RAGPipeline
@@ -53,9 +53,7 @@ def main() -> int:
     logging.getLogger("httpx2").setLevel(logging.WARNING)
 
     settings = get_settings()
-    name = collection_name(
-        FixedSizeChunker.name, settings.chunk_size, settings.chunk_overlap, settings.embedding_model
-    )
+    name = index_collection_name(settings)
     store = ChromaStore(settings.chroma_dir, name)
     if store.count() == 0:
         print(f"Collection {name} is empty; run scripts/build_index.py", file=sys.stderr)

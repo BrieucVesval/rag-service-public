@@ -1,7 +1,7 @@
 """Chunk the processed documents, embed the chunks and store them in Chroma.
 
-The collection name encodes the index configuration (strategy, chunk size,
-overlap, embedding model); its metadata records how and from what it was built.
+The collection name encodes the index configuration (strategy and its options,
+chunk size, overlap, embedding model); its metadata records how and from what it was built.
 
 Usage:
     uv run python scripts/build_index.py
@@ -15,9 +15,9 @@ import sys
 import time
 from datetime import UTC, datetime
 
-from rag.chunking.fixed import FixedSizeChunker
+from rag.chunking.factory import index_collection_name, make_chunker
 from rag.config import get_settings
-from rag.indexing.chroma_store import ChromaStore, collection_name
+from rag.indexing.chroma_store import ChromaStore
 from rag.indexing.embedder import MistralEmbedder
 from rag.ingestion.processed import MANIFEST_NAME, load_processed_documents
 from rag.provenance import git_commit, git_is_dirty
@@ -32,16 +32,15 @@ def main() -> int:
     logging.getLogger("httpx2").setLevel(logging.WARNING)
 
     settings = get_settings()
-    chunker = FixedSizeChunker(settings.chunk_size, settings.chunk_overlap)
-    name = collection_name(
-        chunker.name, settings.chunk_size, settings.chunk_overlap, settings.embedding_model
-    )
+    chunker = make_chunker(settings)
+    name = index_collection_name(settings)
 
     manifest_path = settings.processed_dir / MANIFEST_NAME
     processed_manifest = json.loads(manifest_path.read_text()) if manifest_path.exists() else {}
     dirty = git_is_dirty()
     metadata = {
         "chunk_strategy": chunker.name,
+        "chunk_label": chunker.label,
         "chunk_size": settings.chunk_size,
         "chunk_overlap": settings.chunk_overlap,
         "embedding_model": settings.embedding_model,

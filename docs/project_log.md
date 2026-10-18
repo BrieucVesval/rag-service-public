@@ -39,11 +39,11 @@ Newest entries at the bottom. Each entry: date, phase, what, why (alternatives c
 
 - **Date**: 2026-10-07
 - **Phase**: 0
-- **What**: Git repository with a `.gitignore` and a branch workflow (documented in `CLAUDE.md`, section "Git workflow").
+- **What**: Git repository with a `.gitignore` and a branch workflow: `main` always works, one branch per feature or fix, Conventional Commits, merge only when tests pass.
 - **Why**: history and rollback, one branch per feature so `main` always works, and a clean public history for the portfolio.
   - Raw XML is not versioned: it is reproducible with `scripts/fetch_corpus.py`, changes daily and would bloat the history. `manifest.json` is versioned so each commit records which data snapshot it used.
   - Alternative considered: committing the raw XML (fully self-contained repo, but ~14 MB per snapshot and noisy diffs). Git LFS or DVC could be revisited if the corpus grows.
-- **Files**: `.gitignore`, `CLAUDE.md`
+- **Files**: `.gitignore`
 
 ## Step 4 — XML loader (raw XML → Markdown Documents)
 
@@ -179,7 +179,7 @@ Newest entries at the bottom. Each entry: date, phase, what, why (alternatives c
   uv run python scripts/build_index.py   # once (5b)
   uv run python scripts/ask.py --show-context "Quel est le préavis pour quitter un logement loué vide ?"
   ```
-- **Files**: `src/rag/models.py`, `src/rag/config.py`, `src/rag/indexing/chroma_store.py`, `src/rag/retrieval/`, `src/rag/generation/`, `src/rag/pipeline.py`, `scripts/ask.py`, `tests/conftest.py`, `tests/generation/`, `tests/retrieval/`, `tests/test_pipeline.py`, `.env.example`, `CLAUDE.md`
+- **Files**: `src/rag/models.py`, `src/rag/config.py`, `src/rag/indexing/chroma_store.py`, `src/rag/retrieval/`, `src/rag/generation/`, `src/rag/pipeline.py`, `scripts/ask.py`, `tests/conftest.py`, `tests/generation/`, `tests/retrieval/`, `tests/test_pipeline.py`, `.env.example`
 - **Open points**: golden set and first measured evaluation of v0; LLM-as-judge for citations; per-stage latency split of retrieval into embedding vs. vector search; context diversity (one fiche filling the top-k).
 
 #### 5c analysis — Citations that exist but do not support the claim
@@ -530,7 +530,7 @@ Newest entries at the bottom. Each entry: date, phase, what, why (alternatives c
   - **Tree packing rather than one chunk per heading**: in this corpus the text between two headings has a median of 394 characters (24% under 200), while 37% of `##` sections exceed 2,000. One chunk per heading gives crumbs without context; whole `##` sections are often too big.
   - **No minimum size**: a minimum would force merging unrelated cases ("À Paris" with "Cas général"), the worst error for administrative rules. Short leads are attached to what follows instead (no extra threshold).
   - **Heading path in the text**: a passage under "Cas : En cas de violences" says nothing about "logement vide" or who gives notice. Cost: +7% text to embed, and every chunk of a fiche repeats its title (risk of one fiche filling the top-5). Measured with the `none` ablation.
-  - **Own implementation instead of LangChain** (CLAUDE.md planned LangChain splitters for this strategy): `MarkdownHeaderTextSplitter` splits by heading but neither packs along the tree, nor handles tables, nor returns exact offsets (needed for evidence recall and citations). ~250 lines, tested, no dependency.
+  - **Own implementation instead of LangChain** (the initial plan named LangChain splitters for this strategy): `MarkdownHeaderTextSplitter` splits by heading but neither packs along the tree, nor handles tables, nor returns exact offsets (needed for evidence recall and citations). ~250 lines, tested, no dependency.
 - **Chunk statistics** (`scripts/chunk_stats.py`, 333 documents):
 
   | | Fixed (v0) | Headers + path | Headers, no path |

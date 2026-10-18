@@ -1,6 +1,10 @@
 # Secrets
 .env
 
+# Private notes (local only, never published)
+CLAUDE.md
+docs/interview_notes.md
+
 # Python
 __pycache__/
 *.py[cod]
